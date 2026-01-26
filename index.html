@@ -1,97 +1,103 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hotel Colina Campestre</title>
-    
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- PrimeReact Styles -->
-    <link rel="stylesheet" href="https://unpkg.com/primereact/resources/themes/lara-light-indigo/theme.css" />
-    <link rel="stylesheet" href="https://unpkg.com/primereact/resources/primereact.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/primereact/resources/themes/lara-light-indigo/theme.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/primereact/resources/primereact.min.css"
+    />
     <link rel="stylesheet" href="https://unpkg.com/primeicons/primeicons.css" />
     <style>
+      .p-tabview .p-tabview-nav {
+        background: #f1f5f9;
+        padding: 0.5rem;
+        border-radius: 1rem;
+        border: none;
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+      .p-tabview .p-tabview-nav li {
+        margin-right: 0;
+        flex: 1;
+      }
+      .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+        background: transparent;
+        border: none !important;
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        color: #64748b;
+        font-weight: 700;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        transition: all 0.2s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: none !important;
+      }
+      .p-tabview
+        .p-tabview-nav
+        li:not(.p-highlight):not(.p-disabled):hover
+        .p-tabview-nav-link {
+        background: #e2e8f0;
+        color: #475569;
+      }
+      .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+        background: #4f46e5 !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2) !important;
+      }
+      .p-tabview .p-tabview-panels {
+        background: transparent;
+        padding: 0;
+        border: none;
+      }
+      .p-tabview .p-tabview-nav .p-tabview-ink-bar {
+        display: none !important;
+      }
+      @media (max-width: 640px) {
         .p-tabview .p-tabview-nav {
-            background: #f1f5f9;
-            padding: 0.5rem;
-            border-radius: 1rem;
-            border: none;
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
+          overflow-x: auto;
+          flex-wrap: nowrap;
+          justify-content: flex-start;
         }
         .p-tabview .p-tabview-nav li {
-            margin-right: 0;
-            flex: 1;
+          flex: none;
+          min-width: 120px;
         }
-        .p-tabview .p-tabview-nav li .p-tabview-nav-link {
-            background: transparent;
-            border: none !important;
-            border-radius: 0.75rem;
-            padding: 0.75rem 1rem;
-            color: #64748b;
-            font-weight: 700;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
-            transition: all 0.2s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: none !important;
-        }
-        .p-tabview .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link {
-            background: #e2e8f0;
-            color: #475569;
-        }
-        .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-            background: #4f46e5 !important;
-            color: white !important;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2) !important;
-        }
-        .p-tabview .p-tabview-panels {
-            background: transparent;
-            padding: 0;
-            border: none;
-        }
-        .p-tabview .p-tabview-nav .p-tabview-ink-bar {
-            display: none !important;
-        }
-        @media (max-width: 640px) {
-            .p-tabview .p-tabview-nav {
-                overflow-x: auto;
-                flex-wrap: nowrap;
-                justify-content: flex-start;
-            }
-            .p-tabview .p-tabview-nav li {
-                flex: none;
-                min-width: 120px;
-            }
-        }
+      }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom": "https://esm.sh/react-dom@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react-router-dom": "https://esm.sh/react-router-dom@^7.12.0",
-    "primereact/": "https://esm.sh/primereact@^10.9.7/",
-    "primereact/api": "https://esm.sh/primereact@^10.9.7/api",
-    "react-hook-form": "https://esm.sh/react-hook-form@^7.71.1",
-    "@tanstack/react-query": "https://esm.sh/@tanstack/react-query@^5.90.19",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.45.4"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
-<body class="bg-gray-50 text-gray-900">
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://esm.sh/react@^19.2.3",
+          "react-dom": "https://esm.sh/react-dom@^19.2.3",
+          "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+          "react/": "https://esm.sh/react@^19.2.3/",
+          "react-router-dom": "https://esm.sh/react-router-dom@^7.12.0",
+          "primereact/": "https://esm.sh/primereact@^10.9.7/",
+          "primereact/api": "https://esm.sh/primereact@^10.9.7/api",
+          "react-hook-form": "https://esm.sh/react-hook-form@^7.71.1",
+          "@tanstack/react-query": "https://esm.sh/@tanstack/react-query@^5.90.19",
+          "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.45.4"
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="/index.css" />
+  </head>
+  <body class="bg-gray-50 text-gray-900">
     <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
-<script type="module" src="/index.tsx"></script>
-</body>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
