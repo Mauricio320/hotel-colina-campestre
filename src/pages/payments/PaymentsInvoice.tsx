@@ -23,7 +23,8 @@ const PaymentsInvoice: React.FC = () => {
   const fetchPayments = async (category: string) => {
     const { data, error } = await supabase
       .from("payments")
-      .select(`
+      .select(
+        `
         *,
         stay:stays(
           order_number,
@@ -31,7 +32,7 @@ const PaymentsInvoice: React.FC = () => {
           room:rooms!inner(room_number, category)
         ),
         payment_method:payment_methods(name),
-        employee:employees(first_name, last_name)`
+        employee:employees(first_name, last_name)`,
       )
       .eq("stay.room.category", category)
       .order("payment_date", { ascending: false });
@@ -53,8 +54,6 @@ const PaymentsInvoice: React.FC = () => {
     };
     load();
   }, [activeTab]);
-
-
 
   const getPaymentTypeDisplay = (type: string) => {
     switch (type) {
@@ -86,8 +85,6 @@ const PaymentsInvoice: React.FC = () => {
     }
   };
 
-
-
   const header = (
     <div className="flex flex-wrap gap-4 justify-between items-center p-2">
       <InputText
@@ -101,7 +98,10 @@ const PaymentsInvoice: React.FC = () => {
 
   return (
     <div className="p-4 animate-fade-in">
-      <TabView activeIndex={activeTab} onTabChange={(e) => setActiveTab(e.index)}>
+      <TabView
+        activeIndex={activeTab}
+        onTabChange={(e) => setActiveTab(e.index)}
+      >
         {CATEGORIES.map((cat) => (
           <TabPanel key={cat} header={cat}>
             {loading ? (
@@ -140,7 +140,7 @@ const PaymentsInvoice: React.FC = () => {
                   body={(row) => (
                     <div className="flex flex-col">
                       <span className="font-bold text-gray-800">
-                        {row.stay?.guest 
+                        {row.stay?.guest
                           ? `${row.stay.guest.first_name} ${row.stay.guest.last_name}`
                           : "N/A"}
                       </span>
@@ -155,7 +155,7 @@ const PaymentsInvoice: React.FC = () => {
                       {new Date(row.payment_date).toLocaleDateString("es-CO", {
                         day: "2-digit",
                         month: "short",
-                        year: "numeric"
+                        year: "numeric",
                       })}
                     </span>
                   )}
@@ -193,7 +193,7 @@ const PaymentsInvoice: React.FC = () => {
                   header="Registrado por"
                   body={(row) => (
                     <span className="text-sm text-gray-600">
-                      {row.employee 
+                      {row.employee
                         ? `${row.employee.first_name} ${row.employee.last_name}`
                         : "N/A"}
                     </span>

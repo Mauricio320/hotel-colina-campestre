@@ -134,6 +134,14 @@ export interface PaymentSummary {
   isFullyPaid: boolean;
 }
 
+export interface AccommodationType {
+  id: string;
+  name: string;
+  price: number;
+  is_rentable: boolean;
+  created_at: string;
+}
+
 export interface RoomLog {
   id: string;
   room_id: string;

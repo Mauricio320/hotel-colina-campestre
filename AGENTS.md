@@ -98,6 +98,43 @@ const handleSubmit = async () => {
 - React Query for data fetching/mutations with hierarchical keys
 - Handle errors with specific codes (PGRST116, network errors, etc.)
 
+### Query Development Structure
+
+**When creating queries for any table:**
+1. **Service Layer**: Create folder `src/services/{table_name}/` with `{table_name}Api.ts`
+2. **Hook Layer**: Create `src/hooks/use{TableName}.ts` with React Query
+3. **Naming**: Hooks follow `use{TableName}` pattern
+4. **CRITICAL: Query Scope** - Only implement exactly what is requested. No additional fields, no extra functionality beyond the specific requirement.
+   - If asked for "all data", return only the table's fields
+   - If asked for "all data with joins", then include related data
+   - Default: return table data only, no extra features
+
+```typescript
+// Service layer - src/services/employees/employeeApi.ts
+export const employeeApi = {
+  fetchAll: async () => {
+    const { data, error } = await supabase
+      .from('employees')
+      .select(`
+        *,
+        role:roles(name)
+      `)
+      .order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data || [];
+  }
+};
+
+// Hook - src/hooks/useEmployees.ts
+export const useEmployees = () => {
+  return useQuery({
+    queryKey: ['accommodation_types'],
+    queryFn: () => accommodationTypesApi.fetchAll(),
+    staleTime: 1000 * 60 * 5
+  });
+};
+```
+
 ```typescript
 // Service layer
 export const fetchEmployee = async (id: string): Promise<Employee> => {
@@ -126,7 +163,10 @@ export const useEmployee = (id: string) => useQuery({
 - Max 20-30 lines per function, avoid deep nesting (>3 levels)
 - Remove all console.log statements
 - Self-documenting code, comments only for complex logic
+- Functions must not have comments - function names should be self-descriptive
+- Comments only allowed for extremely complex functions that cannot be described by name
 - React Query cache: 5min staleTime, proper error boundaries
+- **Function completion**: Always report function name and parameters at end of response
 
 ## Security & Performance
 
@@ -141,6 +181,178 @@ export const useEmployee = (id: string) => useQuery({
 - Hooks: `camelCase.ts` (useAuth.ts)
 - Variables/Functions: camelCase
 - Constants: UPPER_SNAKE_CASE
+
+## Deployment
+
+## DATABASE SCHEMA CONTEXT
+
+### IMPORTANT RULES
+- Use foreign keys, never text joins
+- rooms.category is legacy (read-only)
+- accommodation_type_id is the source of truth
+
+---
+
+### accommodation_type_price_history
+- id (uuid)
+- accommodation_type_id → accommodation_types.id
+- employee_id → employees.id
+- price
+- created_at
+
+---
+
+### accommodation_types
+- id (uuid)
+- name (text)
+- price
+- is_rentable
+- created_at
+
+---
+
+### employees
+- id (uuid)
+- auth_id (unique)
+- doc_type (default: 'Cédula de Ciudadanía')
+- doc_number (unique)
+- first_name
+- last_name
+- phone
+- city
+- address
+- email
+- role_id → roles.id
+- created_at
+- active (default: true)
+
+---
+
+### guests
+- id (uuid)
+- doc_type
+- doc_number (unique)
+- first_name
+- last_name
+- phone
+- city
+- address
+- email
+- created_at
+
+---
+
+### payment_methods
+- id (uuid)
+- name (unique)
+
+---
+
+### payments
+- id (uuid)
+- stay_id → stays.id
+- payment_method_id → payment_methods.id
+- employee_id → employees.id
+- amount
+- payment_date
+- observation
+- payment_type ('ABONO_RESERVA' | 'PAGO_COMPLETO_RESERVA' | 'PAGO_CHECKIN_DIRECTO' | 'ANTICIPADO_COMPLETO')
+- created_at
+
+---
+
+### roles
+- id (uuid)
+- name (unique)
+
+---
+
+### room_history
+- id (uuid)
+- room_id → rooms.id
+- stay_id → stays.id
+- previous_status_id → room_statuses.id
+- new_status_id → room_statuses.id
+- employee_id → employees.id
+- action_type
+- observation
+- timestamp
+- accommodation_type_id → accommodation_types.id
+
+---
+
+### room_rates
+- id (uuid)
+- room_id → rooms.id
+- person_count
+- rate
+
+---
+
+### room_statuses
+- id (uuid)
+- name (unique)
+- color
+
+---
+
+### rooms
+- id (uuid)
+- room_number (unique)
+- category ('Hotel' | 'Apartamento' | 'Casa 1' | 'Casa 2') - LEGACY
+- beds_double (default: 0)
+- beds_single (default: 0)
+- observation
+- status_id → room_statuses.id
+- is_active (default: true)
+- created_at
+- status_date (default: CURRENT_DATE)
+- accommodation_type_id → accommodation_types.id
+
+---
+
+### settings
+- id (uuid)
+- key (unique)
+- value
+
+---
+
+### stays
+- id (uuid)
+- order_number (unique, auto-increment)
+- room_id → rooms.id
+- guest_id → guests.id
+- employee_id → employees.id
+- check_in_date
+- check_out_date
+- status ('Active' | 'Reserved' | 'Completed' | 'Cancelled' | 'Moved')
+- total_price
+- paid_amount (default: 0)
+- payment_method_id → payment_methods.id
+- has_extra_mattress (default: false)
+- is_invoice_requested (default: false)
+- iva_amount (default: 0)
+- custom_rate_applied (default: false)
+- observation
+- created_at
+- extra_mattress_price (default: 0)
+- origin_was_reservation (default: false)
+- iva_percentage (default: 19)
+- person_count (default: 1)
+- extra_mattress_count (default: 0)
+- extra_mattress_unit_price (default: 0)
+- accommodation_type_id → accommodation_types.id
+- room_status_id → room_statuses.id
+
+---
+
+### DOMAIN LOGIC
+- Price history tracked in accommodation_type_price_history
+- Status changes → room_history
+- Pricing per person via room_rates
+- accommodation_types controls rentable categories
+- rooms.category is legacy field, use accommodation_type_id
 
 ## Deployment
 

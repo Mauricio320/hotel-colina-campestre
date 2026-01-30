@@ -73,6 +73,22 @@ This is a hotel management system for "Hotel Colina Campestre" built with React 
 - Custom hooks encapsulating API calls and business logic
 - Optimistic updates for better UX
 
+### API Structure Pattern
+
+#### Service Layer
+- Create a folder with the table name in `src/services/`
+- Inside the folder, create a TypeScript file ending in `api.ts` for API calls
+- Example: `src/services/rooms/rooms-api.ts`
+
+#### Hook Layer
+- Create custom hooks with the pattern `useNombreTabla` in `src/hooks/`
+- Hooks must use React Query for data fetching and caching
+- Example: `src/hooks/useRooms.ts`
+
+#### Query Keys
+- Define query keys in `src/services/queryKeys/` following the table name pattern
+- Example: `src/services/queryKeys/rooms.ts`
+
 #### UI Components
 - PrimeReact components with custom styling
 - Consistent layout with sidebar navigation
@@ -85,6 +101,23 @@ This is a hotel management system for "Hotel Colina Campestre" built with React 
 - **Stays**: Booking/check-in/check-out records
 - **Payments**: Payment processing
 - **Room History**: Audit trail for room status changes
+
+## Database Query Guidelines
+
+### Core Rule
+- EVERY TIME you mention something about the DB, you MUST consult the structure of the table
+- When creating queries, ALWAYS include the relevant fields from the tables mentioned
+- NEVER create queries without first checking the table structure
+
+### How to Consult Table Structure
+- Use the `database.sql` file in the project root to check table definitions
+- Use the `Read` tool to examine the specific table structure
+- Include all relevant columns when creating queries
+
+### Examples
+- "creame esta query de esta tabla" → First read the table structure, then create the query
+- "incuyeme esto de esta tabla" → Check what fields exist in the table first
+- "consulta esta tabla" → Always check the structure before proceeding
 
 ### Environment Configuration
 - Uses environment variables for Supabase configuration
