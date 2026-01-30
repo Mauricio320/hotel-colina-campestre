@@ -108,26 +108,7 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
     setLoadingHistory(false);
   };
 
-  const onQuickStatusChange = async (
-    room: Room,
-    statusName: string,
-    action: string,
-  ) => {
-    const targetStatus = roomStatuses.find((s) => s.name === statusName);
-    if (!targetStatus) return;
-
-    try {
-      await updateStatus.mutateAsync({
-        roomId: room.id,
-        statusId: targetStatus.id,
-        actionType: action,
-        employeeId: employee?.id,
-        observation: `${action} desde el panel de gestión`,
-      });
-    } catch (e) {
-      alert("Error: " + (e as any).message);
-    }
-  };
+  
 
   const onSave = async (data: any) => {
     try {
@@ -149,6 +130,23 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
     } catch (e) {
       alert("Error al guardar: " + (e as any).message);
     }
+  };
+
+  const formatRates = (rates: RoomRate[]): string => {
+    if (!rates || rates.length === 0) return "Sin tarifas";
+    
+    return rates
+      .sort((a, b) => a.person_count - b.person_count)
+      .map(rate => `${rate.rate / 1000}k`)
+      .join(' ∙ ');
+  };
+
+  const getRoomCapacity = (room: Room): string => {
+    const total = (room.beds_double * 2) + room.beds_single;
+    const details = [];
+    if (room.beds_double > 0) details.push(`${room.beds_double}D`);
+    if (room.beds_single > 0) details.push(`${room.beds_single}S`);
+    return `${total} pers. (${details.join('+')})`;
   };
 
   const getStatusSeverity = (name: string) => {
@@ -179,15 +177,29 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
         <h2 className="text-2xl font-bold text-gray-800">
           Gestión de Habitaciones
         </h2>
-        {isAdmin && (
-          <Button
-            label="Nueva Habitación"
-            icon="pi pi-plus"
-            className="bg-emerald-600 shadow-md"
-            onClick={openCreate}
-          />
-        )}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+            <i className="pi pi-search text-gray-400"></i>
+            <InputText
+              placeholder="Buscar habitación..."
+              className="border-0 bg-transparent w-40 focus:w-60 transition-all duration-200"
+              onChange={(e) => {
+                // TODO: Implementar búsqueda de habitaciones
+              }}
+            />
+          </div>
+          {isAdmin && (
+            <Button
+              label="Nueva Habitación"
+              icon="pi pi-plus"
+              className="bg-emerald-600 shadow-md"
+              onClick={openCreate}
+            />
+          )}
+        </div>
       </div>
+
+      
 
       <TabView
         activeIndex={activeTab}
@@ -195,101 +207,68 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
       >
         {CATEGORIES.map((cat) => (
           <TabPanel key={cat} header={cat}>
-            <div className="bg-white rounded-lg border shadow-sm mt-4 overflow-hidden">
+            <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
               <DataTable
-                value={roomsQuery.data || []}
+                value={roomsQuery.data?.sort((a, b) => {
+                  // Orden lógico: primero numéricas, luego casas
+                  const aNum = parseInt(a.room_number);
+                  const bNum = parseInt(b.room_number);
+                  
+                  if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+                  if (!isNaN(aNum) && isNaN(bNum)) return -1;
+                  if (isNaN(aNum) && !isNaN(bNum)) return 1;
+                  
+                  return a.room_number.localeCompare(b.room_number);
+                }) || []}
                 responsiveLayout="scroll"
                 className="text-sm"
-                paginator
-                rows={10}
+                scrollable
+                scrollHeight="600px"
+                sortField="room_number"
+                sortOrder={1}
               >
                 <Column
                   field="room_number"
                   header="No."
                   sortable
                   className="font-bold text-emerald-700"
+                  style={{ width: '80px' }}
                 />
                 <Column
-                  header="Estado"
+                  header="Capacidad"
                   body={(rowData) => (
-                    <Tag
-                      value={rowData.status?.name}
-                      severity={getStatusSeverity(rowData.status?.name)}
-                    />
+                    <div className="text-center font-medium text-blue-700">
+                      {getRoomCapacity(rowData)}
+                    </div>
                   )}
                 />
                 <Column
-                  header="Acciones Operativas"
+                  header="Descripción"
+                  field="observation"
                   body={(rowData) => (
-                    <div className="flex gap-2">
-                      {rowData.status?.name === "Disponible" && (
-                        <>
-                          <Button
-                            icon="pi pi-star"
-                            label="Limpiar"
-                            className="p-button-text p-button-sm p-button-info"
-                            onClick={() =>
-                              onQuickStatusChange(
-                                rowData,
-                                "Limpieza",
-                                "LIMPIEZA",
-                              )
-                            }
-                          />
-                          <Button
-                            icon="pi pi-cog"
-                            label="Mant."
-                            className="p-button-text p-button-sm p-button-secondary"
-                            onClick={() =>
-                              onQuickStatusChange(
-                                rowData,
-                                "Mantenimiento",
-                                "MANTENIMIENTO",
-                              )
-                            }
-                          />
-                        </>
+                    <div className="text-xs text-gray-600 italic" title={rowData.observation || 'Sin descripción'}>
+                      {rowData.observation ? (
+                        rowData.observation.length > 30 
+                          ? `${rowData.observation.substring(0, 30)}...`
+                          : rowData.observation
+                      ) : (
+                        <span className="text-gray-400">Sin descripción</span>
                       )}
-                      {rowData.status?.name === "Limpieza" && (
-                        <Button
-                          icon="pi pi-check"
-                          label="Finalizar Limpieza"
-                          className="p-button-sm p-button-info"
-                          onClick={() =>
-                            onQuickStatusChange(
-                              rowData,
-                              "Disponible",
-                              "FIN-LIMPIEZA",
-                            )
-                          }
-                        />
-                      )}
-                      {rowData.status?.name === "Mantenimiento" && (
-                        <Button
-                          icon="pi pi-check"
-                          label="Finalizar Mant."
-                          className="p-button-sm p-button-secondary"
-                          onClick={() =>
-                            onQuickStatusChange(
-                              rowData,
-                              "Disponible",
-                              "FIN-MANT",
-                            )
-                          }
-                        />
-                      )}
-                      {rowData.status?.name === "Ocupado" && (
-                        <span className="text-xs italic text-gray-400">
-                          En uso
-                        </span>
-                      )}
+                    </div>
+                  )}
+                />
+                <Column
+                  header="Tarifas"
+                  body={(rowData) => (
+                    <div className="font-mono text-sm text-emerald-700 font-semibold text-center">
+                      {formatRates(rowData.rates || [])}
                     </div>
                   )}
                 />
                 <Column
                   header="Administración"
                   body={(rowData) => (
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 justify-center">
                       <Button
                         icon="pi pi-history"
                         className="p-button-text p-button-sm p-button-info"
@@ -300,7 +279,7 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                         <Button
                           icon="pi pi-pencil"
                           className="p-button-text p-button-sm p-button-warning"
-                          tooltip="Editar Tarifas y Datos"
+                          tooltip="Editar Tarifas"
                           onClick={() => openEdit(rowData)}
                         />
                       )}
@@ -316,12 +295,29 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
       <Dialog
         header={
           selectedRoom
-            ? `Editar Habitación ${selectedRoom.room_number}`
-            : "Nueva Habitación"
+            ? (
+              <div className="flex items-center gap-3">
+                <div className="bg-emerald-100 text-emerald-800 px-3 py-2 rounded-lg">
+                  <i className="pi pi-home mr-2"></i>
+                  {selectedRoom.room_number}
+                </div>
+                <div className="text-gray-600">Editar Tarifas</div>
+              </div>
+            )
+            : (
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg">
+                  <i className="pi pi-plus mr-2"></i>
+                  Nueva Habitación
+                </div>
+              </div>
+            )
         }
         visible={showFormModal}
         onHide={() => setShowFormModal(false)}
-        className="w-full max-w-2xl"
+        className="w-full max-w-3xl"
+        contentClassName="bg-gradient-to-br from-gray-50 to-white"
+        headerClassName="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white border-none rounded-t-lg"
       >
         <form
           onSubmit={handleSubmit(onSave)}
@@ -344,28 +340,50 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
               )}
             />
           </div>
-          <div className="col-span-full border-t pt-4">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-bold text-gray-700">Tarifas por Huéspedes</h3>
-              <Button
-                type="button"
-                icon="pi pi-plus"
-                label="Añadir Tarifa"
-                className="p-button-text p-button-sm"
-                onClick={() =>
-                  append({ person_count: fields.length + 1, rate: 80000 })
-                }
-              />
+          <div className="col-span-full border-t border-gray-200 pt-6">
+            <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 border border-emerald-200 rounded-xl p-4 mb-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-emerald-800 flex items-center gap-2">
+                  <i className="pi pi-money-bill text-emerald-600"></i>
+                  <span className="text-lg">Configuración de Tarifas</span>
+                </h3>
+                <Button
+                  type="button"
+                  icon="pi pi-plus-circle"
+                  label="Añadir Tarifa"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-md"
+                  onClick={() =>
+                    append({ person_count: fields.length + 1, rate: 80000 })
+                  }
+                />
+              </div>
+              {fields.length > 0 && (
+                <div className="mt-4 bg-white rounded-lg p-3 border border-emerald-200">
+                  <div className="flex items-center gap-2 text-sm text-emerald-700">
+                    <i className="pi pi-eye text-emerald-600"></i>
+                    <span className="font-semibold">Vista previa de tarifas:</span>
+                    <span className="font-mono bg-emerald-50 px-3 py-1 rounded text-emerald-800 font-semibold">
+                      {fields
+                        .map((_, index) => {
+                          const rateField = control._formValues.rates?.[index];
+                          return rateField ? `${rateField.rate / 1000}k` : '---k';
+                        })
+                        .join(' ∙ ')}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               {fields.map((field, index) => (
                 <div
                   key={field.id}
-                  className="flex items-center gap-3 bg-gray-50 p-2 rounded border"
+                  className="flex items-center gap-4 bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200"
                 >
-                  <div className="flex flex-col gap-1 flex-1">
-                    <label className="text-[10px] font-bold text-gray-400">
-                      PARA PERSONAS
+                  <div className="flex flex-col gap-2 flex-1">
+                    <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                      <i className="pi pi-users text-blue-600"></i>
+                      <span>Personas</span>
                     </label>
                     <Controller
                       name={`rates.${index}.person_count`}
@@ -375,14 +393,21 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                           value={field.value}
                           onValueChange={(e) => field.onChange(e.value)}
                           min={1}
-                          className="w-full"
+                          className="w-full border-gray-300 hover:border-blue-400 focus:border-blue-500"
+                          placeholder="1"
                         />
                       )}
                     />
                   </div>
-                  <div className="flex flex-col gap-1 flex-1">
-                    <label className="text-[10px] font-bold text-gray-400">
-                      VALOR NOCHE (COP)
+                  
+                  <div className="flex items-center justify-center text-gray-400 font-bold">
+                    <i className="pi pi-arrow-right text-2xl"></i>
+                  </div>
+                  
+                  <div className="flex flex-col gap-2 flex-1">
+                    <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                      <i className="pi pi-money-bill text-green-600"></i>
+                      <span>Valor noche</span>
                     </label>
                     <Controller
                       name={`rates.${index}.rate`}
@@ -393,33 +418,38 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                           onValueChange={(e) => field.onChange(e.value)}
                           mode="currency"
                           currency="COP"
-                          className="w-full"
+                          className="w-full border-gray-300 hover:border-green-400 focus:border-green-500"
                         />
                       )}
                     />
                   </div>
-                  <Button
-                    type="button"
-                    icon="pi pi-trash"
-                    className="p-button-danger p-button-text p-button-rounded mt-4"
-                    onClick={() => remove(index)}
-                  />
+                  
+                  <div className="flex flex-col items-center gap-2">
+                    <Button
+                      type="button"
+                      icon="pi pi-trash"
+                      className="p-button-danger p-button-text p-button-rounded hover:bg-red-50 text-red-500 hover:text-red-700 transition-colors"
+                      onClick={() => remove(index)}
+                      tooltip="Eliminar tarifa"
+                    />
+                  </div>
                 </div>
               ))}
             </div>
           </div>
-          <div className="col-span-full flex justify-end gap-2 mt-6">
+          <div className="col-span-full flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
             <Button
               type="button"
               label="Cancelar"
-              className="p-button-text"
+              icon="pi pi-times-circle"
+              className="bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-300"
               onClick={() => setShowFormModal(false)}
             />
             <Button
               type="submit"
-              label="Guardar Habitación"
-              icon="pi pi-save"
-              className="bg-emerald-600"
+              label="Guardar Cambios"
+              icon="pi pi-check-circle"
+              className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white border-none shadow-lg hover:shadow-xl transition-all duration-200"
             />
           </div>
         </form>
