@@ -14,7 +14,7 @@ import { Divider } from 'primereact/divider';
 
 import { useRooms } from '@/hooks/useRooms';
 import { useGuests } from '@/hooks/useGuests';
-import { useStays } from '@/hooks/useStays';
+import { usePayments } from '@/hooks/usePayments';
 import { useAuth } from '@/hooks/useAuth';
 import { useStayPricing } from '@/hooks/useStayPricing';
 import { useBlockUI } from '@/context/BlockUIContext';
@@ -37,7 +37,7 @@ const BookingPage: React.FC = () => {
   const { employee } = useAuth();
   const { roomsQuery } = useRooms();
   const { findGuestByDoc, upsertGuest } = useGuests();
-  const { createStayWithPayment } = useStays();
+  const { createStayWithPaymentWithAutoType } = usePayments();
   const { showBlockUI, hideBlockUI } = useBlockUI();
 
   const [loading, setLoading] = useState(false);
@@ -229,7 +229,7 @@ const BookingPage: React.FC = () => {
         address: data.address
       });
 
-      await createStayWithPayment.mutateAsync({
+      await createStayWithPaymentWithAutoType({
         stayData: {
           room_id: roomId,
           guest_id: guest.id,
@@ -253,6 +253,7 @@ const BookingPage: React.FC = () => {
           extra_mattress_unit_price: settings.mat,
         },
         paymentData: {
+          stay_id: '', // Will be set after stay creation
           amount: data.paid_amount,
           payment_method_id: data.payment_method_id,
           employee_id: employee?.id || null,

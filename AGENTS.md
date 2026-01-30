@@ -97,6 +97,7 @@ const handleSubmit = async () => {
 - Service layer: pure functions (no React hooks)
 - React Query for data fetching/mutations with hierarchical keys
 - Handle errors with specific codes (PGRST116, network errors, etc.)
+- **CRITICAL: No direct Supabase calls in hooks** - All Supabase operations must be in services layer
 
 ### Query Development Structure
 
@@ -167,6 +168,59 @@ export const useEmployee = (id: string) => useQuery({
 - Comments only allowed for extremely complex functions that cannot be described by name
 - React Query cache: 5min staleTime, proper error boundaries
 - **Function completion**: Always report function name and parameters at end of response
+
+## Component Development Rules
+
+- **No direct Supabase calls in components** - All database requests must be in services layer
+- **Avoid code duplication** - Implement better design patterns and best practices for new components or refactor requests
+- **New components location** - All new components must be in `components/{page_name}/` folder structure
+- **Date handling** - Always use dayjs for all date-related operations
+- **No direct HTML in main components** - Extract to specialized components
+- **UI elements as components** - Loading, Error, Empty states → `components/ui/`
+- **Custom hooks for logic** - URL parsing, form validation → `hooks/`
+- **Main components orchestrate** - Only compose other components
+
+## Design Patterns Implementation
+
+### **Pattern 1: Composition Over Inheritance**
+- Compose smaller components into larger ones
+- Avoid deep inheritance hierarchies
+
+### **Pattern 2: Strategy Pattern**
+- Use different strategies based on state/context
+- Example: Different UI for room statuses
+
+### **Pattern 3: Observer Pattern**  
+- Use hooks to observe global state changes
+- Example: `useBlockUI`, `useAuth`
+
+### **Pattern 4: Command Pattern**
+- Actions as commands with parameters
+- Example: `handleRoomStatusUpdate(action)`
+
+### **Pattern 5: Factory Pattern**
+- Component factories based on context
+- Example: Modal selection based on type
+
+### **Pattern 6: Single Source of Truth**
+- Centralized state in services/hooks
+- Avoid duplicate state management
+
+### **Component Structure for Refactors**
+```
+src/
+├── components/ui/          # Reusable UI elements
+│   ├── LoadingState.tsx   # Spinners with messages
+│   ├── ErrorState.tsx     # Error handling
+│   └── EmptyState.tsx     # Empty states
+├── hooks/                 # Custom logic hooks
+│   ├── useUrlParams.ts     # URL parameter parsing
+│   └── useReservationStatus.ts # Reservation status logic
+└── components/{page}/     # Page-specific components
+    ├── {Feature}Modal.tsx # Modals
+    ├── {Feature}Card.tsx  # Data cards
+    └── {Feature}Form.tsx  # Forms
+```
 
 ## Security & Performance
 

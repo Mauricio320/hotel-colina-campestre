@@ -7,6 +7,7 @@ import { STATUS_MAP } from "@/constants";
 interface CalendarGridProps {
   days: Date[];
   filteredRooms: Room[];
+  accommodationTypes: any[];
   getActiveStay: (room: Room, date: Date) => Stay | undefined;
   handleRoomClick: (room: Room, stay: Stay | null, date: Date) => void;
 }
@@ -14,6 +15,7 @@ interface CalendarGridProps {
 export const CalendarGrid: React.FC<CalendarGridProps> = ({
   days,
   filteredRooms,
+  accommodationTypes,
   getActiveStay,
   handleRoomClick,
 }) => {

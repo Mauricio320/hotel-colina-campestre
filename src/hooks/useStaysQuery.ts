@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/config/supabase';
 import { Stay } from '@/types';
 
-export const useStays = () => {
+export const useStaysQuery = () => {
   const staysQuery = useQuery({
     queryKey: ['stays'],
     queryFn: async ({ signal }) => {
