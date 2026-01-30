@@ -33,6 +33,10 @@ const BookingMovements: React.FC = () => {
           check_in_date,
           check_out_date,
           origin_was_reservation,
+          iva_percentage,
+          person_count,
+          extra_mattress_count,
+          extra_mattress_unit_price,
           guest:guests(first_name, last_name)
         )
       `)
@@ -57,16 +61,16 @@ const BookingMovements: React.FC = () => {
   const header = (
     <div className="flex flex-wrap gap-4 justify-between items-center p-2">
       <div>
-        <h3 className="m-0 text-xl font-black text-indigo-900 tracking-tight">Registro Detallado de Movimientos</h3>
+        <h3 className="m-0 text-xl font-black text-emerald-900 tracking-tight">Registro Detallado de Movimientos</h3>
         <p className="text-sm text-gray-500 font-medium">Historial exclusivo de órdenes iniciadas como reservas</p>
       </div>
       <span className="p-input-icon-left w-full sm:w-72">
-        <i className="pi pi-search text-indigo-400" />
+        <i className="pi pi-search text-emerald-400" />
         <InputText 
             type="search" 
             onInput={(e: any) => setGlobalFilter(e.target.value)} 
             placeholder="Buscar por orden, huésped o motivo..." 
-            className="p-inputtext-sm w-full rounded-xl border-indigo-100"
+            className="p-inputtext-sm w-full rounded-xl border-emerald-100"
         />
       </span>
     </div>
@@ -83,7 +87,7 @@ const BookingMovements: React.FC = () => {
         </div>
         <button 
             onClick={fetchMovements} 
-            className="flex items-center gap-2 px-4 py-2 bg-white text-indigo-600 border border-indigo-100 rounded-xl hover:bg-indigo-50 transition-all font-bold shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-white text-emerald-600 border border-emerald-100 rounded-xl hover:bg-emerald-50 transition-all font-bold shadow-sm"
             title="Refrescar datos"
         >
             <i className={`pi pi-refresh ${loading ? 'pi-spin' : ''}`}></i>
@@ -91,7 +95,7 @@ const BookingMovements: React.FC = () => {
         </button>
       </div>
 
-      <div className="bg-white rounded-3xl border border-indigo-50 shadow-xl shadow-indigo-100/20 overflow-hidden">
+      <div className="bg-white rounded-3xl border border-emerald-50 shadow-xl shadow-emerald-100/20 overflow-hidden">
         {loading ? (
           <div className="flex flex-col items-center justify-center p-24 gap-4">
             <ProgressSpinner strokeWidth="4" style={{width: '50px'}} />
@@ -132,7 +136,7 @@ const BookingMovements: React.FC = () => {
                 sortable
                 headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
                 body={(row) => (
-                    <span className="font-black text-indigo-600 px-3 py-1 bg-indigo-50 rounded-lg">
+                    <span className="font-black text-emerald-600 px-3 py-1 bg-emerald-50 rounded-lg">
                         #{row.stay?.order_number || 'N/A'}
                     </span>
                 )}
@@ -156,7 +160,7 @@ const BookingMovements: React.FC = () => {
                 headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
                 body={(row) => (
                     <div className="flex flex-col gap-2">
-                        <span className="font-black text-indigo-900 text-lg">Hab. {row.room?.room_number}</span>
+                        <span className="font-black text-emerald-900 text-lg">Hab. {row.room?.room_number}</span>
                         <Tag value={row.action_type.replace('-', ' ')} severity={getActionSeverity(row.action_type)} className="text-[9px] font-black uppercase px-2" />
                     </div>
                 )}
@@ -180,11 +184,38 @@ const BookingMovements: React.FC = () => {
             />
 
             <Column 
+                header="Configuración" 
+                headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+                body={(row) => row.stay ? (
+                    <div className="flex flex-col gap-1 text-xs">
+                        <div className="flex items-center gap-2">
+                            <span className="text-gray-400 font-bold">Personas:</span>
+                            <span className="text-gray-700 font-medium">{row.stay.person_count || 1}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-gray-400 font-bold">Colchonetas:</span>
+                            <span className="text-gray-700 font-medium">{row.stay.extra_mattress_count || 0}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span className="text-gray-400 font-bold">IVA:</span>
+                            <span className="text-gray-700 font-medium">{row.stay.iva_percentage || 19}%</span>
+                        </div>
+                        {row.stay.extra_mattress_count > 0 && (
+                            <div className="flex items-center gap-2">
+                                <span className="text-gray-400 font-bold">Precio/Colchoneta:</span>
+                                <span className="text-gray-700 font-medium">${(row.stay.extra_mattress_unit_price || 0).toLocaleString()}</span>
+                            </div>
+                        )}
+                    </div>
+                ) : <span className="text-gray-300">No disponible</span>}
+            />
+
+            <Column 
                 header="Responsable" 
                 headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
                 body={(row) => (
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-400 border border-indigo-100">
+                        <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-400 border border-emerald-100">
                             <i className="pi pi-user text-xs"></i>
                         </div>
                         <span className="text-xs font-bold text-gray-600">

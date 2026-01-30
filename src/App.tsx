@@ -31,6 +31,7 @@ import MyProfile from "@/pages/profile/MyProfile";
 import Reports from "@/pages/reports/Reports";
 import BookingMovements from "@/pages/bookings/BookingMovements";
 import RoomPayments from "@/pages/payments/RoomPayments";
+import PaymentsInvoice from "@/pages/payments/PaymentsInvoice";
 import InvoiceDetailPage from "@/pages/payments/InvoiceDetailPage";
 
 const queryClient = new QueryClient();
@@ -38,9 +39,11 @@ const queryClient = new QueryClient();
 const AppContent: React.FC = () => {
   const { user, employee, loading, dbError, logout } = useAuth();
 
+  console.log({ user, employee });
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-indigo-900">
+      <div className="min-h-screen flex items-center justify-center bg-emerald-900">
         <div className="flex flex-col items-center gap-4">
           <ProgressSpinner
             strokeWidth="4"
@@ -57,7 +60,7 @@ const AppContent: React.FC = () => {
 
   if (dbError === "DATABASE_NOT_READY") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-indigo-900 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-emerald-900 p-4">
         <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-lg w-full text-center">
           <i className="pi pi-database text-6xl text-amber-500 mb-4"></i>
           <h2 className="text-2xl font-black text-gray-800 mb-2">
@@ -87,7 +90,7 @@ const AppContent: React.FC = () => {
           </div>
           <button
             onClick={() => window.location.reload()}
-            className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
+            className="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200"
           >
             Ya ejecuté el script, recargar
           </button>
@@ -110,7 +113,7 @@ const AppContent: React.FC = () => {
       <Route
         element={
           user ? (
-            <Layout userRole={roleName} onLogout={logout} />
+            <Layout employee={employee} onLogout={logout} />
           ) : (
             <Navigate to="/login" />
           )
@@ -124,6 +127,7 @@ const AppContent: React.FC = () => {
         <Route path="/rooms" element={<RoomManagement userRole={roleName} />} />
         <Route path="/booking-movements" element={<BookingMovements />} />
         <Route path="/room-payments" element={<RoomPayments />} />
+        <Route path="/payments-invoice" element={<PaymentsInvoice />} />
         <Route path="/invoice/:stayId" element={<InvoiceDetailPage />} />
         <Route
           path="/guests"
@@ -145,14 +149,18 @@ const AppContent: React.FC = () => {
   );
 };
 
+import { BlockUIProvider } from "@/context/BlockUIContext";
+
 const App: React.FC = () => {
   return (
     <PrimeReactProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <Router>
-            <AppContent />
-          </Router>
+          <BlockUIProvider>
+            <Router>
+              <AppContent />
+            </Router>
+          </BlockUIProvider>
         </AuthProvider>
       </QueryClientProvider>
     </PrimeReactProvider>

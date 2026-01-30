@@ -33,7 +33,7 @@ const GuestManagement: React.FC<GuestManagementProps> = ({ userRole }) => {
 
   const header = (
     <div className="flex flex-wrap gap-2 justify-between items-center">
-      <h3 className="m-0 text-xl font-bold text-indigo-700">Listado de Huéspedes</h3>
+      <h3 className="m-0 text-xl font-bold text-emerald-700">Listado de Huéspedes</h3>
       <span className="p-input-icon-left">
         <i className="pi pi-search" />
         <InputText type="search" onInput={(e: any) => setGlobalFilter(e.target.value)} placeholder="Buscar documento o nombre..." />
@@ -45,7 +45,7 @@ const GuestManagement: React.FC<GuestManagementProps> = ({ userRole }) => {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-800">Gestión de Huéspedes</h2>
-        <Button label="Nuevo Huésped" icon="pi pi-plus" className="bg-indigo-600" onClick={() => setShowModal(true)} />
+        <Button label="Nuevo Huésped" icon="pi pi-plus" className="bg-emerald-600" onClick={() => setShowModal(true)} />
       </div>
 
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
@@ -106,7 +106,7 @@ const GuestManagement: React.FC<GuestManagementProps> = ({ userRole }) => {
             <InputText {...register('email')} />
           </div>
           <div className="flex flex-col gap-1 md:col-span-2 mt-4">
-            <Button type="submit" label="Guardar Huésped" className="bg-indigo-600" loading={upsertGuest.isPending} />
+            <Button type="submit" label="Guardar Huésped" className="bg-emerald-600" loading={upsertGuest.isPending} />
           </div>
         </form>
       </Dialog>

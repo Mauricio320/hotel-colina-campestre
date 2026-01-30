@@ -90,8 +90,8 @@ const RegisterAdmin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-indigo-900 p-4 py-12">
-      <Card className="w-full max-w-2xl shadow-2xl border-t-4 border-indigo-500">
+    <div className="min-h-screen flex items-center justify-center bg-emerald-900 p-4 py-12">
+      <Card className="w-full max-w-2xl shadow-2xl border-t-4 border-emerald-600">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-black text-gray-800 tracking-tight">Registro de Administrador</h2>
           <p className="text-gray-500 font-medium">Crea una nueva cuenta administrativa</p>
@@ -100,7 +100,7 @@ const RegisterAdmin: React.FC = () => {
         {errorMsg && (
           <div className="mb-6">
             <Message className="w-full justify-start p-3" severity="error" text={errorMsg} />
-            <div className="mt-2 p-3 bg-indigo-50 text-indigo-800 text-xs rounded border border-indigo-200">
+            <div className="mt-2 p-3 bg-emerald-50 text-emerald-800 text-xs rounded border border-emerald-200">
               <i className="pi pi-info-circle mr-1"></i>
               Si ves un error de base de datos persistente, asegúrate de haber ejecutado el script SQL en el editor de Supabase.
             </div>
@@ -199,10 +199,10 @@ const RegisterAdmin: React.FC = () => {
           </div>
 
           <div className="md:col-span-2 flex flex-col gap-4 mt-6">
-            <Button type="submit" label="Crear Cuenta de Administrador" icon="pi pi-user-plus" className="bg-indigo-600 p-3 border-none shadow-md hover:bg-indigo-700 transition-all" loading={loading} />
+            <Button type="submit" label="Crear Cuenta de Administrador" icon="pi pi-user-plus" className="bg-emerald-600 p-3 border-none shadow-md hover:bg-emerald-700 transition-all" loading={loading} />
             <div className="text-center text-sm">
                <span className="text-gray-500 font-medium">¿Ya tienes cuenta? </span>
-               <Link to="/login" className="text-indigo-600 font-bold hover:underline">
+               <Link to="/login" className="text-emerald-600 font-bold hover:underline">
                  Inicia sesión aquí
                </Link>
             </div>

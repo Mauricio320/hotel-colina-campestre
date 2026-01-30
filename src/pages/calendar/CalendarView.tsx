@@ -16,40 +16,50 @@ import { useRooms } from "@/hooks/useRooms";
 import { useStays } from "@/hooks/useStays";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useAuth } from "@/hooks/useAuth";
+import { usePayments } from "@/hooks/usePayments";
 import { supabase } from "@/config/supabase";
 import { Room, Stay, Role } from "@/types";
-
-addLocale("es", {
-  firstDayOfWeek: 1,
-  dayNames: [
-    "domingo",
-    "lunes",
-    "martes",
-    "miércoles",
-    "jueves",
-    "viernes",
-    "sábado",
-  ],
-  dayNamesShort: ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"],
-  dayNamesMin: ["D", "L", "M", "X", "J", "V", "S"],
-  today: "Hoy",
-  clear: "Limpiar",
-});
-
-const toISODate = (date: Date | null): string => {
-  if (!date) return "";
-  const d = new Date(date);
-  return d.toLocaleDateString("sv-SE");
-};
+import { RoomActionEnum, RoomStatusEnum } from "@/util/status-rooms.enum";
+import dayjs from "dayjs";
+import { useBlockUI } from "@/context/BlockUIContext";
+import { TaskCompletionForm } from "@/components/tasks/TaskCompletionForm";
+import { CalendarGrid } from "@/components/calendar/CalendarGrid";
 
 const CalendarView: React.FC = () => {
+  const { showBlockUI, hideBlockUI } = useBlockUI();
   const { employee: currentEmployee } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
-  const [startDate, setStartDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(dayjs().toDate());
 
-  const { roomsQuery, updateStatus } = useRooms();
-  const { staysQuery, registerPayment } = useStays();
+  // Leer parámetro tab de la URL y establecer el tab activo
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get("tab");
+
+    if (tabParam !== null) {
+      const tabIndex = parseInt(tabParam);
+      // Validar que el índice sea válido
+      if (tabIndex >= 0 && tabIndex < CATEGORIES.length) {
+        setActiveTab(tabIndex);
+
+        // Scroll suave al TabView para mejor UX
+        setTimeout(() => {
+          const tabViewElement = document.querySelector(".p-tabview-nav");
+          if (tabViewElement) {
+            tabViewElement.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }
+        }, 100);
+      }
+    }
+  }, [window.location.search]);
+
+  const { roomsQuery } = useRooms();
+  const { staysQuery, registerPayment, registerCheckInReserva } = useStays();
+
   const { employeesQuery } = useEmployees();
 
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
@@ -57,21 +67,38 @@ const CalendarView: React.FC = () => {
   const [activeStay, setActiveStay] = useState<Stay | null>(null);
   const [showMainModal, setShowMainModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showCheckInModal, setShowCheckInModal] = useState(false);
 
-  // pendingAction puede ser: 'LIMPIEZA', 'FIN-LIMPIEZA', 'MANTENIMIENTO', 'FIN-MANT'
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [formEmployeeId, setFormEmployeeId] = useState<string>("");
   const [formObservation, setFormObservation] = useState<string>("");
+  const [checkInObservation, setCheckInObservation] = useState<string>("");
+  const [checkInEmployeeId, setCheckInEmployeeId] = useState<string>("");
 
   const [roomStatuses, setRoomStatuses] = useState<any[]>([]);
   const [newPaymentAmount, setNewPaymentAmount] = useState(0);
+  const [paymentMethodId, setPaymentMethodId] = useState<string>(""); // Will be set when payment methods load
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  // Opciones de métodos de pago (vienen de la BD)
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
 
   useEffect(() => {
     supabase
       .from("room_statuses")
       .select("*")
       .then(({ data }) => setRoomStatuses(data || []));
+
+    // Cargar métodos de pago desde la BD
+    supabase
+      .from("payment_methods")
+      .select("*")
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setPaymentMethods(data);
+          setPaymentMethodId(data[0].id); // Establecer el primer método como default
+        }
+      });
   }, []);
 
   const filteredRooms = useMemo(() => {
@@ -82,15 +109,12 @@ const CalendarView: React.FC = () => {
 
   const days = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(startDate);
-      d.setHours(0, 0, 0, 0);
-      d.setDate(d.getDate() + i);
-      return d;
+      return dayjs(startDate).add(i, "day").toDate();
     });
   }, [startDate]);
 
   const getActiveStay = (room: Room, date: Date) => {
-    const dateStr = toISODate(date);
+    const dateStr = dayjs(date).format("YYYY-MM-DD");
     return staysQuery.data?.find(
       (s) =>
         s.room_id === room.id &&
@@ -110,101 +134,455 @@ const CalendarView: React.FC = () => {
     setShowMainModal(true);
   };
 
-  const handleStatusChangeSubmit = async () => {
-    if (!selectedRoom || !selectedDate || !pendingAction) return;
+  const handleStatusChangeSubmit = async (status: string) => {
+    showBlockUI(`Actualizando estado de la habitación...`);
 
-    let targetStatusName = "Disponible";
-    if (pendingAction === "LIMPIEZA") targetStatusName = "Limpieza";
-    if (pendingAction === "MANTENIMIENTO") targetStatusName = "Mantenimiento";
+    let targetStatusName = RoomStatusEnum.DISPONIBLE;
+    if (status === RoomActionEnum.LIMPIEZA)
+      targetStatusName = RoomStatusEnum.LIMPIEZA;
+    if (status === RoomActionEnum.MANTENIMIENTO)
+      targetStatusName = RoomStatusEnum.MANTENIMIENTO;
 
     const targetStatus = roomStatuses.find((s) => s.name === targetStatusName);
-    if (!targetStatus) return;
 
-    try {
-      await updateStatus.mutateAsync({
-        roomId: selectedRoom.id,
-        statusId: targetStatus.id,
-        actionType: pendingAction,
-        employeeId: formEmployeeId || currentEmployee?.id || null,
-        statusDate: toISODate(selectedDate),
-        observation:
-          formObservation ||
-          `${pendingAction} desde el calendario para el día ${toISODate(selectedDate)}`,
-      });
-      setShowMainModal(false);
-      setPendingAction(null);
-    } catch (e) {
-      alert("Error: " + (e as any).message);
-    }
-  };
+    const timeStr = dayjs().format("hh:mm A");
 
-  const handleConfirmNewPayment = async () => {
-    if (!activeStay || !selectedRoom || newPaymentAmount <= 0) {
-      alert("Ingrese un monto válido para el abono.");
-      return;
+    let defaultObservation = "";
+    switch (status) {
+      case RoomActionEnum.LIMPIEZA:
+        defaultObservation = `Inicio de limpieza registrado el ${dayjs(selectedDate).format("YYYY-MM-DD")} a las ${timeStr}`;
+        break;
+      case RoomActionEnum.FIN_LIMPIEZA:
+        defaultObservation = `Limpieza finalizada exitosamente a las ${timeStr}`;
+        break;
+      case RoomActionEnum.MANTENIMIENTO:
+        defaultObservation = `Mantenimiento iniciado el ${dayjs(selectedDate).format("YYYY-MM-DD")} a las ${timeStr}`;
+        break;
+      case RoomActionEnum.FIN_MANT:
+        defaultObservation = `Mantenimiento completado a las ${timeStr}`;
+        break;
+      default:
+        defaultObservation = `Acción ${status} registrada a las ${timeStr}`;
     }
 
     setIsProcessingPayment(true);
+
     try {
+      const isFullPayment = newPaymentAmount >= pendingAmount;
+
+      const customObservation = isFullPayment
+        ? "Liquidación completa de reserva desde calendario"
+        : "Abono parcial desde calendario";
+
       const result = await registerPayment.mutateAsync({
         stayId: activeStay.id,
         roomId: selectedRoom.id,
         amount: newPaymentAmount,
+        paymentMethodId: paymentMethodId,
         employeeId: currentEmployee?.id,
+        customObservation,
       });
 
-      alert("Abono registrado correctamente.");
+      const message = result?.isFullyPaid
+        ? "Pago completado. La habitación ha pasado a estado Ocupado."
+        : "Abono registrado correctamente.";
+
+      showBlockUI(message);
       setShowPaymentModal(false);
 
-      if (result.isFullyPaid) {
-        alert("Pago completado. La habitación ha pasado a estado Ocupado.");
+      if (result?.isFullyPaid) {
         setShowMainModal(false);
       }
 
       setNewPaymentAmount(0);
-      roomsQuery.refetch();
-      staysQuery.refetch();
     } catch (e: any) {
-      alert("Error al procesar el abono: " + e.message);
+      showBlockUI("Error al procesar el pago: " + e.message);
     } finally {
       setIsProcessingPayment(false);
+      hideBlockUI();
+    }
+  };
+
+  const handleRoomStatusChange = async (action: string) => {
+    showBlockUI(`Actualizando estado de la habitación...`);
+
+    let targetStatusName = RoomStatusEnum.DISPONIBLE;
+    if (action === RoomActionEnum.LIMPIEZA)
+      targetStatusName = RoomStatusEnum.LIMPIEZA;
+    if (action === RoomActionEnum.MANTENIMIENTO)
+      targetStatusName = RoomStatusEnum.MANTENIMIENTO;
+
+    const targetStatus = roomStatuses.find((s) => s.name === targetStatusName);
+
+    if (!targetStatus) {
+      showBlockUI("Error: Estado de habitación no encontrado");
+      hideBlockUI();
+      return;
+    }
+
+    try {
+      // 1. Actualizar estado de la habitación
+      await supabase
+        .from("rooms")
+        .update({
+          status_id: targetStatus.id,
+          status_date: dayjs(selectedDate).format("YYYY-MM-DD"),
+        })
+        .eq("id", selectedRoom.id);
+
+      // 2. Crear registro en room_history
+      await supabase.from("room_history").insert({
+        room_id: selectedRoom.id,
+        previous_status_id: selectedRoom.status_id,
+        new_status_id: targetStatus.id,
+        employee_id: currentEmployee?.id,
+        action_type: action,
+        observation: `${action} iniciado el ${dayjs().format("YYYY-MM-DD HH:mm")}`,
+      });
+
+      showBlockUI(`Estado actualizado a: ${targetStatusName}`);
+      setShowMainModal(false);
+
+      // 3. Refrescar datos
+      roomsQuery.refetch();
+    } catch (error: any) {
+      showBlockUI("Error al actualizar estado: " + error.message);
+    } finally {
+      hideBlockUI();
+    }
+  };
+
+  const handleRoomStatusUpdate = async (action: string) => {
+    showBlockUI(`Actualizando estado de la habitación...`);
+
+    // Validación requerida: responsable
+    if (!formEmployeeId) {
+      showBlockUI("Debe seleccionar un responsable para esta acción");
+      hideBlockUI();
+      return;
+    }
+
+    let targetStatusName = RoomStatusEnum.DISPONIBLE;
+    let actionMessage = "";
+
+    // Mapeo de acciones a estados y mensajes
+    switch (action) {
+      case RoomActionEnum.FIN_LIMPIEZA:
+        targetStatusName = RoomStatusEnum.DISPONIBLE;
+        actionMessage = "Limpieza finalizada, habitación disponible";
+        break;
+      case RoomActionEnum.FIN_MANT:
+        targetStatusName = RoomStatusEnum.DISPONIBLE;
+        actionMessage = "Mantenimiento completado, habitación disponible";
+        break;
+      case RoomActionEnum.LIMPIEZA:
+        targetStatusName = RoomStatusEnum.LIMPIEZA;
+        actionMessage = "Habitación en proceso de limpieza";
+        break;
+      case RoomActionEnum.MANTENIMIENTO:
+        targetStatusName = RoomStatusEnum.MANTENIMIENTO;
+        actionMessage = "Habitación en mantenimiento";
+        break;
+      default:
+        actionMessage = "Estado actualizado";
+    }
+
+    const targetStatus = roomStatuses.find((s) => s.name === targetStatusName);
+
+    if (!targetStatus) {
+      showBlockUI("Error: Estado de habitación no encontrado");
+      hideBlockUI();
+      return;
+    }
+
+    try {
+      // 1. Actualizar estado de la habitación
+      await supabase
+        .from("rooms")
+        .update({
+          status_id: targetStatus.id,
+          status_date: dayjs(selectedDate).format("YYYY-MM-DD"),
+        })
+        .eq("id", selectedRoom.id);
+
+      // 2. Crear registro en room_history
+      const currentTime = dayjs().format("YYYY-MM-DD HH:mm");
+      await supabase.from("room_history").insert({
+        room_id: selectedRoom.id,
+        previous_status_id: selectedRoom.status_id,
+        new_status_id: targetStatus.id,
+        employee_id: formEmployeeId,
+        action_type: action,
+        observation: formObservation
+          ? `${formObservation} (finalizado a las ${currentTime})`
+          : `${action} completado a las ${currentTime}`,
+      });
+
+      showBlockUI(actionMessage);
+      setShowMainModal(false);
+
+      // 3. Refrescar datos
+      roomsQuery.refetch();
+    } catch (error: any) {
+      showBlockUI("Error al actualizar estado: " + error.message);
+    } finally {
+      hideBlockUI();
+    }
+  };
+
+  // 1. Nueva función para evaluar el estado de pago de la reserva
+  const getReservationPaymentStatus = (stay: Stay | null) => {
+    if (!stay)
+      return {
+        isFullyPaid: false,
+        pendingAmount: 0,
+        canCheckIn: false,
+        needsPayment: false,
+      };
+
+    const isFullyPaid = (stay.paid_amount || 0) >= (stay.total_price || 0);
+    const pendingAmount = (stay.total_price || 0) - (stay.paid_amount || 0);
+
+    return {
+      isFullyPaid,
+      pendingAmount,
+      canCheckIn: isFullyPaid,
+      needsPayment: !isFullyPaid,
+    };
+  };
+
+  // 2. Nueva función para check-in directo con observación
+  const handleDirectCheckIn = async () => {
+    if (!currentEmployee?.id) {
+      showBlockUI("Debe haber un empleado logueado para realizar el check-in");
+      hideBlockUI();
+      return;
+    }
+
+    showBlockUI("Procesando check-in de reserva...");
+
+    try {
+      // 1. Cambiar estado de la estancia a "Active"
+      await supabase
+        .from("stays")
+        .update({ status: "Active" })
+        .eq("id", activeStay.id);
+
+      // 2. Cambiar estado de habitación a "Ocupado"
+      const occupiedStatus = roomStatuses.find((s) => s.name === "Ocupado");
+      if (occupiedStatus) {
+        await supabase
+          .from("rooms")
+          .update({
+            status_id: occupiedStatus.id,
+            status_date: dayjs(selectedDate).format("YYYY-MM-DD"),
+          })
+          .eq("id", selectedRoom.id);
+      }
+
+      // 3. Registrar en room_history
+      await supabase.from("room_history").insert({
+        room_id: selectedRoom.id,
+        stay_id: activeStay.id,
+        previous_status_id: selectedRoom.status_id,
+        new_status_id: occupiedStatus?.id,
+        employee_id: currentEmployee.id,
+        action_type: "CHECK-IN-RESERVA",
+        observation: formObservation || "Check-in directo sin observación",
+      });
+
+      showBlockUI(
+        "Check-in de reserva realizado exitosamente. Huésped alojado en habitación.",
+      );
+      setShowMainModal(false);
+      roomsQuery.refetch();
+      staysQuery.refetch();
+    } catch (error: any) {
+      showBlockUI("Error al procesar check-in de reserva: " + error.message);
+    } finally {
+      hideBlockUI();
     }
   };
 
   const handleCheckInAction = () => {
     if (!activeStay) return;
-    const isFullyPaid =
-      (activeStay.paid_amount || 0) >= (activeStay.total_price || 0);
-    if (isFullyPaid) {
-      handleGoToCheckIn();
+    const paymentStatus = getReservationPaymentStatus(activeStay);
+
+    if (paymentStatus.canCheckIn) {
+      // Si está pagada, va directamente a check-in
+      handleDirectCheckIn();
     } else {
-      setNewPaymentAmount(
-        (activeStay.total_price || 0) - (activeStay.paid_amount || 0),
-      );
+      // Si tiene saldo, va a modal de pago
+      setNewPaymentAmount(paymentStatus.pendingAmount);
       setShowPaymentModal(true);
+    }
+  };
+
+  const handleConfirmCheckInReserva = async () => {
+    showBlockUI("Procesando check-in de reserva...");
+
+    setIsProcessingPayment(true);
+
+    console.log(activeStay);
+
+    //TODO: NO ESTA CREANDO BIEN EL REGISTRO DE SEGUIMIENDO AL CHECK IN DE RESERVA
+
+    try {
+      await registerCheckInReserva.mutateAsync({
+        stayId: activeStay.id,
+        roomId: selectedRoom.id,
+        employeeId: currentEmployee?.id,
+        previous_status_id: activeStay.status_id,
+      });
+
+      showBlockUI("Check-in de reserva realizado correctamente.");
+      setShowMainModal(false);
+      roomsQuery.refetch();
+      staysQuery.refetch();
+    } catch (e: any) {
+      showBlockUI("Error al procesar el check-in de reserva: " + e.message);
+    } finally {
+      setIsProcessingPayment(false);
+      hideBlockUI();
     }
   };
 
   const handleGoToCheckIn = () =>
     selectedRoom &&
-    navigate(`/check-in/${selectedRoom.id}?date=${toISODate(selectedDate)}`);
+    navigate(
+      `/check-in/${selectedRoom.id}?date=${dayjs(selectedDate).format("YYYY-MM-DD")}&tab=${activeTab}`,
+    );
   const handleGoToBooking = () =>
     selectedRoom &&
-    navigate(`/booking/${selectedRoom.id}?date=${toISODate(selectedDate)}`);
+    navigate(
+      `/booking/${selectedRoom.id}?date=${dayjs(selectedDate).format("YYYY-MM-DD")}&tab=${activeTab}`,
+    );
   const handleGoToCheckOut = () =>
     activeStay &&
     navigate(`/check-out/${selectedRoom?.id}?stayId=${activeStay.id}`);
 
+  const handleConfirmNewPayment = async () => {
+    if (!activeStay || !selectedRoom || newPaymentAmount <= 0) {
+      return;
+    }
+
+    if (!paymentMethodId || !isPaymentMethodValid) {
+      showBlockUI("Por favor seleccione un método de pago válido");
+      return;
+    }
+
+    try {
+      setIsProcessingPayment(true);
+
+      const isFullPayment = newPaymentAmount >= pendingAmount;
+      const customObservation = isFullPayment
+        ? "Liquidación completa de reserva"
+        : "Abono parcial";
+
+      await registerPayment.mutateAsync({
+        stayId: activeStay.id,
+        roomId: selectedRoom.id,
+        amount: newPaymentAmount,
+        paymentMethodId: paymentMethodId,
+        employeeId: currentEmployee?.id,
+        customObservation,
+      });
+
+      // NUEVO: Actualizar información del modal después del pago (sin check-in automático)
+      if (activeStay) {
+        const newPaidAmount = activeStay.paid_amount + newPaymentAmount;
+        const newPendingAmount = activeStay.total_price - newPaidAmount;
+
+        // Actualizar modal principal con nuevos valores
+        setActiveStay({
+          ...activeStay,
+          paid_amount: newPaidAmount,
+        });
+        setNewPaymentAmount(0);
+        setPendingAction("SUCCESS");
+        setShowPaymentModal(false);
+
+        // Mensaje diferente si el pago está completo
+        if (newPendingAmount <= 0) {
+          showBlockUI(
+            "Abono completado. Reserva fully pagada. Realice check-in para ocupar la habitación.",
+          );
+        } else {
+          showBlockUI("Abono registrado correctamente. Queda saldo pendiente.");
+        }
+      }
+    } catch (e) {
+      console.error("Payment error:", e);
+      showBlockUI("Error al registrar el pago: " + e.message);
+    } finally {
+      setIsProcessingPayment(false);
+      hideBlockUI();
+    }
+  };
+
+  // Nueva función unificada para confirmar check-in (para habitaciones disponibles y reservadas)
+  const handleConfirmCheckIn = async () => {
+    if (!selectedRoom || !currentEmployee?.id) {
+      showBlockUI("Debe haber un empleado logueado para realizar el check-in");
+      return;
+    }
+
+    showBlockUI("Procesando check-in...");
+
+    try {
+      // 1. Cambiar estado de habitación a "Ocupado"
+      const occupiedStatus = roomStatuses.find((s) => s.name === "Ocupado");
+      if (occupiedStatus) {
+        await supabase
+          .from("rooms")
+          .update({
+            status_id: occupiedStatus.id,
+            status_date: dayjs(selectedDate).format("YYYY-MM-DD"),
+          })
+          .eq("id", selectedRoom.id);
+      }
+
+      // 2. Si es una reservada, también actualizar stay a "Active"
+      if (activeStay) {
+        await supabase
+          .from("stays")
+          .update({ status: "Active" })
+          .eq("id", activeStay.id);
+      }
+
+      // 3. Crear room_history record
+      await supabase.from("room_history").insert({
+        room_id: selectedRoom.id,
+        stay_id: activeStay?.id,
+        previous_status_id: selectedRoom.status_id,
+        new_status_id: occupiedStatus?.id,
+        employee_id: currentEmployee.id,
+        action_type: activeStay ? "CHECK-IN-RESERVA" : "CHECK-IN-DIRECTO",
+        observation: checkInObservation || "Check-in sin observación",
+      });
+
+      showBlockUI(
+        "Check-in realizado exitosamente. Huésped alojado en habitación.",
+      );
+      setShowCheckInModal(false);
+      setShowMainModal(false);
+      roomsQuery.refetch();
+      staysQuery.refetch();
+    } catch (error: any) {
+      showBlockUI("Error al procesar check-in: " + error.message);
+    } finally {
+      hideBlockUI();
+    }
+  };
+
   // Filtrado de empleados según la acción
   const taskEmployees = useMemo(() => {
-    if (!pendingAction) return [];
-    const targetRole = pendingAction.includes("LIMPIEZA")
-      ? Role.Limpieza
-      : Role.Mantenimiento;
+    const targetRole = selectedRoom?.status.name;
+
     return (employeesQuery.data || []).filter(
-      (emp) => emp.role?.name === targetRole || emp.role?.name === Role.Admin,
+      (emp) => emp.role?.name === targetRole,
     );
-  }, [employeesQuery.data, pendingAction]);
+  }, [employeesQuery.data, selectedRoom?.status.name]);
 
   // Manejo de carga resiliente
   const isLoading =
@@ -216,7 +594,7 @@ const CalendarView: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center p-24 gap-4">
         <ProgressSpinner strokeWidth="4" />
-        <p className="text-indigo-600 font-bold animate-pulse">
+        <p className="text-emerald-600 font-bold animate-pulse">
           Cargando disponibilidad...
         </p>
       </div>
@@ -257,94 +635,26 @@ const CalendarView: React.FC = () => {
     </div>
   );
 
+  const paymentStatus = getReservationPaymentStatus(activeStay);
   const pendingAmount = activeStay
     ? activeStay.total_price - activeStay.paid_amount
     : 0;
 
+  // Validar que paymentMethodId sea válido
+  const isPaymentMethodValid = paymentMethods.some(
+    (pm) => pm.id === paymentMethodId,
+  );
+
   // Renderizar los botones según el estado
   const renderModalActions = () => {
-    // 0. Si hay un formulario de acción pendiente
-    if (pendingAction) {
-      const isFinishing = pendingAction.startsWith("FIN-");
-      const actionBase = isFinishing
-        ? pendingAction.substring(4)
-        : pendingAction;
-      const colorClass = actionBase === "LIMPIEZA" ? "blue" : "gray";
-
-      return (
-        <div className="flex flex-col gap-4 animate-fade-in">
-          <div
-            className={`bg-${colorClass}-50 p-4 rounded-2xl border border-${colorClass}-100 flex items-center gap-3`}
-          >
-            <i
-              className={`pi ${actionBase === "LIMPIEZA" ? "pi-star text-blue-500" : "pi-cog text-gray-500"} text-xl`}
-            ></i>
-            <div className="flex flex-col">
-              <p
-                className={`text-sm font-black text-${colorClass}-900 uppercase`}
-              >
-                {isFinishing ? "Finalizar" : "Iniciar"}{" "}
-                {actionBase.toLowerCase()}
-              </p>
-              <p className={`text-[10px] text-${colorClass}-600 font-bold`}>
-                Se creará un registro en el historial
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-black text-gray-500 uppercase">
-              Responsable
-            </label>
-            <Dropdown
-              value={formEmployeeId}
-              onChange={(e) => setFormEmployeeId(e.value)}
-              options={taskEmployees}
-              optionLabel={(emp) => `${emp.first_name} ${emp.last_name}`}
-              optionValue="id"
-              placeholder="Seleccione el encargado"
-              className="w-full p-2 border-indigo-200"
-              filter
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-black text-gray-500 uppercase">
-              Observación / Novedad
-            </label>
-            <InputTextarea
-              value={formObservation}
-              onChange={(e) => setFormObservation(e.target.value)}
-              placeholder={`Notas sobre la ${actionBase.toLowerCase()}...`}
-              rows={3}
-              className="w-full border-indigo-200"
-              autoFocus
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 mt-2">
-            <Button
-              label="Atrás"
-              className="p-button-text p-button-plain font-bold"
-              onClick={() => setPendingAction(null)}
-            />
-            <Button
-              label="Guardar Registro"
-              icon="pi pi-save"
-              className={`bg-${colorClass === "blue" ? "blue-600" : "gray-700"} border-none text-white font-black py-3 rounded-xl shadow-lg`}
-              disabled={!formEmployeeId}
-              onClick={handleStatusChangeSubmit}
-            />
-          </div>
-        </div>
-      );
-    }
+    const isDate =
+      dayjs(selectedDate).format("YYYY-MM-DD") === selectedRoom?.status_date;
 
     // 1. Si hay una estancia activa (Ocupado o Reservado)
     if (activeStay) {
       return (
         <div className="flex flex-col gap-4">
-          <div className="p-6 border border-indigo-100 rounded-3xl bg-white shadow-md">
+          <div className="p-6 border border-emerald-200 rounded-3xl bg-white shadow-md">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <span className="text-[10px] font-bold text-gray-400 block uppercase">
@@ -358,7 +668,7 @@ const CalendarView: React.FC = () => {
                 <span className="text-[10px] font-bold text-gray-400 block uppercase">
                   Salida
                 </span>
-                <p className="text-base font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg">
+                <p className="text-base font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg">
                   {activeStay.check_out_date}
                 </p>
               </div>
@@ -369,7 +679,7 @@ const CalendarView: React.FC = () => {
                 <span className="text-[9px] font-black text-gray-400 uppercase">
                   Abonado
                 </span>
-                <span className="text-sm font-black text-indigo-600">
+                <span className="text-sm font-black text-emerald-600">
                   $ {activeStay.paid_amount?.toLocaleString() || "0"}
                 </span>
               </div>
@@ -377,7 +687,7 @@ const CalendarView: React.FC = () => {
                 <span className="text-[9px] font-black text-gray-400 uppercase">
                   Total
                 </span>
-                <span className="text-sm font-black text-gray-800">
+                <span className="text-sm font-black text-emerald-800">
                   $ {activeStay.total_price?.toLocaleString() || "0"}
                 </span>
               </div>
@@ -399,65 +709,73 @@ const CalendarView: React.FC = () => {
               onClick={handleGoToCheckOut}
             />
           ) : (
-            <Button
-              label="Check-in (Reserva)"
-              className="bg-indigo-600 border-none text-white w-full py-4 text-lg font-black rounded-2xl shadow-lg"
-              onClick={handleCheckInAction}
-            />
+            <div className="flex flex-col gap-4">
+              {/* Campo de observación para check-in */}
+              {activeStay.paid_amount >= activeStay.total_price && (
+                <div className="md:col-span-3 flex flex-col gap-1">
+                  <label className="text-sm font-black text-gray-700">
+                    Observación del Check-in (Opcional)
+                  </label>
+                  <InputTextarea
+                    value={checkInObservation}
+                    onChange={(e) => setCheckInObservation(e.target.value)}
+                    placeholder="Agregar observación del check-in..."
+                    rows={3}
+                    className="w-full bg-gray-50 border-gray-100"
+                  />
+                </div>
+              )}
+
+              {paymentStatus.canCheckIn ? (
+                <Button
+                  label="Check-in"
+                  className="bg-emerald-600 border-none text-white w-full py-4 text-lg font-black rounded-2xl shadow-lg"
+                  onClick={handleConfirmCheckIn}
+                />
+              ) : (
+                <Button
+                  label="Abonar"
+                  className="bg-orange-600 border-none text-white w-full py-4 text-lg font-black rounded-2xl shadow-lg"
+                  onClick={handleCheckInAction}
+                />
+              )}
+            </div>
           )}
         </div>
       );
     }
 
     // 2. Si el estado de la celda es Limpieza (permitir finalizar)
-    if (
-      selectedRoom?.status?.name === "Limpieza" &&
-      toISODate(selectedDate) === selectedRoom.status_date
-    ) {
+    if (selectedRoom?.status?.name === RoomStatusEnum.LIMPIEZA && isDate) {
       return (
-        <div className="flex flex-col gap-4">
-          <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 text-center">
-            <i className="pi pi-star text-4xl text-blue-500 mb-2"></i>
-            <p className="text-blue-800 font-bold text-lg">
-              Habitación en proceso de limpieza
-            </p>
-            <p className="text-blue-600 text-sm">
-              ¿Ya se terminó la limpieza de la habitación?
-            </p>
-          </div>
-          <Button
-            label="Finalizar Limpieza"
-            icon="pi pi-check-circle"
-            className="bg-blue-600 border-none text-white w-full py-4 text-lg font-black rounded-2xl shadow-lg"
-            onClick={() => setPendingAction("FIN-LIMPIEZA")}
-          />
-        </div>
+        <TaskCompletionForm
+          onSubmit={() => handleRoomStatusUpdate(RoomActionEnum.FIN_LIMPIEZA)}
+          onObservationChange={setFormObservation}
+          onEmployeeChange={setFormEmployeeId}
+          selectedEmployeeId={formEmployeeId}
+          observation={formObservation}
+          employees={taskEmployees}
+          placeholder="Notas sobre la limpieza..."
+          submitLabel="Finalizar Limpieza"
+          actionColor="blue"
+        />
       );
     }
 
     // 3. Si el estado de la celda es Mantenimiento (permitir finalizar)
-    if (
-      selectedRoom?.status?.name === "Mantenimiento" &&
-      toISODate(selectedDate) === selectedRoom.status_date
-    ) {
+    if (selectedRoom?.status?.name === RoomStatusEnum.MANTENIMIENTO && isDate) {
       return (
-        <div className="flex flex-col gap-4">
-          <div className="bg-gray-100 p-6 rounded-2xl border border-gray-200 text-center">
-            <i className="pi pi-cog text-4xl text-gray-500 mb-2"></i>
-            <p className="text-gray-800 font-bold text-lg">
-              Habitación en mantenimiento
-            </p>
-            <p className="text-gray-600 text-sm">
-              ¿Ya finalizó el mantenimiento técnico?
-            </p>
-          </div>
-          <Button
-            label="Finalizar Mantenimiento"
-            icon="pi pi-check-circle"
-            className="bg-gray-700 border-none text-white w-full py-4 text-lg font-black rounded-2xl shadow-lg"
-            onClick={() => setPendingAction("FIN-MANT")}
-          />
-        </div>
+        <TaskCompletionForm
+          onSubmit={() => handleRoomStatusUpdate(RoomActionEnum.FIN_MANT)}
+          onObservationChange={setFormObservation}
+          onEmployeeChange={setFormEmployeeId}
+          selectedEmployeeId={formEmployeeId}
+          observation={formObservation}
+          employees={taskEmployees}
+          placeholder="Notas sobre el mantenimiento..."
+          submitLabel="Finalizar Mantenimiento"
+          actionColor="gray"
+        />
       );
     }
 
@@ -477,12 +795,12 @@ const CalendarView: React.FC = () => {
         <Button
           label="Limpieza"
           className="bg-[#2d79ff] border-none text-white font-black py-4 rounded-2xl shadow-sm"
-          onClick={() => setPendingAction("LIMPIEZA")}
+          onClick={() => handleRoomStatusChange(RoomActionEnum.LIMPIEZA)}
         />
         <Button
           label="Mant."
           className="bg-[#6e7687] border-none text-white font-black py-4 rounded-2xl shadow-sm"
-          onClick={() => setPendingAction("MANTENIMIENTO")}
+          onClick={() => handleRoomStatusChange(RoomActionEnum.MANTENIMIENTO)}
         />
       </div>
     );
@@ -528,105 +846,12 @@ const CalendarView: React.FC = () => {
       >
         {CATEGORIES.map((cat) => (
           <TabPanel key={cat} header={cat}>
-            <div className="overflow-x-auto bg-white rounded-xl shadow-sm border mt-4">
-              <table className="w-full border-collapse min-w-[800px]">
-                <thead>
-                  <tr className="bg-gray-50 border-b">
-                    <th className="p-4 text-left font-bold text-gray-400 w-[75px] border-r">
-                      Hab..
-                    </th>
-                    {days.map((d) => (
-                      <th
-                        key={d.getTime()}
-                        className="p-4 text-center border-r last:border-r-0"
-                      >
-                        <div className="flex flex-col">
-                          <span className="text-[10px] font-bold uppercase text-gray-400">
-                            {d.toLocaleDateString("es-CO", {
-                              weekday: "short",
-                            })}
-                          </span>
-                          <span
-                            className={`text-lg font-black ${toISODate(d) === toISODate(new Date()) ? "text-indigo-600" : "text-gray-700"}`}
-                          >
-                            {d.getDate()}
-                          </span>
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredRooms.map((room) => (
-                    <tr
-                      key={room.id}
-                      className="border-b last:border-b-0 hover:bg-indigo-50/30 transition-colors"
-                    >
-                      <td className="p-2 border-r bg-gray-50/50">
-                        <div className="flex flex-col gap-1 items-start px-1">
-                          <div className="flex items-center gap-1.5 bg-[#f3f0e9] px-1 py-1 rounded-xl border border-[#e5e0d3] w-fit">
-                            <i className="pi pi-bed text-[#8b7e6a] text-xs"></i>
-                            <span className="text-base font-bold text-[12px] text-[#0f2d52]">
-                              {room.room_number}
-                            </span>
-                          </div>
-                          <span className="text-[8px] font-black text-gray-500 uppercase">
-                            MAX: {room.beds_double * 2 + room.beds_single} PAX
-                          </span>
-                        </div>
-                      </td>
-                      {days.map((d) => {
-                        const stay = getActiveStay(room, d);
-                        const dateStr = toISODate(d);
-                        let statusColor =
-                          STATUS_MAP["Disponible"]?.color || "bg-green-500";
-                        let cellContent = null;
-
-                        if (stay) {
-                          statusColor =
-                            stay.status === "Active"
-                              ? STATUS_MAP["Ocupado"]?.color || "bg-red-500"
-                              : STATUS_MAP["Reserved"]?.color ||
-                                "bg-yellow-500";
-                          cellContent = (
-                            <span className="text-[8px] px-1 truncate">
-                              {stay.guest?.first_name} {stay.guest?.last_name}
-                            </span>
-                          );
-                        } else if (
-                          room.status_date === dateStr &&
-                          room.status?.name !== "Disponible"
-                        ) {
-                          statusColor =
-                            STATUS_MAP[room.status.name]?.color || statusColor;
-                          cellContent = (
-                            <span className="text-[8px] font-bold uppercase">
-                              {room.status.name}
-                            </span>
-                          );
-                        }
-
-                        return (
-                          <td
-                            key={d.getTime()}
-                            className="p-1 border-r last:border-r-0 cursor-pointer"
-                            onClick={() =>
-                              handleRoomClick(room, stay || null, d)
-                            }
-                          >
-                            <div
-                              className={`h-10 w-full rounded-lg flex items-center justify-center text-white font-bold transition-all ${statusColor} shadow-sm overflow-hidden`}
-                            >
-                              {cellContent}
-                            </div>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <CalendarGrid
+              days={days}
+              filteredRooms={filteredRooms}
+              getActiveStay={getActiveStay}
+              handleRoomClick={handleRoomClick}
+            />
           </TabPanel>
         ))}
       </TabView>
@@ -645,18 +870,19 @@ const CalendarView: React.FC = () => {
                   value={
                     activeStay
                       ? activeStay.status === "Active"
-                        ? "Ocupado"
-                        : "Reserved"
-                      : selectedRoom?.status?.name || "Disponible"
+                        ? RoomStatusEnum.OCUPADO
+                        : RoomStatusEnum.RESERVED
+                      : selectedRoom?.status?.name || RoomStatusEnum.DISPONIBLE
                   }
                   severity={
                     activeStay
                       ? activeStay.status === "Active"
                         ? "danger"
                         : "warning"
-                      : selectedRoom?.status?.name === "Limpieza"
+                      : selectedRoom?.status?.name === RoomStatusEnum.LIMPIEZA
                         ? "info"
-                        : selectedRoom?.status?.name === "Mantenimiento"
+                        : selectedRoom?.status?.name ===
+                            RoomStatusEnum.MANTENIMIENTO
                           ? "secondary"
                           : "success"
                   }
@@ -668,8 +894,8 @@ const CalendarView: React.FC = () => {
                 <div className="flex flex-col gap-2 text-gray-600 text-base font-medium">
                   <p>
                     Fecha seleccionada:{" "}
-                    <span className="font-bold text-indigo-600">
-                      {toISODate(selectedDate)}
+                    <span className="font-bold text-emerald-600">
+                      {dayjs(selectedDate).format("YYYY-MM-DD")}
                     </span>
                   </p>
                   <p>
@@ -682,7 +908,6 @@ const CalendarView: React.FC = () => {
               </div>
             </>
           )}
-
           {renderModalActions()}
         </div>
       </Dialog>
@@ -694,8 +919,8 @@ const CalendarView: React.FC = () => {
         className="w-full max-w-md rounded-2xl"
       >
         <div className="flex flex-col gap-5 py-2">
-          <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-            <p className="text-indigo-800 text-sm font-medium">
+          <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+            <p className="text-emerald-800 text-sm font-medium">
               <i className="pi pi-info-circle mr-2"></i>
               Para proceder con el check-in de una reserva, el saldo pendiente
               debe ser cero.
@@ -710,6 +935,20 @@ const CalendarView: React.FC = () => {
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-black text-gray-700">
+                Método de Pago
+              </label>
+              <Dropdown
+                value={paymentMethodId}
+                options={paymentMethods}
+                optionLabel="name"
+                optionValue="id"
+                onChange={(e) => setPaymentMethodId(e.value)}
+                placeholder="Seleccionar método de pago"
+                className="w-full"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-black text-gray-700">
                 Monto a Abonar
               </label>
               <InputNumber
@@ -718,7 +957,7 @@ const CalendarView: React.FC = () => {
                 mode="currency"
                 currency="COP"
                 className="w-full"
-                inputClassName="text-2xl font-black py-4 border-indigo-200"
+                inputClassName="text-2xl font-black py-4 border-emerald-200"
                 autoFocus
               />
             </div>
@@ -735,7 +974,62 @@ const CalendarView: React.FC = () => {
               className="bg-green-600 border-none text-white font-black py-4 rounded-xl shadow-lg"
               onClick={handleConfirmNewPayment}
               loading={isProcessingPayment}
-              disabled={newPaymentAmount <= 0}
+              disabled={
+                newPaymentAmount <= 0 ||
+                !paymentMethodId ||
+                !isPaymentMethodValid
+              }
+            />
+          </div>
+        </div>
+      </Dialog>
+
+      {/* Modal de Check-in - Nueva modal para observación */}
+      <Dialog
+        visible={showCheckInModal}
+        onHide={() => setShowCheckInModal(false)}
+        header="Confirmar Check-in"
+        modal
+        className="w-full max-w-md"
+        resizable={false}
+        draggable={false}
+      >
+        <div className="flex flex-col gap-4">
+          <div className="text-center mb-4">
+            <div className="text-2xl mb-2">🏨</div>
+            <h3 className="text-lg font-bold text-gray-800">
+              {selectedRoom?.room_number} - Check-in
+            </h3>
+            <p className="text-sm text-gray-600">
+              {activeStay ? "Check-in de reserva" : "Check-in directo"}
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-black text-gray-700">
+              Observación del Check-in (Opcional)
+            </label>
+            <InputTextarea
+              value={checkInObservation}
+              onChange={(e) => setCheckInObservation(e.target.value)}
+              placeholder="Agregar observación del check-in..."
+              rows={3}
+              className="w-full bg-gray-50 border-gray-100"
+              autoFocus
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <Button
+              label="Cancelar"
+              className="p-button-text p-button-plain font-bold"
+              onClick={() => setShowCheckInModal(false)}
+            />
+            <Button
+              label="Confirmar Check-in"
+              icon="pi pi-check"
+              className="bg-emerald-600 border-none text-white font-black py-4 rounded-xl shadow-lg"
+              onClick={handleConfirmCheckIn}
             />
           </div>
         </div>

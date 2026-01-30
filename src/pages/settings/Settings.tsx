@@ -49,7 +49,7 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
     <div className="flex flex-col gap-6">
       <h2 className="text-2xl font-bold text-gray-800">Parámetros Globales (Módulo Otros)</h2>
       
-      <Card className="shadow-sm max-w-xl border-t-4 border-indigo-600">
+      <Card className="shadow-sm max-w-xl border-t-4 border-emerald-600">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
             <label htmlFor="iva" className="font-bold text-gray-700">Porcentaje IVA (%)</label>
@@ -79,7 +79,7 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
             <small className="text-gray-500">Costo fijo por noche al agregar una colchoneta extra a la habitación.</small>
           </div>
 
-          <Button type="submit" label="Actualizar Parámetros" icon="pi pi-save" className="bg-indigo-600 mt-2 p-3 font-bold" />
+          <Button type="submit" label="Actualizar Parámetros" icon="pi pi-save" className="bg-emerald-600 mt-2 p-3 font-bold" />
         </form>
       </Card>
     </div>

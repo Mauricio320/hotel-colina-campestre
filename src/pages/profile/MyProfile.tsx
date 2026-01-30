@@ -62,7 +62,7 @@ const MyProfile: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card title="Mis Datos Personales" className="shadow-sm border-t-4 border-indigo-500">
+      <Card title="Mis Datos Personales" className="shadow-sm border-t-4 border-emerald-500">
         <form onSubmit={profileForm.handleSubmit(onUpdateProfile)} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
@@ -86,7 +86,7 @@ const MyProfile: React.FC = () => {
             <label className="text-xs font-bold text-gray-500 uppercase">Teléfono</label>
             <InputText {...profileForm.register('phone')} />
           </div>
-          <Button type="submit" label="Actualizar Perfil" icon="pi pi-save" className="bg-indigo-600 mt-2" />
+          <Button type="submit" label="Actualizar Perfil" icon="pi pi-save" className="bg-emerald-600 mt-2" />
         </form>
       </Card>
 

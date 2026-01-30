@@ -6,6 +6,13 @@ export enum Role {
   Mantenimiento = 'Mantenimiento'
 }
 
+export enum PaymentType {
+  ABONO_RESERVA = 'ABONO_RESERVA',           // Abono parcial de reserva
+  PAGO_COMPLETO_RESERVA = 'PAGO_COMPLETO_RESERVA', // Pago completo de reserva  
+  PAGO_CHECKIN_DIRECTO = 'PAGO_CHECKIN_DIRECTO',   // Pago completo check-in directo
+  ANTICIPADO_COMPLETO = 'ANTICIPADO_COMPLETO'     // Pago completo anticipado
+}
+
 export interface RoomStatus {
   id: string;
   name: 'Ocupado' | 'Disponible' | 'Reservado' | 'Limpieza' | 'Mantenimiento';
@@ -77,8 +84,54 @@ export interface Stay {
   iva_amount: number;
   observation?: string;
   origin_was_reservation: boolean;
+  // New configuration fields
+  iva_percentage: number;
+  person_count: number;
+  extra_mattress_count: number;
+  extra_mattress_unit_price: number;
   room?: Room;
   guest?: Guest;
+}
+
+export interface PaymentMethod {
+  id: string;
+  name: string;
+}
+
+export interface Payment {
+  id: string;
+  stay_id: string;
+  payment_method_id: string;
+  employee_id: string;
+  amount: number;
+  payment_date: string;
+  observation?: string;
+  payment_type: PaymentType;
+  created_at: string;
+  payment_method?: PaymentMethod;
+  employee?: Employee;
+}
+
+export interface CreatePaymentDto {
+  stay_id: string;
+  payment_method_id: string;
+  employee_id: string;
+  amount: number;
+  payment_type: PaymentType;
+  observation?: string;
+}
+
+export interface StayWithPaymentDto {
+  stayData: any;
+  paymentData: CreatePaymentDto;
+}
+
+export interface PaymentSummary {
+  totalPaid: number;
+  totalAmount: number;
+  pendingAmount: number;
+  payments: Payment[];
+  isFullyPaid: boolean;
 }
 
 export interface RoomLog {

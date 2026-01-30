@@ -1,0 +1,322 @@
+@import "primereact/resources/themes/lara-light-indigo/theme.css";
+@import "primeicons/primeicons.css";
+/* ============ Variables de Colores del Hotel ============ */
+:root {
+  /* Colores principales del sistema */
+  --hotel-primary: #059669; /* esmeralda para check-in y acciones principales */
+  --hotel-secondary: #f59e0b; /* amarillo para reservas */
+  --hotel-danger: #ef4444; /* rojo para check-out y peligros */
+  --hotel-info: #3b82f6; /* azul para información */
+  --hotel-success: #059669; /* verde para éxitos (igual a primary) */
+  --hotel-warning: #f59e0b; /* amarillo para advertencias (igual a secondary) */
+
+  /* Colores neutros */
+  --hotel-surface: #ffffff; /* fondo de componentes */
+  --hotel-background: #f9fafb; /* fondo de página */
+  --hotel-text-primary: #1f2937; /* texto principal */
+  --hotel-text-secondary: #6b7280; /* texto secundario */
+  --hotel-border: #e7e4dd; /* bordes */
+  --hotel-border-light: #f3f4f6; /* bordes claros */
+
+  /* Espaciado y bordes */
+  --hotel-border-radius: 0.75rem;
+  --hotel-spacing: 0.75rem;
+}
+
+/* ============ Personalización de Botones Principales ============ */
+
+/* Botones de Check-in (éxito/primary) */
+.p-button.p-button-success,
+.p-button:not(.p-button-outlined).p-button-success {
+  background-color: var(--hotel-primary) !important;
+  border-color: var(--hotel-primary) !important;
+  color: white !important;
+  padding: 0.75rem 1.5rem !important;
+  font-weight: 600 !important;
+  border-radius: var(--hotel-border-radius) !important;
+  transition: all 0.2s ease !important;
+}
+
+.p-button.p-button-success:hover {
+  background-color: #059669 !important;
+  border-color: #059669 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Botones de Reserva (warning/secondary) */
+.p-button.p-button-warning {
+  background-color: var(--hotel-secondary) !important;
+  border-color: var(--hotel-secondary) !important;
+  color: white !important;
+  padding: 0.75rem 1.5rem !important;
+  font-weight: 600 !important;
+  border-radius: var(--hotel-border-radius) !important;
+  transition: all 0.2s ease !important;
+}
+
+.p-button.p-button-warning:hover {
+  background-color: #d97706 !important;
+  border-color: #d97706 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Botones de Check-out (danger) */
+.p-button.p-button-danger {
+  background-color: var(--hotel-danger) !important;
+  border-color: var(--hotel-danger) !important;
+  color: white !important;
+  padding: 0.75rem 1.5rem !important;
+  font-weight: 600 !important;
+  border-radius: var(--hotel-border-radius) !important;
+  transition: all 0.2s ease !important;
+}
+
+.p-button.p-button-danger:hover {
+  background-color: #dc2626 !important;
+  border-color: #dc2626 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Botones secundarios (outlined) */
+.p-button.p-button-outlined:not(.p-button-success):not(.p-button-warning):not(
+    .p-button-danger
+  ) {
+  background-color: transparent !important;
+  border-color: var(--hotel-border) !important;
+  color: var(--hotel-text-secondary) !important;
+  padding: 0.75rem 1.5rem !important;
+  font-weight: 500 !important;
+  border-radius: var(--hotel-border-radius) !important;
+  transition: all 0.2s ease !important;
+}
+
+.p-button.p-button-outlined:hover:not(.p-button-success):not(
+    .p-button-warning
+  ):not(.p-button-danger) {
+  background-color: var(--hotel-background) !important;
+  border-color: var(--hotel-text-primary) !important;
+  color: var(--hotel-text-primary) !important;
+}
+
+/* Botones de texto (text-only) */
+.p-button.p-button-text {
+  color: var(--hotel-text-secondary) !important;
+  padding: 0.5rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.p-button.p-button-text:hover {
+  color: var(--hotel-text-primary) !important;
+  background-color: var(--hotel-background) !important;
+}
+
+.p-button:disabled {
+  opacity: 0.5;
+}
+
+/* ============ Personalización de Inputs de Texto ============ */
+
+.p-inputtext {
+  border: 1px solid var(--hotel-border) !important;
+  border-radius: var(--hotel-border-radius) !important;
+  padding: var(--hotel-spacing) !important;
+  /* background-color: var(--hotel-surface) !important; */
+  color: var(--hotel-text-primary) !important;
+  font-size: 1rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.p-calendar .p-inputtext {
+  border: none !important;
+  outline: none !important  ;
+}
+.p-calendar:not(.p-calendar-disabled).p-focus > .p-inputtext {
+  box-shadow: none !important;
+}
+
+.p-inputwrapper .p-inputtext {
+  border: none !important;
+}
+
+.p-inputtext:focus {
+  border-color: var(--hotel-primary) !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
+  outline: none !important;
+}
+
+.p-inputtext:disabled {
+  background-color: var(--hotel-border-light) !important;
+  color: var(--hotel-text-secondary) !important;
+  cursor: not-allowed !important;
+}
+
+/* ============ Personalización de Dropdowns ============ */
+
+.p-dropdown {
+  border: 1px solid var(--hotel-border) !important;
+  border-radius: var(--hotel-border-radius) !important;
+  background-color: var(--hotel-surface) !important;
+  color: var(--hotel-text-primary) !important;
+  transition: all 0.2s ease !important;
+}
+
+.p-dropdown:focus,
+.p-dropdown.p-focus {
+  border-color: var(--hotel-primary) !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
+}
+
+.p-dropdown.p-disabled {
+  background-color: var(--hotel-border-light) !important;
+  color: var(--hotel-text-secondary) !important;
+  cursor: not-allowed !important;
+}
+
+/* ============ Personalización de Calendarios ============ */
+
+.p-calendar {
+  border: 1px solid var(--hotel-border) !important;
+  border-radius: var(--hotel-border-radius) !important;
+  background-color: var(--hotel-surface) !important;
+  width: 100% !important;
+}
+
+.p-calendar:focus,
+.p-calendar.p-focus {
+  border-color: var(--hotel-primary) !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* ============ Personalización de Fields (Formularios) ============ */
+
+.p-field {
+  margin-bottom: 1rem !important;
+}
+
+.p-field-label {
+  display: block !important;
+  margin-bottom: 0.5rem !important;
+  font-weight: 600 !important;
+  color: var(--hotel-text-primary) !important;
+  font-size: 0.875rem !important;
+}
+
+/* ============ Personalización de Componentes Adicionales ============ */
+
+.p-inputnumber {
+  border: 1px solid var(--hotel-border) !important;
+  border-radius: var(--hotel-border-radius) !important;
+  background-color: var(--hotel-surface) !important;
+  width: 100% !important;
+}
+
+.p-inputnumber:focus,
+.p-inputnumber.p-focus {
+  border-color: var(--hotel-primary) !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
+}
+
+.p-checkbox {
+  margin-right: 0.5rem !important;
+  border: 1px solid var(--hotel-border) !important;
+  padding-bottom: 22px;
+}
+.p-highlight .p-checkbox {
+  border: 0px !important;
+}
+
+.p-highlight .p-checkbox-box {
+  background: var(--hotel-primary) !important;
+  margin: -1px !important;
+}
+
+/* ============ Personalización de Layout ============ */
+
+/* Asegurar que solo el main tenga scroll */
+main {
+  height: calc(100vh - 4rem) !important; /* Altura total menos header (64px) */
+  overflow-y: auto !important;
+  position: relative !important;
+}
+
+/* Evitar scroll duplicado en el contenedor principal */
+body {
+  overflow: hidden !important;
+}
+
+html {
+  overflow: hidden !important;
+}
+
+.p-inputtextarea {
+  border: 1px solid var(--hotel-border) !important;
+  border-radius: var(--hotel-border-radius) !important;
+  padding: var(--hotel-spacing) !important;
+  background-color: var(--hotel-surface) !important;
+  color: var(--hotel-text-primary) !important;
+  resize: vertical !important;
+  min-height: 100px !important;
+}
+
+.p-tabview .p-tabview-nav {
+  background: #eeebe4;
+  padding: 0.5rem;
+  border-radius: 1rem;
+  border: none;
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.p-tabview .p-tabview-nav li {
+  margin-right: 0;
+  flex: 1;
+}
+.p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  background: transparent;
+  border: none !important;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: oklch(27.8% 0.033 256.848);
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: none !important;
+}
+.p-tabview
+  .p-tabview-nav
+  li:not(.p-highlight):not(.p-disabled):hover
+  .p-tabview-nav-link {
+  background: #e2e8f0;
+  color: #475569;
+}
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background: #faf8f5 !important;
+  color: oklch(27.8% 0.033 256.848);
+}
+.p-tabview .p-tabview-panels {
+  background: transparent;
+  padding: 0;
+  border: none;
+}
+.p-tabview .p-tabview-nav .p-tabview-ink-bar {
+  display: none !important;
+}
+@media (max-width: 640px) {
+  .p-tabview .p-tabview-nav {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+  }
+  .p-tabview .p-tabview-nav li {
+    flex: none;
+    min-width: 120px;
+  }
+}

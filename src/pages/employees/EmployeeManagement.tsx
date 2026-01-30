@@ -45,14 +45,14 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({ userRole }) => 
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-800">Gestión de Talento Humano</h2>
-        <Button label="Registrar Empleado" icon="pi pi-user-plus" className="bg-indigo-600 shadow-md" onClick={() => setShowModal(true)} />
+        <Button label="Registrar Empleado" icon="pi pi-user-plus" className="bg-emerald-600 shadow-md" onClick={() => setShowModal(true)} />
       </div>
 
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
         <DataTable value={employeesQuery.data || []} responsiveLayout="scroll" className="text-sm" paginator rows={10}>
           <Column header="Empleado" body={(row) => `${row.first_name} ${row.last_name}`} sortable />
           <Column field="doc_number" header="Documento" />
-          <Column field="role.name" header="Rol" sortable body={(row) => <span className="font-bold text-indigo-600">{row.role?.name}</span>} />
+          <Column field="role.name" header="Rol" sortable body={(row) => <span className="font-bold text-emerald-600">{row.role?.name}</span>} />
           <Column field="email" header="Email" />
           <Column field="phone" header="Teléfono" />
           <Column 
@@ -86,7 +86,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({ userRole }) => 
           <InputText {...register('email', { required: true })} placeholder="Correo Institucional" className="col-span-2 w-full" />
           <InputText {...register('phone')} placeholder="Teléfono de Contacto" className="col-span-2 w-full" />
           <div className="col-span-2 mt-4">
-             <Button type="submit" label="Crear Perfil" className="bg-indigo-600 w-full p-3 font-bold" loading={createEmployee.isPending} />
+             <Button type="submit" label="Crear Perfil" className="bg-emerald-600 w-full p-3 font-bold" loading={createEmployee.isPending} />
           </div>
         </form>
       </Dialog>

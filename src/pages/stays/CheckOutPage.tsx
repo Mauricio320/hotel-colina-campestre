@@ -11,6 +11,8 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { useStays } from '@/hooks/useStays';
 import { useRooms } from '@/hooks/useRooms';
 import { useAuth } from '@/hooks/useAuth';
+import { usePayments } from '@/hooks/usePayments';
+import { useBlockUI } from '@/context/BlockUIContext';
 import { supabase } from '@/config/supabase';
 import { Stay } from '@/types';
 
@@ -21,6 +23,8 @@ const CheckOutPage: React.FC = () => {
   const navigate = useNavigate();
   const { employee } = useAuth();
   const { updateStatus } = useRooms();
+  const { createPaymentWithAutoType } = usePayments();
+  const { showBlockUI, hideBlockUI } = useBlockUI();
   
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -58,27 +62,47 @@ const CheckOutPage: React.FC = () => {
 
   const handleCheckOut = async () => {
     if (!stay) return;
+    
+    if (finalPayment > 0 && !paymentMethod) {
+      alert("Por favor seleccione un método de pago");
+      return;
+    }
+    
     setSubmitting(true);
+    showBlockUI("Procesando check-out...");
+    
     try {
       const todayStr = new Date().toLocaleDateString('sv-SE');
-
-      // 1. Actualizar la estadía como completada y actualizar el monto pagado
+ 
+      // 1. Si hay pago final, registrar en la tabla payments
+      if (finalPayment > 0) {
+        await createPaymentWithAutoType({
+          stay_id: stay.id,
+          payment_method_id: paymentMethod,
+          employee_id: employee?.id || '',
+          amount: finalPayment,
+          totalPrice: stay.total_price,
+          context: 'checkin_direct', // Es un pago de cierre
+          customObservation: `Pago final de check-out${observation ? ': ' + observation : ''}`
+        });
+      }
+ 
+      // 2. Actualizar la estadía como completada
       const { error: stayError } = await supabase
         .from('stays')
         .update({ 
             status: 'Completed',
-            paid_amount: stay.paid_amount + finalPayment 
+            observation: observation || stay.observation
         })
         .eq('id', stay.id);
       
       if (stayError) throw stayError;
-
-      // 2. Cambiar estado de la habitación a "Limpieza"
-      // Se utiliza la fecha actual del sistema para que la habitación aparezca en limpieza hoy mismo
+ 
+      // 3. Cambiar estado de la habitación a "Limpieza"
       const { data: cleaningStatus } = await supabase.from('room_statuses').select('id').eq('name', 'Limpieza').single();
       
       if (cleaningStatus) {
-          const finalObservation = `Check-out realizado.${finalPayment > 0 ? ` Pago final: $${finalPayment.toLocaleString()}.` : ''} ${observation}`.trim();
+          const finalObservation = `Check-out realizado${finalPayment > 0 ? '. Pago final: $' + finalPayment.toLocaleString() : ''}${observation ? '. ' + observation : ''}`.trim();
           
           await updateStatus.mutateAsync({
               roomId: roomId!,
@@ -86,16 +110,21 @@ const CheckOutPage: React.FC = () => {
               statusId: cleaningStatus.id,
               actionType: 'CHECK-OUT',
               employeeId: employee?.id,
-              statusDate: todayStr, // Usar la fecha actual del sistema para el calendario
+              statusDate: todayStr,
               observation: finalObservation
           });
       }
-
-      navigate('/calendar');
+ 
+      showBlockUI("Check-out procesado correctamente");
+      setTimeout(() => {
+        navigate('/calendar');
+      }, 1500);
     } catch (e: any) {
-      alert("Error: " + e.message);
+      showBlockUI("Error al procesar check-out: " + e.message);
+      setTimeout(hideBlockUI, 3000);
     } finally {
       setSubmitting(false);
+      hideBlockUI();
     }
   };
 
@@ -113,7 +142,7 @@ const CheckOutPage: React.FC = () => {
 
       <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 flex flex-col gap-6">
         <div>
-            <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">Huésped</span>
+            <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Huésped</span>
             <h2 className="text-2xl font-black text-gray-800">{stay.guest?.first_name} {stay.guest?.last_name}</h2>
             <p className="text-gray-500 text-sm">{stay.guest?.doc_type}: {stay.guest?.doc_number}</p>
         </div>

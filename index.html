@@ -6,6 +6,24 @@
     <title>Hotel Colina Campestre</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Note: For production, consider installing Tailwind CSS as a PostCSS plugin -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            animation: {
+              "fade-in": "fadeIn 0.3s ease-in-out",
+            },
+            keyframes: {
+              fadeIn: {
+                "0%": { opacity: "0", transform: "translateY(-10px)" },
+                "100%": { opacity: "1", transform: "translateY(0)" },
+              },
+            },
+          },
+        },
+      };
+    </script>
     <!-- PrimeReact Styles -->
     <link
       rel="stylesheet"
@@ -16,68 +34,7 @@
       href="https://unpkg.com/primereact/resources/primereact.min.css"
     />
     <link rel="stylesheet" href="https://unpkg.com/primeicons/primeicons.css" />
-    <style>
-      .p-tabview .p-tabview-nav {
-        background: #f1f5f9;
-        padding: 0.5rem;
-        border-radius: 1rem;
-        border: none;
-        display: flex;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-      }
-      .p-tabview .p-tabview-nav li {
-        margin-right: 0;
-        flex: 1;
-      }
-      .p-tabview .p-tabview-nav li .p-tabview-nav-link {
-        background: transparent;
-        border: none !important;
-        border-radius: 0.75rem;
-        padding: 0.75rem 1rem;
-        color: #64748b;
-        font-weight: 700;
-        font-size: 0.875rem;
-        text-transform: uppercase;
-        letter-spacing: 0.025em;
-        transition: all 0.2s ease;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        box-shadow: none !important;
-      }
-      .p-tabview
-        .p-tabview-nav
-        li:not(.p-highlight):not(.p-disabled):hover
-        .p-tabview-nav-link {
-        background: #e2e8f0;
-        color: #475569;
-      }
-      .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-        background: #4f46e5 !important;
-        color: white !important;
-        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2) !important;
-      }
-      .p-tabview .p-tabview-panels {
-        background: transparent;
-        padding: 0;
-        border: none;
-      }
-      .p-tabview .p-tabview-nav .p-tabview-ink-bar {
-        display: none !important;
-      }
-      @media (max-width: 640px) {
-        .p-tabview .p-tabview-nav {
-          overflow-x: auto;
-          flex-wrap: nowrap;
-          justify-content: flex-start;
-        }
-        .p-tabview .p-tabview-nav li {
-          flex: none;
-          min-width: 120px;
-        }
-      }
-    </style>
+
     <script type="importmap">
       {
         "imports": {
