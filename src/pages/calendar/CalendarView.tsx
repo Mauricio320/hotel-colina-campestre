@@ -3,10 +3,11 @@ import { CalendarHeader } from "@/components/calendar/CalendarHeader";
 import { CheckInModal } from "@/components/calendar/CheckInModal";
 import { PaymentModal } from "@/components/calendar/PaymentModal";
 import { RoomActionModal } from "@/components/calendar/RoomActionModal";
-import { LoadingState } from "@/components/ui/LoadingState";
+import { RoomActionModalB } from "@/components/calendar/RoomActionModalB";
 import { ErrorState } from "@/components/ui/ErrorState";
-import { useAccommodationTypes } from "@/hooks/useAccommodationTypes";
+import { SkeletonUI } from "@/components/ui/SkeletonUI";
 import { useBlockUI } from "@/context/BlockUIContext";
+import { useAccommodationTypes } from "@/hooks/useAccommodationTypes";
 import { useAuth } from "@/hooks/useAuth";
 import { useEmployees } from "@/hooks/useEmployees";
 import { usePaymentMethods } from "@/hooks/usePaymentMethods";
@@ -20,12 +21,11 @@ import { useStaysCheckInActions } from "@/hooks/useStaysCheckInActions";
 import { useUrlParams } from "@/hooks/useUrlParams";
 import { Room, Stay } from "@/types";
 import { RoomActionEnum, RoomStatusEnum } from "@/util/status-rooms.enum";
+import { UseQueryResult } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { TabPanel, TabView } from "primereact/tabview";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Skeleton } from "primereact/skeleton";
-import { SkeletonUI } from "@/components/ui/SkeletonUI";
 
 const CalendarView: React.FC = () => {
   const { showBlockUI, hideBlockUI } = useBlockUI();
@@ -405,63 +405,70 @@ const CalendarView: React.FC = () => {
         {accommodationTypesQuery.data?.map((type) => (
           <TabPanel key={type.id} header={type.name}>
             <CalendarGrid
-              days={days}
+              refectCalendar={() => {
+                setTimeout(() => {
+                  roomsQuery.refetch().then(() => {
+                    hideBlockUI();
+                  });
+                }, 500);
+              }}
+              roomStatuses={roomStatuses?.fetchAll?.data || []}
               filteredRooms={filteredRooms}
               getActiveStay={getActiveStay}
-              handleRoomClick={handleRoomClick}
-              accommodationTypes={accommodationTypesQuery.data || []}
+              accommodationType={type}
+              activeStay={activeStay}
+              activeTab={activeTab}
+              days={days}
             />
           </TabPanel>
         ))}
       </TabView>
-
-      <RoomActionModal
-        visible={showMainModal}
-        onHide={() => setShowMainModal(false)}
-        selectedRoom={selectedRoom}
-        selectedDate={selectedDate}
-        activeStay={activeStay}
-        pendingAction={null}
-        formEmployeeId={formEmployeeId}
-        formObservation={formObservation}
-        taskEmployees={taskEmployees}
-        onEmployeeChange={setFormEmployeeId}
-        onObservationChange={setFormObservation}
-        onGoToCheckIn={handleGoToCheckIn}
-        onGoToBooking={handleGoToBooking}
-        onGoToCheckOut={handleGoToCheckOut}
+      {/* 
+      <RoomActionModalB
+        onCheckInObservationChange={setCheckInObservation}
         onRoomStatusChange={handleRoomStatusChange}
         onRoomStatusUpdate={handleRoomStatusUpdate}
-        onCheckInAction={handleCheckInAction}
+        onObservationChange={setFormObservation}
+        onHide={() => setShowMainModal(false)}
         onConfirmCheckIn={handleConfirmCheckIn}
         checkInObservation={checkInObservation}
-        onCheckInObservationChange={setCheckInObservation}
-        checkInEmployeeId={currentEmployee?.id || ""}
-        onCheckInEmployeeIdChange={() => {}}
-      />
+        onCheckInAction={handleCheckInAction}
+        onEmployeeChange={setFormEmployeeId}
+        onGoToCheckOut={handleGoToCheckOut}
+        formObservation={formObservation}
+        onGoToCheckIn={handleGoToCheckIn}
+        onGoToBooking={handleGoToBooking}
+        formEmployeeId={formEmployeeId}
+        taskEmployees={taskEmployees}
+        selectedRoom={selectedRoom}
+        selectedDate={selectedDate}
+        visible={showMainModal}
+        activeStay={activeStay}
+        pendingAction={null}
+      /> */}
 
       <PaymentModal
-        visible={showPaymentModal}
-        onHide={() => setShowPaymentModal(false)}
-        pendingAmount={pendingAmount}
-        paymentMethods={paymentMethods.fetchAll.data || []}
-        paymentMethodId={paymentMethodId}
-        newPaymentAmount={newPaymentAmount}
-        isProcessingPayment={isProcessingPayment}
         isPaymentMethodValid={isPaymentMethodValid || false}
-        onPaymentMethodChange={setPaymentMethodId}
+        paymentMethods={paymentMethods.fetchAll.data || []}
         onNewPaymentAmountChange={setNewPaymentAmount}
         onConfirmNewPayment={handleConfirmNewPayment}
+        onHide={() => setShowPaymentModal(false)}
+        onPaymentMethodChange={setPaymentMethodId}
+        isProcessingPayment={isProcessingPayment}
+        newPaymentAmount={newPaymentAmount}
+        paymentMethodId={paymentMethodId}
+        pendingAmount={pendingAmount}
+        visible={showPaymentModal}
       />
 
       <CheckInModal
-        visible={showCheckInModal}
-        onHide={() => setShowCheckInModal(false)}
-        selectedRoom={selectedRoom}
-        activeStay={activeStay}
-        checkInObservation={checkInObservation}
         onCheckInObservationChange={setCheckInObservation}
+        onHide={() => setShowCheckInModal(false)}
+        checkInObservation={checkInObservation}
         onConfirmCheckIn={handleConfirmCheckIn}
+        selectedRoom={selectedRoom}
+        visible={showCheckInModal}
+        activeStay={activeStay}
       />
     </div>
   );

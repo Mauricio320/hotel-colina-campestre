@@ -16,3 +16,8 @@ export enum RoomStatusEnum {
   LIMPIEZA = "Limpieza",
   MANTENIMIENTO = "Mantenimiento",
 }
+
+export enum AccommodationTypeEnum {
+  HABITACION = "Habitación",
+  APARTAMENTO = "Apartamento",
+}

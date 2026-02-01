@@ -133,3 +133,4 @@ This is a hotel management system for "Hotel Colina Campestre" built with React 
 - Error handling with specific error types (database not ready, invalid credentials, etc.)
 - Room status management with visual calendar integration
 - Payment system with various payment types and IVA support
+- Role-based UI element visibility

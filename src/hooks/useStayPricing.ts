@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
-import { Room } from '@/types';
+import { useMemo } from "react";
+import { AccommodationType, Room } from "@/types";
 
 export interface StayPricingParams {
-  room: Room | null;
+  room: Room | AccommodationType;
   checkInDate: Date | null;
   checkOutDate: Date | null;
   personCount: number;
@@ -25,7 +25,9 @@ export interface StayPricingReturn {
   };
 }
 
-export const useStayPricing = (params: StayPricingParams): StayPricingReturn => {
+export const useStayPricing = (
+  params: StayPricingParams,
+): StayPricingReturn => {
   const {
     room,
     checkInDate,
@@ -33,52 +35,64 @@ export const useStayPricing = (params: StayPricingParams): StayPricingReturn => 
     personCount,
     extraMattressCount,
     invoiceRequested,
-    settings
+    settings,
   } = params;
 
-  // Calculate number of nights
   const nights = useMemo(() => {
     if (!checkInDate || !checkOutDate) return 1;
-    const diff = checkOutDate.getTime() - checkInDate.getTime();
-    return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+    const millisecondsPerDay = 1000 * 60 * 60 * 24;
+    const timeDifference = checkOutDate.getTime() - checkInDate.getTime();
+    return Math.max(1, Math.ceil(timeDifference / millisecondsPerDay));
   }, [checkInDate, checkOutDate]);
 
-  // Calculate pricing information
   const priceInfo = useMemo(() => {
     if (!room) {
       return { rate: 0, subtotalHospedaje: 0, subtotal: 0, iva: 0, total: 0 };
     }
 
-    const roomRates = room.rates || [];
-    const rateObj = roomRates
-      .filter((r) => r.person_count <= personCount)
-      .sort((a, b) => b.person_count - a.person_count)[0];
+    let dailyRate: number;
 
-    const rate = rateObj?.rate || (room.category === 'Hotel' ? 80000 : 90000);
-    const subtotalHospedaje = rate * nights;
-    let subtotal = subtotalHospedaje;
+    if ("room_number" in room) {
+      const roomRates = room.rates || [];
+      const applicableRate = roomRates
+        .filter((rate) => rate.person_count <= personCount)
+        .sort((a, b) => b.person_count - a.person_count)[0];
 
-    // Add extra mattress cost
+      const defaultBaseRate = room.category === "Hotel" ? 80000 : 90000;
+      dailyRate = applicableRate?.rate || defaultBaseRate;
+    } else {
+      dailyRate = (room as AccommodationType).price || 0;
+    }
+
+    const accommodationSubtotal = dailyRate * nights;
+    let totalBeforeTax = accommodationSubtotal;
+
     if (extraMattressCount > 0) {
-      subtotal += settings.mat * extraMattressCount * nights;
+      const mattressTotalCost = settings.mat * extraMattressCount * nights;
+      totalBeforeTax += mattressTotalCost;
     }
 
-    // Calculate IVA if invoice is requested
-    let iva = 0;
+    let taxAmount = 0;
     if (invoiceRequested) {
-      iva = Math.round(subtotal * (settings.iva / 100));
+      taxAmount = Math.round(totalBeforeTax * (settings.iva / 100));
     }
 
-    const total = subtotal + iva;
+    const finalTotal = totalBeforeTax + taxAmount;
 
-    return { rate, subtotalHospedaje, subtotal, iva, total };
+    return {
+      rate: dailyRate,
+      subtotalHospedaje: accommodationSubtotal,
+      subtotal: totalBeforeTax,
+      iva: taxAmount,
+      total: finalTotal,
+    };
   }, [
     room,
     personCount,
     nights,
     extraMattressCount,
     invoiceRequested,
-    settings
+    settings,
   ]);
 
   return { nights, priceInfo };

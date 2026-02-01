@@ -1,45 +1,65 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { useForm, Controller } from "react-hook-form";
 import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
-import { InputNumber } from "primereact/inputnumber";
-import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
-import { Checkbox } from "primereact/checkbox";
-import { InputTextarea } from "primereact/inputtextarea";
 import { ProgressSpinner } from "primereact/progressspinner";
-import { Divider } from "primereact/divider";
+import React, { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import {
+  data,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 
-import { useRooms } from "@/hooks/useRooms";
-import { useGuests } from "@/hooks/useGuests";
-import { usePayments } from "@/hooks/usePayments";
-import { useAuth } from "@/hooks/useAuth";
-import { useStayPricing } from "@/hooks/useStayPricing";
-import { useBlockUI } from "@/context/BlockUIContext";
-import { supabase } from "@/config/supabase";
-import { DOC_TYPES } from "@/constants";
-import { Room } from "@/types";
 import GuestDataForm from "@/components/stays/GuestDataForm";
-import StayDetailsForm from "@/components/stays/StayDetailsForm";
 import PaymentSection from "@/components/stays/PaymentSection";
+import StayDetailsForm from "@/components/stays/StayDetailsForm";
+import { useUniversalRoomQuery } from "@/hooks/useUniversalRoomQuery";
 
-interface ColombiaData {
-  id: number;
-  departamento: string;
-  ciudades: string[];
-}
+import { useBlockUI } from "@/context/BlockUIContext";
+import { useAuth } from "@/hooks/useAuth";
+import { useGuests } from "@/hooks/useGuests";
+import { useStays } from "@/hooks/useStays";
+import { useStayPricing } from "@/hooks/useStayPricing";
+import { useColombiaGeography } from "@/hooks/useColombiaGeography";
+import { useSettings, usePaymentMethods } from "@/hooks/useSettings";
+import RoomInfoCard from "@/components/stays/CheckInPage/RoomInfoCard";
+import {
+  AccommodationTypeEnum,
+  RoomStatusEnum,
+} from "@/util/status-rooms.enum";
+import { Room } from "@/types";
+import { useRoomStatuses } from "@/hooks/useRoomStatuses";
 
 const CheckInPage: React.FC = () => {
+  const { colombiaData, loadingGeo } = useColombiaGeography();
+  const { createStayWithPayment } = useStays();
+  const { findGuestByDoc, upsertGuest } = useGuests();
+  const { data: roomStatuses } = useRoomStatuses();
+
+  const { showBlockUI, hideBlockUI } = useBlockUI();
+  const {
+    settings,
+    isLoading: isSettingsLoading,
+    error: settingsError,
+  } = useSettings();
+  const {
+    paymentMethods,
+    isLoading: isPaymentMethodsLoading,
+    error: paymentMethodsError,
+  } = usePaymentMethods();
+
+  const { employee } = useAuth();
+
   const { roomId } = useParams<{ roomId: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const tabParam = searchParams.get("tab");
-  const { employee } = useAuth();
-  const { roomsQuery } = useRooms();
-  const { findGuestByDoc, upsertGuest } = useGuests();
-  const { createStayWithPaymentWithAutoType } = usePayments();
-  const { showBlockUI, hideBlockUI } = useBlockUI();
+  const action = searchParams.get("action") as AccommodationTypeEnum;
+
+  const {
+    data: universalData,
+    isLoading,
+    error,
+  } = useUniversalRoomQuery(roomId, action);
 
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
@@ -49,22 +69,6 @@ const CheckInPage: React.FC = () => {
     type: "success" | "info" | null;
     text: string;
   }>({ type: null, text: "" });
-  const [settings, setSettings] = useState({ iva: 19, mat: 30000 });
-
-  // Estado para la geografía de Colombia
-  const [colombiaData, setColombiaData] = useState<ColombiaData[]>([]);
-  const [loadingGeo, setLoadingGeo] = useState(true);
-
-  const selectedRoom = useMemo(
-    () => roomsQuery.data?.find((r) => r.id === roomId),
-    [roomsQuery.data, roomId],
-  );
-
-  // Cálculo de capacidad máxima basado en camas
-  const maxCapacity = useMemo(() => {
-    if (!selectedRoom) return 1;
-    return selectedRoom.beds_double * 2 + selectedRoom.beds_single;
-  }, [selectedRoom]);
 
   const {
     control,
@@ -106,51 +110,11 @@ const CheckInPage: React.FC = () => {
   const watchDocNumber = watch("doc_number");
   const selectedDepartment = watch("department");
 
-  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
-
-  // Cargar datos de Colombia y configuraciones iniciales
   useEffect(() => {
-    const fetchGeoData = async () => {
-      try {
-        const response = await fetch(
-          "https://raw.githubusercontent.com/marcovega/colombia-json/master/colombia.json",
-        );
-        const data = await response.json();
-        setColombiaData(data);
-      } catch (error) {
-        console.error("Error cargando geografía:", error);
-      } finally {
-        setLoadingGeo(false);
-      }
-    };
+    if (paymentMethods?.length > 0)
+      setValue("payment_method_id", paymentMethods[0].id);
+  }, [paymentMethods]);
 
-    fetchGeoData();
-
-    supabase
-      .from("settings")
-      .select("*")
-      .then(({ data }) => {
-        if (data) {
-          setSettings({
-            iva: data.find((s) => s.key === "iva_percentage")?.value || 19,
-            mat:
-              data.find((s) => s.key === "extra_mattress_price")?.value ||
-              30000,
-          });
-        }
-      });
-    supabase
-      .from("payment_methods")
-      .select("*")
-      .then(({ data }) => {
-        if (data && data.length > 0) {
-          setPaymentMethods(data);
-          setValue("payment_method_id", data[0].id);
-        }
-      });
-  }, [setValue]);
-
-  // Opciones de municipios basadas en departamento
   const cityOptions = useMemo(() => {
     if (!selectedDepartment || !colombiaData.length) return [];
     const dept = colombiaData.find(
@@ -160,11 +124,9 @@ const CheckInPage: React.FC = () => {
   }, [selectedDepartment, colombiaData]);
 
   const searchGuest = async () => {
-    // Validaciones iniciales
     if (searching) return;
     if (watchDocNumber.length < 5) return;
 
-    // 1. Limpiar siempre al inicio de CADA búsqueda
     setGuestNotFound(false);
     setGuestFound(false);
     setSearchMessage({ type: null, text: "" });
@@ -178,7 +140,6 @@ const CheckInPage: React.FC = () => {
     setValue("city", "");
     setValue("doc_type", "CC");
 
-    // 2. Ejecutar búsqueda
     setSearching(true);
     showBlockUI("Buscando huésped...");
 
@@ -192,21 +153,18 @@ const CheckInPage: React.FC = () => {
         setValue("address", guest.address || "");
         setValue("doc_type", guest.doc_type);
 
-        // Intentar encontrar el departamento basado en la ciudad guardada
         if (guest.city) {
           const deptFound = colombiaData.find((d) =>
             d.ciudades.includes(guest.city),
           );
           if (deptFound) {
             setValue("department", deptFound.departamento);
-            // Esperar un tick para que se actualicen las opciones del municipio
             setTimeout(() => setValue("city", guest.city), 0);
           } else {
             setValue("city", guest.city);
           }
         }
 
-        // Establecer estado de éxito y mensaje
         setGuestFound(true);
         setSearchMessage({
           type: "success",
@@ -225,14 +183,12 @@ const CheckInPage: React.FC = () => {
       setTimeout(hideBlockUI, 2000);
     } finally {
       hideBlockUI();
-      // Asegurar que searching se resetee siempre
       setTimeout(() => setSearching(false), 0);
     }
   };
 
-  // Use the centralized pricing hook
   const { nights, priceInfo } = useStayPricing({
-    room: selectedRoom,
+    room: universalData,
     checkInDate,
     checkOutDate,
     personCount,
@@ -246,10 +202,8 @@ const CheckInPage: React.FC = () => {
   }, [priceInfo.total, setValue]);
 
   const onSubmit = async (data: any) => {
-    if (!data.check_out_date) {
-      alert("Seleccione una fecha de salida");
-      return;
-    }
+    if (!data.check_out_date) return alert("Seleccione una fecha de salida");
+
     setLoading(true);
     try {
       const guest = await upsertGuest.mutateAsync({
@@ -263,9 +217,13 @@ const CheckInPage: React.FC = () => {
         address: data.address,
       });
 
-      await createStayWithPaymentWithAutoType({
+      const isApartmentAction = action === AccommodationTypeEnum.APARTAMENTO;
+      const roomStatusId = roomStatuses?.find(
+        (rs) => rs.name === RoomStatusEnum.OCUPADO,
+      )?.id;
+
+      await createStayWithPayment.mutateAsync({
         stayData: {
-          room_id: roomId,
           guest_id: guest.id,
           employee_id: employee?.id || null,
           check_in_date: data.check_in_date.toLocaleDateString("sv-SE"),
@@ -279,16 +237,18 @@ const CheckInPage: React.FC = () => {
           is_invoice_requested: data.is_invoice_requested,
           iva_amount: priceInfo.iva,
           observation: data.observation,
-          origin_was_reservation: false, // Check-in directo no nace como reserva
-          // New configuration fields
+          origin_was_reservation: false,
           iva_percentage: settings.iva,
           person_count: data.person_count,
           extra_mattress_count: data.extra_mattress_count,
           extra_mattress_unit_price: settings.mat,
+          room_status_id: roomStatusId,
+          ...(isApartmentAction
+            ? { accommodation_type_id: roomId }
+            : { room_id: roomId }),
         },
         paymentData: {
-          stay_id: '', // Will be set after stay creation
-          amount: priceInfo.total, // Siempre pago completo en check-in directo
+          amount: priceInfo.total,
           payment_method_id: data.payment_method_id,
           employee_id: employee?.id || null,
           context: "checkin_direct",
@@ -296,7 +256,7 @@ const CheckInPage: React.FC = () => {
         },
       });
 
-      navigate(tabParam ? `/calendar?tab=${tabParam}` : "/calendar");
+      // navigate(tabParam ? `/calendar?tab=${tabParam}` : "/calendar");
     } catch (e: any) {
       alert("Error: " + e.message);
     } finally {
@@ -304,9 +264,25 @@ const CheckInPage: React.FC = () => {
     }
   };
 
-  if (!selectedRoom && !roomsQuery.isLoading)
+  const accommodationTitleLabel = useMemo(() => {
+    if (!universalData) return "";
+
+    const isRoomType = "room_number" in universalData;
+    if (isRoomType) {
+      return `${universalData.category} | HAB ${universalData.room_number}`;
+    }
+
+    return universalData.name;
+  }, [universalData]);
+
+  const accommodationObservationLabel = useMemo(() => {
+    return universalData?.["observation"] || "";
+  }, [universalData]);
+
+  if (!universalData && !isLoading)
     return <div className="p-8">Habitación no encontrada</div>;
-  if (roomsQuery.isLoading || loadingGeo)
+
+  if (isLoading || loadingGeo)
     return (
       <div className="flex justify-center p-24">
         <ProgressSpinner />
@@ -315,7 +291,6 @@ const CheckInPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto pb-12 animate-fade-in">
-      {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <Button
           icon="pi pi-arrow-left"
@@ -329,49 +304,14 @@ const CheckInPage: React.FC = () => {
             Check-in
           </h1>
           <p className="text-gray-500 font-medium">
-            Habitación {selectedRoom?.room_number} -{" "}
-            {selectedRoom?.observation || "Sin observación"}
+            {accommodationTitleLabel}{" "}
+            {accommodationObservationLabel &&
+              `- ${accommodationObservationLabel}`}
           </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-        {/* Información de la Habitación */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center gap-2 mb-6">
-            <i className="pi pi-box text-gray-600"></i>
-            <h3 className="font-bold text-gray-700">
-              Información de la Habitación
-            </h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-[#f5f2eb] p-4 rounded-xl">
-              <span className="text-xs text-gray-400 font-bold uppercase block mb-1">
-                Camas Dobles
-              </span>
-              <span className="text-2xl font-black text-gray-800">
-                {selectedRoom?.beds_double}
-              </span>
-            </div>
-            <div className="bg-[#f5f2eb] p-4 rounded-xl">
-              <span className="text-xs text-gray-400 font-bold uppercase block mb-1">
-                Camas Sencillas
-              </span>
-              <span className="text-2xl font-black text-gray-800">
-                {selectedRoom?.beds_single}
-              </span>
-            </div>
-            <div className="bg-[#f5f2eb] p-4 rounded-xl">
-              <span className="text-xs text-gray-400 font-bold uppercase block mb-1">
-                Capacidad Máxima
-              </span>
-              <span className="text-2xl font-black text-gray-800">
-                {maxCapacity} personas
-              </span>
-            </div>
-          </div>
-        </div>
-
         <GuestDataForm
           register={register}
           control={control}
@@ -394,7 +334,7 @@ const CheckInPage: React.FC = () => {
           setValue={setValue}
           watch={watch}
           checkInDate={checkInDate}
-          maxCapacity={maxCapacity}
+          maxCapacity={2}
           settings={settings}
         />
 
@@ -426,7 +366,6 @@ const CheckInPage: React.FC = () => {
             type="submit"
             label="Confirmar Check-in"
             className="p-button p-button-success w-full"
-            loading={loading}
           />
         </div>
       </form>

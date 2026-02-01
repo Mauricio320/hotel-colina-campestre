@@ -19,6 +19,7 @@ yarn install
 ```
 
 **No testing or linting tools currently configured.** To run tests, first configure Vitest:
+
 - `yarn add -D vitest @testing-library/react @testing-library/jest-dom`
 - Run single test: `vitest run <test-file>`
 - Run tests in watch mode: `vitest`
@@ -41,15 +42,17 @@ src/
 ## Import Patterns
 
 **Always use absolute imports with `@/` alias:**
+
 ```typescript
-import { supabase } from '@/config/supabase';
-import { Employee } from '@/types';
-import { useAuth } from '@/hooks/useAuth';
+import { supabase } from "@/config/supabase";
+import { Employee } from "@/types";
+import { useAuth } from "@/hooks/useAuth";
 ```
 
 **Import order:** React → Third-party → Internal → @/ absolute imports
 
 **CRITICAL: Component Export Rules**
+
 - ❌ NEVER create barrel exports with `index.ts` for components
 - ❌ NEVER use `import { Component } from '@/components/forms'`
 - ✅ ALWAYS import components directly: `import GuestForm from '@/components/stays/GuestForm'`
@@ -70,10 +73,12 @@ const Component: React.FC<Props> = ({ name }) => <div>{name}</div>;
 ## React Patterns
 
 ### Custom Hooks
+
 - Place in `src/hooks/`, naming: `useXxx`
 - Return consistent object with loading/error states
 
 ### REQUIRED: UI Blocking Pattern
+
 Always use `@/context/BlockUIContext` for loading screens:
 
 ```typescript
@@ -102,6 +107,7 @@ const handleSubmit = async () => {
 ### Query Development Structure
 
 **When creating queries for any table:**
+
 1. **Service Layer**: Create folder `src/services/{table_name}/` with `{table_name}Api.ts`
 2. **Hook Layer**: Create `src/hooks/use{TableName}.ts` with React Query
 3. **Naming**: Hooks follow `use{TableName}` pattern
@@ -115,23 +121,25 @@ const handleSubmit = async () => {
 export const employeeApi = {
   fetchAll: async () => {
     const { data, error } = await supabase
-      .from('employees')
-      .select(`
+      .from("employees")
+      .select(
+        `
         *,
         role:roles(name)
-      `)
-      .order('created_at', { ascending: false });
+      `,
+      )
+      .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     return data || [];
-  }
+  },
 };
 
 // Hook - src/hooks/useEmployees.ts
 export const useEmployees = () => {
   return useQuery({
-    queryKey: ['accommodation_types'],
+    queryKey: ["accommodation_types"],
     queryFn: () => accommodationTypesApi.fetchAll(),
-    staleTime: 1000 * 60 * 5
+    staleTime: 1000 * 60 * 5,
   });
 };
 ```
@@ -139,16 +147,21 @@ export const useEmployees = () => {
 ```typescript
 // Service layer
 export const fetchEmployee = async (id: string): Promise<Employee> => {
-  const { data, error } = await supabase.from('employees').select('*').eq('id', id).single();
+  const { data, error } = await supabase
+    .from("employees")
+    .select("*")
+    .eq("id", id)
+    .single();
   if (error) throw new Error(error.message);
   return data;
 };
 
 // Hook
-export const useEmployee = (id: string) => useQuery({
-  queryKey: ['employee', id],
-  queryFn: () => fetchEmployee(id)
-});
+export const useEmployee = (id: string) =>
+  useQuery({
+    queryKey: ["employee", id],
+    queryFn: () => fetchEmployee(id),
+  });
 ```
 
 ## UI/UX - Emerald Color System
@@ -174,6 +187,7 @@ export const useEmployee = (id: string) => useQuery({
 - **No direct Supabase calls in components** - All database requests must be in services layer
 - **Avoid code duplication** - Implement better design patterns and best practices for new components or refactor requests
 - **New components location** - All new components must be in `components/{page_name}/` folder structure
+- **Page-specific components** - When creating a new component within a page, it must be created in `components` in its own folder, which has the same name as the page (e.g., `src/components/stays/CheckInPage/`). **Do not create further subfolders inside this directory unless explicitly requested.**
 - **Date handling** - Always use dayjs for all date-related operations
 - **No direct HTML in main components** - Extract to specialized components
 - **UI elements as components** - Loading, Error, Empty states → `components/ui/`
@@ -183,30 +197,37 @@ export const useEmployee = (id: string) => useQuery({
 ## Design Patterns Implementation
 
 ### **Pattern 1: Composition Over Inheritance**
+
 - Compose smaller components into larger ones
 - Avoid deep inheritance hierarchies
 
 ### **Pattern 2: Strategy Pattern**
+
 - Use different strategies based on state/context
 - Example: Different UI for room statuses
 
-### **Pattern 3: Observer Pattern**  
+### **Pattern 3: Observer Pattern**
+
 - Use hooks to observe global state changes
 - Example: `useBlockUI`, `useAuth`
 
 ### **Pattern 4: Command Pattern**
+
 - Actions as commands with parameters
 - Example: `handleRoomStatusUpdate(action)`
 
 ### **Pattern 5: Factory Pattern**
+
 - Component factories based on context
 - Example: Modal selection based on type
 
 ### **Pattern 6: Single Source of Truth**
+
 - Centralized state in services/hooks
 - Avoid duplicate state management
 
 ### **Component Structure for Refactors**
+
 ```
 src/
 ├── components/ui/          # Reusable UI elements
@@ -241,6 +262,7 @@ src/
 ## DATABASE SCHEMA CONTEXT
 
 ### IMPORTANT RULES
+
 - Use foreign keys, never text joins
 - rooms.category is legacy (read-only)
 - accommodation_type_id is the source of truth
@@ -248,6 +270,7 @@ src/
 ---
 
 ### accommodation_type_price_history
+
 - id (uuid)
 - accommodation_type_id → accommodation_types.id
 - employee_id → employees.id
@@ -257,6 +280,7 @@ src/
 ---
 
 ### accommodation_types
+
 - id (uuid)
 - name (text)
 - price
@@ -266,6 +290,7 @@ src/
 ---
 
 ### employees
+
 - id (uuid)
 - auth_id (unique)
 - doc_type (default: 'Cédula de Ciudadanía')
@@ -283,6 +308,7 @@ src/
 ---
 
 ### guests
+
 - id (uuid)
 - doc_type
 - doc_number (unique)
@@ -297,12 +323,14 @@ src/
 ---
 
 ### payment_methods
+
 - id (uuid)
 - name (unique)
 
 ---
 
 ### payments
+
 - id (uuid)
 - stay_id → stays.id
 - payment_method_id → payment_methods.id
@@ -312,16 +340,19 @@ src/
 - observation
 - payment_type ('ABONO_RESERVA' | 'PAGO_COMPLETO_RESERVA' | 'PAGO_CHECKIN_DIRECTO' | 'ANTICIPADO_COMPLETO')
 - created_at
+- accommodation_type_id → accommodation_types.id
 
 ---
 
 ### roles
+
 - id (uuid)
 - name (unique)
 
 ---
 
 ### room_history
+
 - id (uuid)
 - room_id → rooms.id
 - stay_id → stays.id
@@ -336,6 +367,7 @@ src/
 ---
 
 ### room_rates
+
 - id (uuid)
 - room_id → rooms.id
 - person_count
@@ -344,6 +376,7 @@ src/
 ---
 
 ### room_statuses
+
 - id (uuid)
 - name (unique)
 - color
@@ -351,6 +384,7 @@ src/
 ---
 
 ### rooms
+
 - id (uuid)
 - room_number (unique)
 - category ('Hotel' | 'Apartamento' | 'Casa 1' | 'Casa 2') - LEGACY
@@ -366,6 +400,7 @@ src/
 ---
 
 ### settings
+
 - id (uuid)
 - key (unique)
 - value
@@ -373,6 +408,7 @@ src/
 ---
 
 ### stays
+
 - id (uuid)
 - order_number (unique, auto-increment)
 - room_id → rooms.id
@@ -402,6 +438,7 @@ src/
 ---
 
 ### DOMAIN LOGIC
+
 - Price history tracked in accommodation_type_price_history
 - Status changes → room_history
 - Pricing per person via room_rates

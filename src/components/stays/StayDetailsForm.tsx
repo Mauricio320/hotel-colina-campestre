@@ -1,10 +1,11 @@
-import React from 'react';
-import { Control, UseFormSetValue } from 'react-hook-form';
-import { Dropdown } from 'primereact/dropdown';
-import { Calendar } from 'primereact/calendar';
-import { Checkbox } from 'primereact/checkbox';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { Controller } from 'react-hook-form';
+import React from "react";
+import { Control, UseFormSetValue } from "react-hook-form";
+import { Dropdown } from "primereact/dropdown";
+import { Calendar } from "primereact/calendar";
+import { Checkbox } from "primereact/checkbox";
+import { InputNumber } from "primereact/inputnumber";
+import { InputTextarea } from "primereact/inputtextarea";
+import { Controller } from "react-hook-form";
 
 export interface StayDetailsFormProps {
   title: string;
@@ -30,8 +31,8 @@ const StayDetailsForm: React.FC<StayDetailsFormProps> = ({
   maxCapacity,
   settings,
 }) => {
-  const personCount = watch('person_count');
-  const extraMattressCount = watch('extra_mattress_count');
+  const personCount = watch("person_count");
+  const extraMattressCount = watch("extra_mattress_count");
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -60,7 +61,7 @@ const StayDetailsForm: React.FC<StayDetailsFormProps> = ({
             )}
           />
         </div>
-        
+
         <div className="flex flex-col gap-1">
           <label className="text-xs font-bold text-gray-700">
             Fecha de Salida *
@@ -81,7 +82,7 @@ const StayDetailsForm: React.FC<StayDetailsFormProps> = ({
             )}
           />
         </div>
-        
+
         <div className="flex flex-col gap-1">
           <label className="text-xs font-bold text-gray-700">
             Número de Huéspedes *
@@ -90,14 +91,20 @@ const StayDetailsForm: React.FC<StayDetailsFormProps> = ({
             name="person_count"
             control={control}
             render={({ field }) => (
-              <Dropdown
+              <InputNumber
+                id={field.name}
                 value={field.value}
-                onChange={(e) => field.onChange(e.value)}
-                options={Array.from({ length: maxCapacity }, (_, i) => ({
-                  label: `${i + 1} persona${i > 0 ? "s" : ""}`,
-                  value: i + 1,
-                }))}
+                onValueChange={(e) => field.onChange(e.value)}
+                min={1}
+                showButtons
+                buttonLayout="horizontal"
+                step={1}
+                decrementButtonClassName="p-button-secondary"
+                incrementButtonClassName="p-button-secondary"
+                incrementButtonIcon="pi pi-plus"
+                decrementButtonIcon="pi pi-minus"
                 className="w-full"
+                inputClassName="w-full"
               />
             )}
           />
@@ -136,10 +143,7 @@ const StayDetailsForm: React.FC<StayDetailsFormProps> = ({
               />
             )}
           />
-          <label
-            htmlFor="iva"
-            className="text-sm font-medium text-gray-600"
-          >
+          <label htmlFor="iva" className="text-sm font-medium text-gray-600">
             Requiere factura electrónica (+19% IVA)
           </label>
         </div>

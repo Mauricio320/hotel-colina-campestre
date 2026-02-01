@@ -1,28 +1,27 @@
-
 export enum Role {
-  Admin = 'Admin',
-  Recepcionista = 'Recepcionista',
-  Limpieza = 'Limpieza',
-  Mantenimiento = 'Mantenimiento'
+  Admin = "Admin",
+  Recepcionista = "Recepcionista",
+  Limpieza = "Limpieza",
+  Mantenimiento = "Mantenimiento",
 }
 
 export enum PaymentType {
-  ABONO_RESERVA = 'ABONO_RESERVA',           // Abono parcial de reserva
-  PAGO_COMPLETO_RESERVA = 'PAGO_COMPLETO_RESERVA', // Pago completo de reserva  
-  PAGO_CHECKIN_DIRECTO = 'PAGO_CHECKIN_DIRECTO',   // Pago completo check-in directo
-  ANTICIPADO_COMPLETO = 'ANTICIPADO_COMPLETO'     // Pago completo anticipado
+  ABONO_RESERVA = "ABONO_RESERVA", // Abono parcial de reserva
+  PAGO_COMPLETO_RESERVA = "PAGO_COMPLETO_RESERVA", // Pago completo de reserva
+  PAGO_CHECKIN_DIRECTO = "PAGO_CHECKIN_DIRECTO", // Pago completo check-in directo
+  ANTICIPADO_COMPLETO = "ANTICIPADO_COMPLETO", // Pago completo anticipado
 }
 
 export interface RoomStatus {
   id: string;
-  name: 'Ocupado' | 'Disponible' | 'Reservado' | 'Limpieza' | 'Mantenimiento';
+  name: "Ocupado" | "Disponible" | "Reservado" | "Limpieza" | "Mantenimiento";
   color: string;
 }
 
 export interface Room {
   id: string;
   room_number: string;
-  category: 'Hotel' | 'Apartamento' | 'Casa 1' | 'Casa 2'; // LEGACY - solo para compatibilidad
+  category: "Hotel" | "Apartamento" | "Casa 1" | "Casa 2"; // LEGACY - solo para compatibilidad
   accommodation_type_id: string; // Nuevo campo para relación con accommodation_types
   beds_double: number;
   beds_single: number;
@@ -75,7 +74,7 @@ export interface Stay {
   employee_id: string;
   check_in_date: string;
   check_out_date: string;
-  status: 'Active' | 'Completed' | 'Cancelled' | 'Reserved';
+  status: "Active" | "Completed" | "Cancelled" | "Reserved";
   total_price: number;
   paid_amount: number;
   payment_method_id: string;
@@ -92,6 +91,8 @@ export interface Stay {
   extra_mattress_unit_price: number;
   room?: Room;
   guest?: Guest;
+  accommodation_type_id?: string;
+  room_status_id?: string;
 }
 
 export interface PaymentMethod {
@@ -111,6 +112,8 @@ export interface Payment {
   created_at: string;
   payment_method?: PaymentMethod;
   employee?: Employee;
+  accommodation_type_id?: string;
+  accommodation_type?: AccommodationType;
 }
 
 export interface CreatePaymentDto {
@@ -153,7 +156,7 @@ export interface AccommodationType {
 
 export interface RoomStatus {
   id: string;
-  name: 'Ocupado' | 'Disponible' | 'Reservado' | 'Limpieza' | 'Mantenimiento';
+  name: "Ocupado" | "Disponible" | "Reservado" | "Limpieza" | "Mantenimiento";
   color: string;
 }
 
@@ -164,7 +167,7 @@ export interface PaymentMethod {
 
 export interface RoomHistory {
   id: string;
-  room_id: string;
+  room_id?: string;
   stay_id?: string;
   previous_status_id?: string;
   new_status_id: string;
@@ -173,6 +176,7 @@ export interface RoomHistory {
   observation?: string;
   timestamp: string;
   accommodation_type_id?: string;
+  accommodation_type?: AccommodationType;
 }
 
 export interface RoomLog {

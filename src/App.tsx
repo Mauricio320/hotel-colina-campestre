@@ -39,8 +39,6 @@ const queryClient = new QueryClient();
 const AppContent: React.FC = () => {
   const { user, employee, loading, dbError, logout } = useAuth();
 
-  console.log({ user, employee });
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-emerald-900">
