@@ -7,7 +7,7 @@ import {
   RoomStatusEnum,
   RoomActionEnum,
   AccommodationTypeEnum,
-} from "@/util/status-rooms.enum";
+} from "@/util/enums/status-rooms.enum";
 import { AccommodationType, Room, RoomStatus, Stay } from "@/types";
 import dayjs from "dayjs";
 import { TaskCompletionForm } from "@/components/tasks/TaskCompletionForm";

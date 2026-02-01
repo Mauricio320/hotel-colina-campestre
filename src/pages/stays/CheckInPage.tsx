@@ -3,10 +3,11 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
-  data,
   useNavigate,
   useParams,
   useSearchParams,
+  useLocation,
+  useMatch,
 } from "react-router-dom";
 
 import GuestDataForm from "@/components/stays/GuestDataForm";
@@ -14,38 +15,38 @@ import PaymentSection from "@/components/stays/PaymentSection";
 import StayDetailsForm from "@/components/stays/StayDetailsForm";
 import { useUniversalRoomQuery } from "@/hooks/useUniversalRoomQuery";
 
+import AvailabilityConflictModal from "@/components/stays/AvailabilityConflictModal";
+import AdminAuthorizationModal from "@/components/stays/CheckInPage/AdminAuthorizationModal";
+import CheckInHeader from "@/components/stays/CheckInPage/CheckInHeader";
+import CorporateClientSelector from "@/components/stays/CheckInPage/CorporateClientSelector";
 import { useBlockUI } from "@/context/BlockUIContext";
 import { useAuth } from "@/hooks/useAuth";
-import { useGuests } from "@/hooks/useGuests";
-import { useStays } from "@/hooks/useStays";
-import { useStayPricing } from "@/hooks/useStayPricing";
 import { useColombiaGeography } from "@/hooks/useColombiaGeography";
-import { useSettings, usePaymentMethods } from "@/hooks/useSettings";
-import RoomInfoCard from "@/components/stays/CheckInPage/RoomInfoCard";
+import { useGuests } from "@/hooks/useGuests";
+import { useRoomStatuses } from "@/hooks/useRoomStatuses";
+import { usePaymentMethods, useSettings } from "@/hooks/useSettings";
+import { useStayPricing } from "@/hooks/useStayPricing";
+import {
+  CheckAvailability,
+  useCreateOnStayWithPayment,
+} from "@/hooks/useStays";
+import { Employee, PaymentType } from "@/types";
 import {
   AccommodationTypeEnum,
   RoomStatusEnum,
-} from "@/util/status-rooms.enum";
-import { Room } from "@/types";
-import { useRoomStatuses } from "@/hooks/useRoomStatuses";
+} from "@/util/enums/status-rooms.enum";
 
 const CheckInPage: React.FC = () => {
   const { colombiaData, loadingGeo } = useColombiaGeography();
-  const { createStayWithPayment } = useStays();
+
   const { findGuestByDoc, upsertGuest } = useGuests();
   const { data: roomStatuses } = useRoomStatuses();
+  const location = useLocation();
+  const isCheckInMode = !!useMatch("/check-in/:roomId");
 
   const { showBlockUI, hideBlockUI } = useBlockUI();
-  const {
-    settings,
-    isLoading: isSettingsLoading,
-    error: settingsError,
-  } = useSettings();
-  const {
-    paymentMethods,
-    isLoading: isPaymentMethodsLoading,
-    error: paymentMethodsError,
-  } = usePaymentMethods();
+  const { settings } = useSettings();
+  const { paymentMethods } = usePaymentMethods();
 
   const { employee } = useAuth();
 
@@ -55,13 +56,11 @@ const CheckInPage: React.FC = () => {
   const tabParam = searchParams.get("tab");
   const action = searchParams.get("action") as AccommodationTypeEnum;
 
-  const {
-    data: universalData,
-    isLoading,
-    error,
-  } = useUniversalRoomQuery(roomId, action);
+  const { data: universalData, isLoading } = useUniversalRoomQuery(
+    roomId,
+    action,
+  );
 
-  const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
   const [guestNotFound, setGuestNotFound] = useState(false);
   const [guestFound, setGuestFound] = useState(false);
@@ -70,15 +69,13 @@ const CheckInPage: React.FC = () => {
     text: string;
   }>({ type: null, text: "" });
 
-  const {
-    control,
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    reset,
-    formState: { errors },
-  } = useForm({
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [authorizedBy, setAuthorizedBy] = useState<Employee | null>(null);
+  const [isAdminModalVisible, setIsAdminModalVisible] = useState(false);
+  const [isConflictModalVisible, setIsConflictModalVisible] = useState(false);
+  const [conflicts, setConflicts] = useState<any[]>([]);
+
+  const { control, register, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
       doc_type: "CC",
       doc_number: "",
@@ -99,6 +96,8 @@ const CheckInPage: React.FC = () => {
       observation: "",
       payment_method_id: "",
       paid_amount: 0,
+      room_status_current_id: null,
+      new_status_id: null,
     },
   });
 
@@ -188,7 +187,7 @@ const CheckInPage: React.FC = () => {
   };
 
   const { nights, priceInfo } = useStayPricing({
-    room: universalData,
+    room: universalData!,
     checkInDate,
     checkOutDate,
     personCount,
@@ -197,14 +196,40 @@ const CheckInPage: React.FC = () => {
     settings,
   });
 
+  const finalPriceInfo = useMemo(() => {
+    return {
+      ...priceInfo,
+      total: Math.max(0, priceInfo.total - discountAmount),
+      discountAmount: discountAmount,
+    };
+  }, [priceInfo, discountAmount]);
+
   useEffect(() => {
-    setValue("paid_amount", priceInfo.total);
-  }, [priceInfo.total, setValue]);
+    setValue("paid_amount", finalPriceInfo.total);
+  }, [finalPriceInfo.total, setValue]);
 
   const onSubmit = async (data: any) => {
     if (!data.check_out_date) return alert("Seleccione una fecha de salida");
+    showBlockUI("Procesando check-in...");
+    const isApartmentAction = action === AccommodationTypeEnum.APARTAMENTO;
 
-    setLoading(true);
+    if (isApartmentAction) {
+      showBlockUI("Verificando disponibilidad...");
+      const { data: currentConflicts } = await CheckAvailability(
+        roomId,
+        data.check_in_date.toLocaleDateString("sv-SE"),
+        data.check_out_date.toLocaleDateString("sv-SE"),
+      );
+      hideBlockUI();
+      console.log(currentConflicts);
+
+      if (currentConflicts && currentConflicts.length > 0) {
+        setConflicts(currentConflicts);
+        setIsConflictModalVisible(true);
+        return;
+      }
+    }
+
     try {
       const guest = await upsertGuest.mutateAsync({
         doc_type: data.doc_type,
@@ -216,51 +241,69 @@ const CheckInPage: React.FC = () => {
         city: data.city,
         address: data.address,
       });
-
       const isApartmentAction = action === AccommodationTypeEnum.APARTAMENTO;
-      const roomStatusId = roomStatuses?.find(
+      const room_status_current_id = roomStatuses?.find(
+        (rs) => rs.name === RoomStatusEnum.DISPONIBLE,
+      )?.id;
+      const new_status_id = roomStatuses?.find(
         (rs) => rs.name === RoomStatusEnum.OCUPADO,
       )?.id;
-
-      await createStayWithPayment.mutateAsync({
-        stayData: {
+      const observation =
+        discountAmount > 0
+          ? `Pago check-in con descuento autorizado por ${authorizedBy?.first_name} ${authorizedBy?.last_name}`
+          : "Pago completo check-in";
+      const keyId = isApartmentAction
+        ? { accommodation_type_id: roomId }
+        : { room_id: roomId };
+      await useCreateOnStayWithPayment({
+        stay: {
           guest_id: guest.id,
           employee_id: employee?.id || null,
           check_in_date: data.check_in_date.toLocaleDateString("sv-SE"),
           check_out_date: data.check_out_date.toLocaleDateString("sv-SE"),
           status: "Active",
-          total_price: priceInfo.total,
+          total_price: finalPriceInfo.total,
           paid_amount: data.paid_amount,
           payment_method_id: data.payment_method_id,
           has_extra_mattress: data.extra_mattress_count > 0,
           extra_mattress_price: data.extra_mattress_count * settings.mat,
           is_invoice_requested: data.is_invoice_requested,
           iva_amount: priceInfo.iva,
-          observation: data.observation,
           origin_was_reservation: false,
           iva_percentage: settings.iva,
           person_count: data.person_count,
           extra_mattress_count: data.extra_mattress_count,
           extra_mattress_unit_price: settings.mat,
-          room_status_id: roomStatusId,
-          ...(isApartmentAction
-            ? { accommodation_type_id: roomId }
-            : { room_id: roomId }),
+          observation,
         },
-        paymentData: {
-          amount: priceInfo.total,
+        new_status_id,
+        room_status_current_id,
+        keyId: keyId,
+        payment: {
+          amount: finalPriceInfo.total,
           payment_method_id: data.payment_method_id,
           employee_id: employee?.id || null,
-          context: "checkin_direct",
-          customObservation: "Pago completo check-in directo",
+          observation,
+          payment_type: PaymentType.PAGO_CHECKIN_DIRECTO,
+          payment_date: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+        },
+        price_overrides: {
+          save: discountAmount > 0 && authorizedBy !== null,
+          original_price: priceInfo.total,
+          discount_amount: discountAmount,
+          final_price: finalPriceInfo.total,
+          authorized_by: authorizedBy?.id,
         },
       });
-
-      // navigate(tabParam ? `/calendar?tab=${tabParam}` : "/calendar");
+      navigate(tabParam ? `/calendar?tab=${tabParam}` : "/calendar");
     } catch (e: any) {
       alert("Error: " + e.message);
     } finally {
-      setLoading(false);
+      showBlockUI("Ya estamos terminando...");
+      setTimeout(() => {
+        hideBlockUI();
+      }, 1000);
     }
   };
 
@@ -291,25 +334,15 @@ const CheckInPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto pb-12 animate-fade-in">
-      <div className="flex items-center gap-4 mb-8">
-        <Button
-          icon="pi pi-arrow-left"
-          onClick={() =>
-            navigate(tabParam ? `/calendar?tab=${tabParam}` : "/calendar")
-          }
-          className="p-button-text p-button-plain p-button-rounded text-gray-400"
-        />
-        <div>
-          <h1 className="text-3xl font-black text-gray-800 tracking-tight">
-            Check-in
-          </h1>
-          <p className="text-gray-500 font-medium">
-            {accommodationTitleLabel}{" "}
-            {accommodationObservationLabel &&
-              `- ${accommodationObservationLabel}`}
-          </p>
-        </div>
-      </div>
+      <CheckInHeader
+        title={isCheckInMode ? "Check-in" : "Nueva Reserva"}
+        subtitle={accommodationTitleLabel}
+        observation={accommodationObservationLabel}
+        color={isCheckInMode ? "emerald-500" : "yellow-500"}
+        onBack={() =>
+          navigate(tabParam ? `/calendar?tab=${tabParam}` : "/calendar")
+        }
+      />
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <GuestDataForm
@@ -329,18 +362,28 @@ const CheckInPage: React.FC = () => {
 
         <StayDetailsForm
           title="Detalles de la Estadía"
-          control={control}
+          checkInDate={checkInDate}
           register={register}
           setValue={setValue}
-          watch={watch}
-          checkInDate={checkInDate}
-          maxCapacity={2}
+          control={control}
           settings={settings}
+          maxCapacity={2}
+          watch={watch}
+        />
+
+        <CorporateClientSelector
+          onOpenModal={() => setIsAdminModalVisible(true)}
+          hasDiscount={discountAmount > 0}
+          discountAmount={discountAmount}
+          onResetDiscount={() => {
+            setDiscountAmount(0);
+            setAuthorizedBy(null);
+          }}
         />
 
         <PaymentSection
           title="Pago"
-          priceInfo={priceInfo}
+          priceInfo={finalPriceInfo}
           nights={nights}
           personCount={personCount}
           extraMattressCount={extraMattressCount}
@@ -352,20 +395,28 @@ const CheckInPage: React.FC = () => {
           isReservation={false}
         />
 
-        {/* Footer Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-          <Button
-            type="button"
-            label="Cancelar"
-            className="p-button p-button-outlined w-full"
-            onClick={() =>
-              navigate(tabParam ? `/calendar?tab=${tabParam}` : "/calendar")
-            }
-          />
+        <AvailabilityConflictModal
+          visible={isConflictModalVisible}
+          onHide={() => setIsConflictModalVisible(false)}
+          conflicts={conflicts}
+        />
+
+        <AdminAuthorizationModal
+          visible={isAdminModalVisible}
+          onHide={() => setIsAdminModalVisible(false)}
+          currentTotal={priceInfo.total}
+          onAuthorize={(admin, discount) => {
+            setAuthorizedBy(admin);
+            setDiscountAmount(discount);
+            setValue("paid_amount", Math.max(0, priceInfo.total - discount));
+          }}
+        />
+
+        <div className="flex justify-end">
           <Button
             type="submit"
-            label="Confirmar Check-in"
-            className="p-button p-button-success w-full"
+            label={isCheckInMode ? "Confirmar Check-in" : "Confirmar Reserva"}
+            className={`p-button text-white w-[250px] ${isCheckInMode ? "bg-emerald-500" : "bg-yellow-500"}`}
           />
         </div>
       </form>

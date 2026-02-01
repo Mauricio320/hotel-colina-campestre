@@ -24,7 +24,9 @@
 }
 
 /* ============ Personalización de Botones Principales ============ */
-
+.p-button {
+  min-height: 40px !important;
+}
 /* Botones de Check-in (éxito/primary) */
 .p-button.p-button-success,
 .p-button:not(.p-button-outlined).p-button-success {
@@ -319,4 +321,10 @@ html {
     flex: none;
     min-width: 120px;
   }
+}
+
+.p-password .p-icon-field-right {
+  width: 100%;
+  border: 1px solid var(--hotel-border) !important;
+  border-radius: var(--hotel-border-radius) !important;
 }

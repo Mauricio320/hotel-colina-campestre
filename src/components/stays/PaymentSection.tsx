@@ -1,11 +1,11 @@
-import React from 'react';
-import { Control, UseFormSetValue } from 'react-hook-form';
-import { Button } from 'primereact/button';
-import { Dropdown } from 'primereact/dropdown';
-import { InputNumber } from 'primereact/inputnumber';
-import { Divider } from 'primereact/divider';
-import { Controller } from 'react-hook-form';
-import { PaymentType, PaymentMethod } from '@/types';
+import React from "react";
+import { Control, UseFormSetValue } from "react-hook-form";
+import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
+import { InputNumber } from "primereact/inputnumber";
+import { Divider } from "primereact/divider";
+import { Controller } from "react-hook-form";
+import { PaymentType, PaymentMethod } from "@/types";
 
 export interface PaymentSectionProps {
   title: string;
@@ -15,6 +15,7 @@ export interface PaymentSectionProps {
     subtotal: number;
     iva: number;
     total: number;
+    discountAmount?: number;
   };
   nights: number;
   personCount: number;
@@ -43,12 +44,12 @@ const PaymentSection: React.FC<PaymentSectionProps> = ({
   watch,
   isReservation,
 }) => {
-  const invoiceRequested = watch('is_invoice_requested');
+  const invoiceRequested = watch("is_invoice_requested");
 
   // Auto-set paid_amount when priceInfo changes
   React.useEffect(() => {
     if (!isReservation) {
-      setValue('paid_amount', priceInfo.total);
+      setValue("paid_amount", priceInfo.total);
     }
   }, [priceInfo.total, setValue, isReservation]);
 
@@ -71,8 +72,7 @@ const PaymentSection: React.FC<PaymentSectionProps> = ({
       </div>
       <div className="flex justify-between items-center py-1 font-bold">
         <span className="text-sm text-gray-800">
-          Subtotal hospedaje ({nights} x ${" "}
-          {priceInfo.rate.toLocaleString()})
+          Subtotal hospedaje ({nights} x $ {priceInfo.rate.toLocaleString()})
         </span>
         <span className="text-sm text-gray-800">
           $ {priceInfo.subtotalHospedaje.toLocaleString()}
@@ -85,12 +85,7 @@ const PaymentSection: React.FC<PaymentSectionProps> = ({
             {settings.mat.toLocaleString()} x {nights} nch)
           </span>
           <span className="font-bold text-gray-800">
-            ${" "}
-            {(
-              settings.mat *
-              extraMattressCount *
-              nights
-            ).toLocaleString()}
+            $ {(settings.mat * extraMattressCount * nights).toLocaleString()}
           </span>
         </div>
       )}
@@ -126,17 +121,19 @@ const PaymentSection: React.FC<PaymentSectionProps> = ({
       </div>
 
       <div className="bg-[#f5f2eb] rounded-2xl p-6 mb-8">
-        {isReservation ? renderSimplifiedBreakdown() : renderCompleteBreakdown()}
-        
+        {isReservation
+          ? renderSimplifiedBreakdown()
+          : renderCompleteBreakdown()}
+
         <Divider className="my-3 opacity-50" />
-        
+
         <div className="flex justify-between items-center py-1 font-bold">
           <span className="text-sm text-gray-800">Subtotal</span>
           <span className="text-sm text-gray-800">
             $ {priceInfo.subtotal.toLocaleString()}
           </span>
         </div>
-        
+
         {invoiceRequested && (
           <div className="flex justify-between items-center py-1">
             <span className="text-sm text-gray-600">IVA (19%)</span>
@@ -145,10 +142,19 @@ const PaymentSection: React.FC<PaymentSectionProps> = ({
             </span>
           </div>
         )}
-        
+
+        {priceInfo.discountAmount && priceInfo.discountAmount > 0 ? (
+          <div className="flex justify-between items-center py-1 text-red-600 font-bold">
+            <span className="text-sm">Descuento</span>
+            <span className="text-sm">
+              - $ {priceInfo.discountAmount.toLocaleString()}
+            </span>
+          </div>
+        ) : null}
+
         <div className="flex justify-between items-center py-2 mt-2">
           <span className="text-lg font-black text-gray-900">
-            {isReservation ? 'Total Reserva' : 'Total'}
+            {isReservation ? "Total Reserva" : "Total"}
           </span>
           <span className="text-xl font-black text-gray-900">
             $ {priceInfo.total.toLocaleString()}
@@ -173,7 +179,6 @@ const PaymentSection: React.FC<PaymentSectionProps> = ({
                 className="w-full"
                 placeholder="Seleccionar método de pago"
                 filter
-                showClear
               />
             )}
           />

@@ -1,11 +1,11 @@
-import { supabase } from '@/config/supabase';
-import { 
-  Payment, 
-  CreatePaymentDto, 
-  StayWithPaymentDto, 
-  PaymentSummary, 
-  PaymentType 
-} from '@/types';
+import { supabase } from "@/config/supabase";
+import {
+  Payment,
+  CreatePaymentDto,
+  StayWithPaymentDto,
+  PaymentSummary,
+  PaymentType,
+} from "@/types";
 
 /**
  * Pure API functions for payment management
@@ -17,17 +17,19 @@ export const paymentApi = {
    */
   createPayment: async (paymentData: CreatePaymentDto): Promise<Payment> => {
     const { data, error } = await supabase
-      .from('payments')
+      .from("payments")
       .insert(paymentData)
-      .select(`
+      .select(
+        `
         *,
         payment_method:payment_methods(name),
         employee:employees(first_name, last_name)
-      `)
+      `,
+      )
       .single();
 
     if (error) {
-      console.error('Error creating payment:', error);
+      console.error("Error creating payment:", error);
       throw new Error(`Error al crear pago: ${error.message}`);
     }
 
@@ -39,17 +41,19 @@ export const paymentApi = {
    */
   getPaymentsByStay: async (stayId: string): Promise<Payment[]> => {
     const { data, error } = await supabase
-      .from('payments')
-      .select(`
+      .from("payments")
+      .select(
+        `
         *,
         payment_method:payment_methods(name),
         employee:employees(first_name, last_name)
-      `)
-      .eq('stay_id', stayId)
-      .order('payment_date', { ascending: true });
+      `,
+      )
+      .eq("stay_id", stayId)
+      .order("payment_date", { ascending: true });
 
     if (error) {
-      console.error('Error fetching payments:', error);
+      console.error("Error fetching payments:", error);
       throw new Error(`Error al obtener pagos: ${error.message}`);
     }
 
@@ -61,21 +65,26 @@ export const paymentApi = {
    */
   getStayPaymentSummary: async (stayId: string): Promise<PaymentSummary> => {
     const payments = await paymentApi.getPaymentsByStay(stayId);
-    
+
     // Get stay details to get total price
     const { data: stay, error: stayError } = await supabase
-      .from('stays')
-      .select('total_price')
-      .eq('id', stayId)
+      .from("stays")
+      .select("total_price")
+      .eq("id", stayId)
       .single();
 
     if (stayError) {
-      console.error('Error fetching stay for summary:', stayError);
-      throw new Error(`Error al obtener datos de estancia: ${stayError.message}`);
+      console.error("Error fetching stay for summary:", stayError);
+      throw new Error(
+        `Error al obtener datos de estancia: ${stayError.message}`,
+      );
     }
 
     const totalAmount = stay?.total_price || 0;
-    const totalPaid = payments.reduce((sum, payment) => sum + Number(payment.amount), 0);
+    const totalPaid = payments.reduce(
+      (sum, payment) => sum + Number(payment.amount),
+      0,
+    );
     const pendingAmount = totalAmount - totalPaid;
     const isFullyPaid = pendingAmount <= 0;
 
@@ -84,7 +93,7 @@ export const paymentApi = {
       totalAmount,
       pendingAmount,
       payments,
-      isFullyPaid
+      isFullyPaid,
     };
   },
 
@@ -95,27 +104,27 @@ export const paymentApi = {
     try {
       // First, create the stay
       const { data: stay, error: stayError } = await supabase
-        .from('stays')
+        .from("stays")
         .insert(data.stayData)
         .select()
         .single();
 
       if (stayError) {
-        console.error('Error creating stay:', stayError);
+        console.error("Error creating stay:", stayError);
         throw new Error(`Error al crear estancia: ${stayError.message}`);
       }
 
       // Then create the payment record
       const paymentData = {
         ...data.paymentData,
-        stay_id: stay.id
+        stay_id: stay.id,
       };
 
       await paymentApi.createPayment(paymentData);
 
       return stay;
     } catch (error) {
-      console.error('Error in createStayWithPayment:', error);
+      console.error("Error in createStayWithPayment:", error);
       throw error;
     }
   },
@@ -123,20 +132,25 @@ export const paymentApi = {
   /**
    * Update payment record
    */
-  updatePayment: async (paymentId: string, updates: Partial<CreatePaymentDto>): Promise<Payment> => {
+  updatePayment: async (
+    paymentId: string,
+    updates: Partial<CreatePaymentDto>,
+  ): Promise<Payment> => {
     const { data, error } = await supabase
-      .from('payments')
+      .from("payments")
       .update(updates)
-      .eq('id', paymentId)
-      .select(`
+      .eq("id", paymentId)
+      .select(
+        `
         *,
         payment_method:payment_methods(name),
         employee:employees(first_name, last_name)
-      `)
+      `,
+      )
       .single();
 
     if (error) {
-      console.error('Error updating payment:', error);
+      console.error("Error updating payment:", error);
       throw new Error(`Error al actualizar pago: ${error.message}`);
     }
 
@@ -148,12 +162,12 @@ export const paymentApi = {
    */
   deletePayment: async (paymentId: string): Promise<void> => {
     const { error } = await supabase
-      .from('payments')
+      .from("payments")
       .delete()
-      .eq('id', paymentId);
+      .eq("id", paymentId);
 
     if (error) {
-      console.error('Error deleting payment:', error);
+      console.error("Error deleting payment:", error);
       throw new Error(`Error al eliminar pago: ${error.message}`);
     }
   },
@@ -161,26 +175,33 @@ export const paymentApi = {
   /**
    * Get payment history for a date range
    */
-  getPaymentsByDateRange: async (startDate: string, endDate: string): Promise<Payment[]> => {
+  getPaymentsByDateRange: async (
+    startDate: string,
+    endDate: string,
+  ): Promise<Payment[]> => {
     const { data, error } = await supabase
-      .from('payments')
-      .select(`
+      .from("payments")
+      .select(
+        `
         *,
         payment_method:payment_methods(name),
         employee:employees(first_name, last_name),
         stay:stays(id, order_number, check_in_date, check_out_date, guest:guests(first_name, last_name))
-      `)
-      .gte('payment_date', startDate)
-      .lte('payment_date', endDate)
-      .order('payment_date', { ascending: false });
+      `,
+      )
+      .gte("payment_date", startDate)
+      .lte("payment_date", endDate)
+      .order("payment_date", { ascending: false });
 
     if (error) {
-      console.error('Error fetching payments by date range:', error);
-      throw new Error(`Error al obtener pagos por rango de fechas: ${error.message}`);
+      console.error("Error fetching payments by date range:", error);
+      throw new Error(
+        `Error al obtener pagos por rango de fechas: ${error.message}`,
+      );
     }
 
     return data || [];
-  }
+  },
 };
 
 /**
@@ -191,13 +212,13 @@ export const paymentHelpers = {
    * Determine payment type based on amount, total price, and context
    */
   determinePaymentType: (
-    paidAmount: number, 
-    totalPrice: number, 
-    context: 'reservation' | 'checkin_direct' | 'calendar_payment',
-    checkInDate?: Date
+    paidAmount: number,
+    totalPrice: number,
+    context: "reservation" | "checkin_direct" | "calendar_payment",
+    checkInDate?: Date,
   ): PaymentType => {
     // Check-in direct is always complete payment
-    if (context === 'checkin_direct') {
+    if (context === "checkin_direct") {
       return PaymentType.PAGO_CHECKIN_DIRECTO;
     }
 
@@ -218,23 +239,31 @@ export const paymentHelpers = {
   generateObservation: (
     paymentType: PaymentType,
     paidAmount: number,
-    totalPrice: number
+    totalPrice: number,
   ): string => {
     switch (paymentType) {
       case PaymentType.ABONO_RESERVA:
         return `Abono parcial de reserva: $${paidAmount.toLocaleString()} de $${totalPrice.toLocaleString()}`;
-      
+
       case PaymentType.PAGO_COMPLETO_RESERVA:
-        return 'Liquidación completa de reserva';
-      
+        return "Liquidación completa de reserva";
+
       case PaymentType.PAGO_CHECKIN_DIRECTO:
-        return 'Pago completo check-in directo';
-      
+        return "Pago completo check-in directo";
+
       case PaymentType.ANTICIPADO_COMPLETO:
-        return 'Pago completo anticipado de reserva';
-      
+        return "Pago completo anticipado de reserva";
+
       default:
-        return 'Pago registrado';
+        return "Pago registrado";
     }
-  }
+  },
+};
+
+export const CreatePayment = async (data: Payment): Promise<Payment> => {
+  return supabase
+    .from("payments")
+    .insert(data)
+    .select()
+    .single() as unknown as Promise<Payment>;
 };

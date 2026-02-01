@@ -64,12 +64,13 @@ export interface Employee {
   email: string;
   role_id: string;
   role?: { name: string };
+  password?: string;
 }
 
 export interface Stay {
-  id: string;
-  order_number: number;
-  room_id: string;
+  id?: string;
+  order_number?: number;
+  room_id?: string;
   guest_id: string;
   employee_id: string;
   check_in_date: string;
@@ -93,6 +94,7 @@ export interface Stay {
   guest?: Guest;
   accommodation_type_id?: string;
   room_status_id?: string;
+  active?: boolean;
 }
 
 export interface PaymentMethod {
@@ -101,8 +103,8 @@ export interface PaymentMethod {
 }
 
 export interface Payment {
-  id: string;
-  stay_id: string;
+  id?: string;
+  stay_id?: string;
   payment_method_id: string;
   employee_id: string;
   amount: number;
@@ -190,4 +192,14 @@ export interface RoomLog {
   observation?: string;
   timestamp: string;
   employee?: Employee;
+}
+
+export interface PriceOverride {
+  id?: string;
+  stay_id?: string;
+  original_price: number;
+  discount_amount: number;
+  final_price: number;
+  authorized_by: string;
+  created_at?: string;
 }

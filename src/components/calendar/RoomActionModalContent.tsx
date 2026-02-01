@@ -8,7 +8,7 @@ import {
   AccommodationTypeEnum,
   RoomActionEnum,
   RoomStatusEnum,
-} from "@/util/status-rooms.enum";
+} from "@/util/enums/status-rooms.enum";
 import dayjs from "dayjs";
 import { Button } from "primereact/button";
 import React from "react";

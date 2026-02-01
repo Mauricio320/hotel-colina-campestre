@@ -3,6 +3,7 @@ import { Controller } from "react-hook-form";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
+import { DocsTypesConst } from "@/util/const/types-docs.const";
 
 interface ColombiaData {
   departamento: string;
@@ -59,7 +60,7 @@ export const GuestDataForm: React.FC<GuestDataFormProps> = ({
             render={({ field }) => (
               <Dropdown
                 {...field}
-                options={["CC", "CE", "PAS", "NIT"]}
+                options={DocsTypesConst}
                 className="w-full "
               />
             )}

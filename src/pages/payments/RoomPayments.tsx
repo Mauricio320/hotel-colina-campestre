@@ -78,12 +78,12 @@ const RoomPayments: React.FC = () => {
     if (pending > 0) {
       return {
         status: "Pendiente de Pago",
-        severity: "warning"
+        severity: "warning",
       };
     } else {
       return {
         status: "Pago Completo",
-        severity: "success"
+        severity: "success",
       };
     }
   };
@@ -94,7 +94,6 @@ const RoomPayments: React.FC = () => {
         <h3 className="m-0 text-xl font-black text-emerald-900 tracking-tight">
           Registro de Pagos por Habitación
         </h3>
-
       </div>
       <span className="p-input-icon-left w-full sm:w-72">
         <i className="pi pi-search text-emerald-400" />
@@ -227,7 +226,7 @@ const RoomPayments: React.FC = () => {
                       return (
                         <Tag
                           value={paymentStatus.status}
-                          severity={paymentStatus.severity}
+                          severity={paymentStatus?.severity as unknown as any}
                           className="text-[10px] font-black uppercase"
                         />
                       );

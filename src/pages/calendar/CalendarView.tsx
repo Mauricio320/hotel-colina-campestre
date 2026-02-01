@@ -20,7 +20,7 @@ import { useStaysActions } from "@/hooks/useStaysActions";
 import { useStaysCheckInActions } from "@/hooks/useStaysCheckInActions";
 import { useUrlParams } from "@/hooks/useUrlParams";
 import { Room, Stay } from "@/types";
-import { RoomActionEnum, RoomStatusEnum } from "@/util/status-rooms.enum";
+import { RoomActionEnum, RoomStatusEnum } from "@/util/enums/status-rooms.enum";
 import { UseQueryResult } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { TabPanel, TabView } from "primereact/tabview";
@@ -63,7 +63,7 @@ const CalendarView: React.FC = () => {
   const isLoading =
     (roomsQuery.isLoading && !roomsQuery.data) ||
     (staysQuery.isLoading && !staysQuery.data) ||
-    roomStatuses.fetchAll.isLoading ||
+    roomStatuses.isLoading ||
     paymentMethods.fetchAll.isLoading ||
     accommodationTypesQuery.isLoading;
 
@@ -128,8 +128,7 @@ const CalendarView: React.FC = () => {
   };
 
   const handleRoomStatusChange = async (action: string) => {
-    if (!selectedRoom || !roomStatuses.fetchAll.data || !currentEmployee?.id)
-      return;
+    if (!selectedRoom || !roomStatuses || !currentEmployee?.id) return;
 
     showBlockUI(`Actualizando estado de la habitación...`);
 
@@ -139,7 +138,7 @@ const CalendarView: React.FC = () => {
     if (action === RoomActionEnum.MANTENIMIENTO)
       targetStatusName = RoomStatusEnum.MANTENIMIENTO;
 
-    const targetStatus = roomStatuses.fetchAll.data.find(
+    const targetStatus = roomStatuses.data.find(
       (s) => s.name === targetStatusName,
     );
 
@@ -190,7 +189,7 @@ const CalendarView: React.FC = () => {
   };
 
   const handleRoomStatusUpdate = async (action: string) => {
-    if (!selectedRoom || !roomStatuses.fetchAll.data || !formEmployeeId) {
+    if (!selectedRoom || !roomStatuses.data || !formEmployeeId) {
       showBlockUI("Debe seleccionar un responsable para esta acción");
       hideBlockUI();
       return;
@@ -222,7 +221,7 @@ const CalendarView: React.FC = () => {
         actionMessage = "Estado actualizado";
     }
 
-    const targetStatus = roomStatuses.fetchAll.data.find(
+    const targetStatus = roomStatuses.data.find(
       (s) => s.name === targetStatusName,
     );
 
@@ -386,7 +385,7 @@ const CalendarView: React.FC = () => {
         onRetry={() => {
           roomsQuery.refetch();
           staysQuery.refetch();
-          roomStatuses.fetchAll.refetch();
+          roomStatuses.refetch();
           paymentMethods.fetchAll.refetch();
           accommodationTypesQuery.refetch();
         }}
@@ -412,7 +411,7 @@ const CalendarView: React.FC = () => {
                   });
                 }, 500);
               }}
-              roomStatuses={roomStatuses?.fetchAll?.data || []}
+              roomStatuses={roomStatuses?.data || []}
               filteredRooms={filteredRooms}
               getActiveStay={getActiveStay}
               accommodationType={type}

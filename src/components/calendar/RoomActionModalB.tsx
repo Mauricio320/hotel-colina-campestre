@@ -2,7 +2,7 @@ import React from "react";
 import { Dialog } from "primereact/dialog";
 import { Tag } from "primereact/tag";
 import { Button } from "primereact/button";
-import { RoomStatusEnum, RoomActionEnum } from "@/util/status-rooms.enum";
+import { RoomStatusEnum, RoomActionEnum } from "@/util/enums/status-rooms.enum";
 import { Room, Stay } from "@/types";
 import dayjs from "dayjs";
 import { TaskCompletionForm } from "@/components/tasks/TaskCompletionForm";

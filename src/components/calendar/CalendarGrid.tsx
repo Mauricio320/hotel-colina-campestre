@@ -1,6 +1,6 @@
 import { STATUS_MAP } from "@/constants";
 import { AccommodationType, Room, RoomStatus, Stay } from "@/types";
-import { RoomStatusEnum } from "@/util/status-rooms.enum";
+import { RoomStatusEnum } from "@/util/enums/status-rooms.enum";
 import dayjs from "dayjs";
 import { Button } from "primereact/button";
 import React, { useState } from "react";

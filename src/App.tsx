@@ -120,7 +120,8 @@ const AppContent: React.FC = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/calendar" element={<CalendarView />} />
         <Route path="/check-in/:roomId" element={<CheckInPage />} />
-        <Route path="/booking/:roomId" element={<BookingPage />} />
+        <Route path="/booking/:roomId" element={<CheckInPage />} />
+        <Route path="/booking2/:roomId" element={<BookingPage />} />
         <Route path="/check-out/:roomId" element={<CheckOutPage />} />
         <Route path="/rooms" element={<RoomManagement userRole={roleName} />} />
         <Route path="/booking-movements" element={<BookingMovements />} />

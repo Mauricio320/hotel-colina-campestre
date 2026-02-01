@@ -32,7 +32,7 @@ export const useEmployees = () => {
     mutationFn: async (employeeData: any) => {
       const { data, error } = await supabase
         .from("employees")
-        .insert(employeeData)
+        .upsert(employeeData, { onConflict: "doc_number" })
         .select()
         .single();
       if (error) throw error;
@@ -44,4 +44,14 @@ export const useEmployees = () => {
   });
 
   return { employeesQuery, createEmployee, fetchEmployeesByRole };
+};
+export const useEmployeesByRole = (roleName: string) => {
+  return useQuery({
+    queryKey: ["employees", "role", roleName],
+    queryFn: () =>
+      import("@/services/auth/employeeApi").then((m) =>
+        m.getEmployeesByRole(roleName),
+      ),
+    enabled: !!roleName,
+  });
 };
