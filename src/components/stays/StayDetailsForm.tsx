@@ -105,6 +105,8 @@ const StayDetailsForm: React.FC<StayDetailsFormProps> = ({
                 decrementButtonIcon="pi pi-minus"
                 className="w-full"
                 inputClassName="w-full"
+                minFractionDigits={0}
+                maxFractionDigits={0}
               />
             )}
           />

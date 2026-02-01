@@ -1,9 +1,9 @@
-import React from 'react';
-import { Dialog } from 'primereact/dialog';
-import { Button } from 'primereact/button';
-import { Dropdown } from 'primereact/dropdown';
-import { InputNumber } from 'primereact/inputnumber';
-import { PaymentMethod } from '@/types';
+import React from "react";
+import { Dialog } from "primereact/dialog";
+import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
+import { InputNumber } from "primereact/inputnumber";
+import { PaymentMethod } from "@/types";
 
 interface PaymentModalProps {
   visible: boolean;
@@ -80,6 +80,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               className="w-full"
               inputClassName="text-2xl font-black py-4 border-emerald-200"
               autoFocus
+              minFractionDigits={0}
+              maxFractionDigits={0}
             />
           </div>
         </div>
@@ -96,9 +98,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             onClick={onConfirmNewPayment}
             loading={isProcessingPayment}
             disabled={
-              newPaymentAmount <= 0 ||
-              !paymentMethodId ||
-              !isPaymentMethodValid
+              newPaymentAmount <= 0 || !paymentMethodId || !isPaymentMethodValid
             }
           />
         </div>

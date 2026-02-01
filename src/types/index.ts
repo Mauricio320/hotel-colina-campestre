@@ -31,6 +31,7 @@ export interface Room {
   is_active: boolean;
   rates?: RoomRate[];
   status?: RoomStatus;
+  stays?: Stay[];
 }
 
 export interface RoomRate {

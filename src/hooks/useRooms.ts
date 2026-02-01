@@ -129,3 +129,42 @@ export const useRooms = (category?: string) => {
 
   return { roomsQuery, updateStatus, upsertRoom };
 };
+
+export const RoomsQueryCtegory = (id: string) => {
+  return useQuery({
+    queryKey: ["rooms", id],
+    queryFn: async ({ signal }) => {
+      const { data: accommodationType } = await supabase
+        .from("stays")
+        .select(`*`)
+        .eq("accommodation_type_id", id)
+        .eq("active", true)
+        .abortSignal(signal);
+
+      console.log(accommodationType, "aslknd");
+
+      const { data } = await supabase
+        .from("rooms")
+        .select(
+          `*, 
+          status:room_statuses(*), rates:room_rates(*), stays(id, check_in_date, check_out_date, active, person_count,paid_amount, 
+            room_statuses(*)))`,
+        )
+        .eq("is_active", true)
+        .eq("accommodation_type_id", id)
+        .eq("stays.active", true)
+        .abortSignal(signal)
+        .order("room_number");
+
+      return (data as unknown as Room[]).forEach((room) => {
+        accommodationType.forEach((stay) => {
+          room.stays.push(stay);
+        });
+      });
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 0,
+    gcTime: 0,
+    retry: 1,
+  });
+};

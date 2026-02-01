@@ -303,7 +303,7 @@ const BookingPage: React.FC = () => {
       </div>
     );
 
-return (
+  return (
     <div className="max-w-4xl mx-auto pb-12 animate-fade-in">
       <div className="flex items-center gap-4 mb-8">
         <Button

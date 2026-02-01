@@ -185,7 +185,7 @@ const PaymentSection: React.FC<PaymentSectionProps> = ({
         </div>
         <div className="flex flex-col gap-1">
           <label className="text-xs font-bold text-gray-700 uppercase">
-            {isReservation ? "Abono Inicial" : "Monto a Pagar"}
+            {isReservation ? "Abono Inicial/Completo" : "Monto a Pagar"}
           </label>
           <Controller
             name="paid_amount"
@@ -196,8 +196,10 @@ const PaymentSection: React.FC<PaymentSectionProps> = ({
                 onValueChange={(e) => field.onChange(e.value)}
                 className="w-full"
                 inputClassName="w-full"
-                mode={isReservation ? "currency" : undefined}
-                currency={isReservation ? "COP" : undefined}
+                mode="currency"
+                currency="COP"
+                minFractionDigits={0}
+                maxFractionDigits={0}
               />
             )}
           />

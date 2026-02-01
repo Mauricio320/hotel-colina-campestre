@@ -108,8 +108,6 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
     setLoadingHistory(false);
   };
 
-  
-
   const onSave = async (data: any) => {
     try {
       await upsertRoom.mutateAsync({
@@ -134,19 +132,19 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
 
   const formatRates = (rates: RoomRate[]): string => {
     if (!rates || rates.length === 0) return "Sin tarifas";
-    
+
     return rates
       .sort((a, b) => a.person_count - b.person_count)
-      .map(rate => `${rate.rate / 1000}k`)
-      .join(' ∙ ');
+      .map((rate) => `${rate.rate / 1000}k`)
+      .join(" ∙ ");
   };
 
   const getRoomCapacity = (room: Room): string => {
-    const total = (room.beds_double * 2) + room.beds_single;
+    const total = room.beds_double * 2 + room.beds_single;
     const details = [];
     if (room.beds_double > 0) details.push(`${room.beds_double}D`);
     if (room.beds_single > 0) details.push(`${room.beds_single}S`);
-    return `${total} pers. (${details.join('+')})`;
+    return `${total} pers. (${details.join("+")})`;
   };
 
   const getStatusSeverity = (name: string) => {
@@ -199,8 +197,6 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
         </div>
       </div>
 
-      
-
       <TabView
         activeIndex={activeTab}
         onTabChange={(e) => setActiveTab(e.index)}
@@ -209,17 +205,19 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
           <TabPanel key={cat} header={cat}>
             <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
               <DataTable
-                value={roomsQuery.data?.sort((a, b) => {
-                  // Orden lógico: primero numéricas, luego casas
-                  const aNum = parseInt(a.room_number);
-                  const bNum = parseInt(b.room_number);
-                  
-                  if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
-                  if (!isNaN(aNum) && isNaN(bNum)) return -1;
-                  if (isNaN(aNum) && !isNaN(bNum)) return 1;
-                  
-                  return a.room_number.localeCompare(b.room_number);
-                }) || []}
+                value={
+                  roomsQuery.data?.sort((a, b) => {
+                    // Orden lógico: primero numéricas, luego casas
+                    const aNum = parseInt(a.room_number);
+                    const bNum = parseInt(b.room_number);
+
+                    if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+                    if (!isNaN(aNum) && isNaN(bNum)) return -1;
+                    if (isNaN(aNum) && !isNaN(bNum)) return 1;
+
+                    return a.room_number.localeCompare(b.room_number);
+                  }) || []
+                }
                 responsiveLayout="scroll"
                 className="text-sm"
                 scrollable
@@ -232,7 +230,7 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                   header="No."
                   sortable
                   className="font-bold text-emerald-700"
-                  style={{ width: '80px' }}
+                  style={{ width: "80px" }}
                 />
                 <Column
                   header="Capacidad"
@@ -246,11 +244,16 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                   header="Descripción"
                   field="observation"
                   body={(rowData) => (
-                    <div className="text-xs text-gray-600 italic" title={rowData.observation || 'Sin descripción'}>
+                    <div
+                      className="text-xs text-gray-600 italic"
+                      title={rowData.observation || "Sin descripción"}
+                    >
                       {rowData.observation ? (
-                        rowData.observation.length > 30 
-                          ? `${rowData.observation.substring(0, 30)}...`
-                          : rowData.observation
+                        rowData.observation.length > 30 ? (
+                          `${rowData.observation.substring(0, 30)}...`
+                        ) : (
+                          rowData.observation
+                        )
                       ) : (
                         <span className="text-gray-400">Sin descripción</span>
                       )}
@@ -294,24 +297,22 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
 
       <Dialog
         header={
-          selectedRoom
-            ? (
-              <div className="flex items-center gap-3">
-                <div className="bg-emerald-100 text-emerald-800 px-3 py-2 rounded-lg">
-                  <i className="pi pi-home mr-2"></i>
-                  {selectedRoom.room_number}
-                </div>
-                <div className="text-gray-600">Editar Tarifas</div>
+          selectedRoom ? (
+            <div className="flex items-center gap-3">
+              <div className="bg-emerald-100 text-emerald-800 px-3 py-2 rounded-lg">
+                <i className="pi pi-home mr-2"></i>
+                {selectedRoom.room_number}
               </div>
-            )
-            : (
-              <div className="flex items-center gap-3">
-                <div className="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg">
-                  <i className="pi pi-plus mr-2"></i>
-                  Nueva Habitación
-                </div>
+              <div className="text-gray-600">Editar Tarifas</div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg">
+                <i className="pi pi-plus mr-2"></i>
+                Nueva Habitación
               </div>
-            )
+            </div>
+          )
         }
         visible={showFormModal}
         onHide={() => setShowFormModal(false)}
@@ -336,7 +337,11 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
               name="category"
               control={control}
               render={({ field }) => (
-                <Dropdown {...field} options={CATEGORIES} className="w-full" />
+                <Dropdown
+                  {...field}
+                  options={[...CATEGORIES]}
+                  className="w-full"
+                />
               )}
             />
           </div>
@@ -361,14 +366,18 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                 <div className="mt-4 bg-white rounded-lg p-3 border border-emerald-200">
                   <div className="flex items-center gap-2 text-sm text-emerald-700">
                     <i className="pi pi-eye text-emerald-600"></i>
-                    <span className="font-semibold">Vista previa de tarifas:</span>
+                    <span className="font-semibold">
+                      Vista previa de tarifas:
+                    </span>
                     <span className="font-mono bg-emerald-50 px-3 py-1 rounded text-emerald-800 font-semibold">
                       {fields
                         .map((_, index) => {
                           const rateField = control._formValues.rates?.[index];
-                          return rateField ? `${rateField.rate / 1000}k` : '---k';
+                          return rateField
+                            ? `${rateField.rate / 1000}k`
+                            : "---k";
                         })
-                        .join(' ∙ ')}
+                        .join(" ∙ ")}
                     </span>
                   </div>
                 </div>
@@ -395,15 +404,17 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                           min={1}
                           className="w-full border-gray-300 hover:border-blue-400 focus:border-blue-500"
                           placeholder="1"
+                          minFractionDigits={0}
+                          maxFractionDigits={0}
                         />
                       )}
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-center text-gray-400 font-bold">
                     <i className="pi pi-arrow-right text-2xl"></i>
                   </div>
-                  
+
                   <div className="flex flex-col gap-2 flex-1">
                     <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
                       <i className="pi pi-money-bill text-green-600"></i>
@@ -419,11 +430,13 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                           mode="currency"
                           currency="COP"
                           className="w-full border-gray-300 hover:border-green-400 focus:border-green-500"
+                          minFractionDigits={0}
+                          maxFractionDigits={0}
                         />
                       )}
                     />
                   </div>
-                  
+
                   <div className="flex flex-col items-center gap-2">
                     <Button
                       type="button"

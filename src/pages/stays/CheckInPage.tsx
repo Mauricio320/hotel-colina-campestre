@@ -30,6 +30,7 @@ import {
   CheckAvailability,
   useCreateOnStayWithPayment,
 } from "@/hooks/useStays";
+import { generateStayObservation } from "@/util/helper/stayHelpers";
 import { Employee, PaymentType } from "@/types";
 import {
   AccommodationTypeEnum,
@@ -43,6 +44,9 @@ const CheckInPage: React.FC = () => {
   const { data: roomStatuses } = useRoomStatuses();
   const location = useLocation();
   const isCheckInMode = !!useMatch("/check-in/:roomId");
+
+  const getStatusId = (name: RoomStatusEnum) =>
+    roomStatuses?.find((rs) => rs.name === name)?.id;
 
   const { showBlockUI, hideBlockUI } = useBlockUI();
   const { settings } = useSettings();
@@ -242,26 +246,31 @@ const CheckInPage: React.FC = () => {
         address: data.address,
       });
       const isApartmentAction = action === AccommodationTypeEnum.APARTAMENTO;
-      const room_status_current_id = roomStatuses?.find(
-        (rs) => rs.name === RoomStatusEnum.DISPONIBLE,
-      )?.id;
-      const new_status_id = roomStatuses?.find(
-        (rs) => rs.name === RoomStatusEnum.OCUPADO,
-      )?.id;
-      const observation =
-        discountAmount > 0
-          ? `Pago check-in con descuento autorizado por ${authorizedBy?.first_name} ${authorizedBy?.last_name}`
-          : "Pago completo check-in";
+
+      const room_status_current_id = getStatusId(RoomStatusEnum.DISPONIBLE);
+      const new_status_id = isCheckInMode
+        ? getStatusId(RoomStatusEnum.OCUPADO)
+        : getStatusId(RoomStatusEnum.RESERVADO);
+
+      const observation = generateStayObservation({
+        isCheckIn: isCheckInMode,
+        paidAmount: data.paid_amount,
+        totalAmount: finalPriceInfo.total,
+        discountAmount,
+        authorizedBy,
+      });
+
       const keyId = isApartmentAction
         ? { accommodation_type_id: roomId }
         : { room_id: roomId };
+
       await useCreateOnStayWithPayment({
         stay: {
           guest_id: guest.id,
           employee_id: employee?.id || null,
           check_in_date: data.check_in_date.toLocaleDateString("sv-SE"),
           check_out_date: data.check_out_date.toLocaleDateString("sv-SE"),
-          status: "Active",
+          status: isCheckInMode ? "Active" : "Reserved",
           total_price: finalPriceInfo.total,
           paid_amount: data.paid_amount,
           payment_method_id: data.payment_method_id,
@@ -269,7 +278,7 @@ const CheckInPage: React.FC = () => {
           extra_mattress_price: data.extra_mattress_count * settings.mat,
           is_invoice_requested: data.is_invoice_requested,
           iva_amount: priceInfo.iva,
-          origin_was_reservation: false,
+          origin_was_reservation: !isCheckInMode,
           iva_percentage: settings.iva,
           person_count: data.person_count,
           extra_mattress_count: data.extra_mattress_count,
@@ -280,11 +289,15 @@ const CheckInPage: React.FC = () => {
         room_status_current_id,
         keyId: keyId,
         payment: {
-          amount: finalPriceInfo.total,
+          amount: data.paid_amount,
           payment_method_id: data.payment_method_id,
           employee_id: employee?.id || null,
           observation,
-          payment_type: PaymentType.PAGO_CHECKIN_DIRECTO,
+          payment_type: isCheckInMode
+            ? PaymentType.PAGO_CHECKIN_DIRECTO
+            : data.paid_amount >= finalPriceInfo.total
+              ? PaymentType.PAGO_COMPLETO_RESERVA
+              : PaymentType.ABONO_RESERVA,
           payment_date: new Date().toISOString(),
           created_at: new Date().toISOString(),
         },
@@ -392,7 +405,7 @@ const CheckInPage: React.FC = () => {
           control={control}
           setValue={setValue}
           watch={watch}
-          isReservation={false}
+          isReservation={!isCheckInMode}
         />
 
         <AvailabilityConflictModal

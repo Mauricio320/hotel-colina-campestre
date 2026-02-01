@@ -6,6 +6,7 @@ import { Button } from "primereact/button";
 import React, { useState } from "react";
 import { RoomActionModal } from "./RoomActionModal";
 import { UseQueryResult } from "@tanstack/react-query";
+import { RoomsQueryCtegory } from "@/hooks/useRooms";
 
 interface CalendarGridProps {
   getActiveStay: (room: Room, date: Date) => Stay | undefined;
@@ -31,6 +32,9 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   const [showActionModal, setShowActionModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [room, setRoom] = useState<Room | null>(null);
+  const { data } = RoomsQueryCtegory(accommodationType.id);
+
+  console.log(data);
 
   const handleRoomClick = (room: Room, date: Date) => {
     setRoom(room);
