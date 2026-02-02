@@ -96,9 +96,6 @@ export const RoomActionModalB: React.FC<RoomActionModalProps> = ({
           <StayInfoCard
             activeStay={activeStay}
             onGoToCheckOut={onGoToCheckOut}
-            checkInObservation={checkInObservation}
-            onCheckInObservationChange={onCheckInObservationChange}
-            paymentStatus={paymentStatus}
             onCheckInAction={onCheckInAction}
             onConfirmCheckIn={onConfirmCheckIn}
           />

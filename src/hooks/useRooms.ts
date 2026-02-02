@@ -150,10 +150,14 @@ export const RoomsQueryCtegory = (id: string) => {
         .from("rooms")
         .select(
           `*, 
-          status:room_statuses(*), rates:room_rates(*), stays(*, 
-          room:rooms(*),  
-          guest:guests(*),
-          room_statuses(*))`,
+          status:room_statuses(*), 
+          rates:room_rates(*), 
+          stays(*, 
+            room:rooms(*),  
+            guest:guests(*),
+            room_statuses(*)
+          ),
+          accommodation_types(*)`,
         )
         .eq("is_active", true)
         .eq("accommodation_type_id", id)
@@ -172,5 +176,45 @@ export const RoomsQueryCtegory = (id: string) => {
     staleTime: 0,
     gcTime: 0,
     retry: 1,
+  });
+};
+
+export const useRoomById = (roomId: string | null) => {
+  return useQuery({
+    queryKey: ["room", roomId],
+    queryFn: async () => {
+      if (!roomId) return null;
+      const { data, error } = await supabase
+        .from("rooms")
+        .select("*, rates:room_rates(*)")
+        .eq("id", roomId)
+        .single();
+
+      if (error) throw error;
+      return data as Room;
+    },
+    enabled: !!roomId,
+    staleTime: 0,
+  });
+};
+
+export const useRoomHistory = (roomId: string | null) => {
+  return useQuery({
+    queryKey: ["room_history", roomId],
+    queryFn: async () => {
+      if (!roomId) return [];
+      const { data, error } = await supabase
+        .from("room_history")
+        .select(
+          "*, employee:employees(*), new_status:room_statuses!new_status_id(*), prev_status:room_statuses!previous_status_id(*), stay:stays(*)",
+        )
+        .eq("room_id", roomId)
+        .order("timestamp", { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!roomId,
+    staleTime: 0,
   });
 };

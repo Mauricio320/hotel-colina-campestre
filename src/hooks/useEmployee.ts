@@ -1,20 +1,20 @@
-import React from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  getEmployeeByAuthId, 
-  syncUserProfile, 
-  getAdminRole 
-} from '@/services/auth/employeeApi';
-import { authQueryKeys } from '@/services/queryKeys/auth.queryKeys';
-import { AuthUser } from '@/services/auth/types';
+import React from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  getEmployeeByAuthId,
+  syncUserProfile,
+  getAdminRole,
+} from "@/services/auth/employeeApi";
+import { authQueryKeys } from "@/services/queryKeys/auth.queryKeys";
+import { AuthUser } from "@/services/auth/types";
 
 /**
  * Hook for fetching employee data by auth ID
  */
 export const useEmployeeQuery = (authId: string | null) => {
   return useQuery({
-    queryKey: authQueryKeys.employee(authId || ''),
-    queryFn: () => getEmployeeByAuthId(authId || ''),
+    queryKey: authQueryKeys.employee(authId || ""),
+    queryFn: () => getEmployeeByAuthId(authId || ""),
     enabled: !!authId,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
@@ -45,14 +45,14 @@ export const useSyncProfileMutation = () => {
     onSuccess: (data, authId) => {
       // Update the employee cache with new data
       queryClient.setQueryData(authQueryKeys.employee(authId), data);
-      
+
       // Invalidate related queries
       queryClient.invalidateQueries({
-        queryKey: authQueryKeys.employee(authId)
+        queryKey: authQueryKeys.employee(authId),
       });
     },
     onError: (error) => {
-      console.error('Error syncing profile:', error);
+      console.error("Error syncing profile:", error);
     },
   });
 };
@@ -70,7 +70,7 @@ export const useEmployeeWithSync = (authId: string | null) => {
   React.useEffect(() => {
     if (isError && authId && !syncProfileMutation.isPending) {
       const errorType = error?.message;
-      if (errorType === 'DATABASE_NOT_READY' || !employee) {
+      if (errorType === "DATABASE_NOT_READY" || !employee) {
         syncProfileMutation.mutate(authId);
       }
     }
@@ -92,7 +92,9 @@ export const useSessionQuery = () => {
   return useQuery({
     queryKey: authQueryKeys.session,
     queryFn: async () => {
-      const { session } = await import('@/services/auth/authApi').then(m => m.getCurrentSession());
+      const { session } = await import("@/services/auth/authApi").then((m) =>
+        m.getCurrentSession(),
+      );
       return session;
     },
     staleTime: 0, // Always check session

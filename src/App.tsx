@@ -22,6 +22,8 @@ import CheckInPage from "@/pages/stays/CheckInPage";
 import BookingPage from "@/pages/stays/BookingPage";
 import CheckOutPage from "@/pages/stays/CheckOutPage";
 import RoomManagement from "@/pages/rooms/RoomManagement";
+import RoomFormPage from "@/pages/rooms/RoomFormPage";
+import RoomHistoryPage from "@/pages/rooms/RoomHistoryPage";
 import GuestManagement from "@/pages/guests/GuestManagement";
 import EmployeeManagement from "@/pages/employees/EmployeeManagement";
 import CleaningLogs from "@/pages/logs/CleaningLogs";
@@ -121,9 +123,12 @@ const AppContent: React.FC = () => {
         <Route path="/calendar" element={<CalendarView />} />
         <Route path="/check-in/:roomId" element={<CheckInPage />} />
         <Route path="/booking/:roomId" element={<CheckInPage />} />
-        <Route path="/booking2/:roomId" element={<BookingPage />} />
-        <Route path="/check-out/:roomId" element={<CheckOutPage />} />
+        <Route path="/check-out/:stayId" element={<CheckOutPage />} />
         <Route path="/rooms" element={<RoomManagement userRole={roleName} />} />
+        <Route path="/rooms/new" element={<RoomFormPage />} />
+        <Route path="/rooms/edit/:roomId" element={<RoomFormPage />} />
+        <Route path="/rooms/history/:roomId" element={<RoomHistoryPage />} />
+        <Route path="/check-in-payment/:stayId" element={<CheckInPayment />} />
         <Route path="/booking-movements" element={<BookingMovements />} />
         <Route path="/room-payments" element={<RoomPayments />} />
         <Route path="/payments-invoice" element={<PaymentsInvoice />} />
@@ -149,6 +154,7 @@ const AppContent: React.FC = () => {
 };
 
 import { BlockUIProvider } from "@/context/BlockUIContext";
+import { CheckInPayment } from "./pages/stays/CheckInPayment";
 
 const App: React.FC = () => {
   return (

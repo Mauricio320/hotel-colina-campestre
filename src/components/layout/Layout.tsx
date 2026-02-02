@@ -1,10 +1,9 @@
-import React, { useState } from "react";
-import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Sidebar } from "primereact/sidebar";
+import { Employee, Role } from "@/types";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
-import { Employee, Role } from "@/types";
-import { AuthUser } from "@supabase/supabase-js";
+import { Sidebar } from "primereact/sidebar";
+import React, { useState } from "react";
+import { Link, Outlet, useLocation } from "react-router-dom";
 
 const wccLogo = new URL("/images/wcc_logo-u12188.png", import.meta.url);
 
@@ -44,12 +43,6 @@ const Layout: React.FC<LayoutProps> = ({ employee, onLogout }) => {
       label: "Habitaciones",
       icon: "pi pi-building",
       path: "/rooms",
-      roles: [Role.Admin, Role.Recepcionista],
-    },
-    {
-      label: "Movimiento Reservas",
-      icon: "pi pi-directions",
-      path: "/booking-movements",
       roles: [Role.Admin, Role.Recepcionista],
     },
     {

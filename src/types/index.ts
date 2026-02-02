@@ -23,6 +23,7 @@ export interface Room {
   room_number: string;
   category: "Hotel" | "Apartamento" | "Casa 1" | "Casa 2"; // LEGACY - solo para compatibilidad
   accommodation_type_id: string; // Nuevo campo para relación con accommodation_types
+  accommodation_types?: AccommodationType;
   beds_double: number;
   beds_single: number;
   observation?: string;
@@ -96,6 +97,7 @@ export interface Stay {
   accommodation_type_id?: string;
   room_status_id?: string;
   active?: boolean;
+  room_statuses?: RoomStatus;
 }
 
 export interface PaymentMethod {
@@ -147,25 +149,6 @@ export interface AccommodationType {
   price: number;
   is_rentable: boolean;
   created_at: string;
-}
-
-export interface AccommodationType {
-  id: string;
-  name: string;
-  price: number;
-  is_rentable: boolean;
-  created_at: string;
-}
-
-export interface RoomStatus {
-  id: string;
-  name: "Ocupado" | "Disponible" | "Reservado" | "Limpieza" | "Mantenimiento";
-  color: string;
-}
-
-export interface PaymentMethod {
-  id: string;
-  name: string;
 }
 
 export interface RoomHistory {

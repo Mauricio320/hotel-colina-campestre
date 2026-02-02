@@ -1,23 +1,20 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import PaymentHistoryTable from "@/components/payments/PaymentHistoryTable";
+import { supabase } from "@/config/supabase";
+import { usePayments } from "@/hooks/usePayments";
+import { Payment } from "@/types";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
-import { Divider } from "primereact/divider";
-import { Tag } from "primereact/tag";
-import { Card } from "primereact/card";
-import { supabase } from "@/config/supabase";
-import { Stay, Payment } from "@/types";
-import { usePayments } from "@/hooks/usePayments";
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 const InvoiceDetailPage: React.FC = () => {
   const { stayId } = useParams<{ stayId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [stay, setStay] = useState<any | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [error, setError] = useState<string | null>(null);
-
-  const { getPaymentsByStay } = usePayments();
 
   useEffect(() => {
     const fetchInvoiceData = async () => {
@@ -122,40 +119,18 @@ const InvoiceDetailPage: React.FC = () => {
     }
   };
 
-  const getPaymentTypeDisplay = (type: string) => {
-    switch (type) {
-      case "ABONO_RESERVA":
-        return "Abono Parcial";
-      case "PAGO_COMPLETO_RESERVA":
-        return "Pago Completo";
-      case "PAGO_CHECKIN_DIRECTO":
-        return "Pago Check-in Directo";
-      case "ANTICIPADO_COMPLETO":
-        return "Pago Anticipado";
-      default:
-        return type;
-    }
-  };
-
-  const getPaymentTypeColor = (type: string) => {
-    switch (type) {
-      case "ABONO_RESERVA":
-        return "bg-blue-50 text-blue-700";
-      case "PAGO_COMPLETO_RESERVA":
-        return "bg-green-50 text-green-700";
-      case "PAGO_CHECKIN_DIRECTO":
-        return "bg-emerald-50 text-emerald-700";
-      case "ANTICIPADO_COMPLETO":
-        return "bg-purple-50 text-purple-700";
-      default:
-        return "bg-gray-50 text-gray-700";
-    }
-  };
-
   // Calcular totales de pagos
   const totalPaymentsVerified =
     payments?.reduce((sum, payment) => sum + Number(payment.amount), 0) || 0;
   const pendingAmount = (stay?.total_price || 0) - totalPaymentsVerified;
+
+  const handleBack = () => {
+    if (location.state?.from) {
+      navigate(location.state.from);
+    } else {
+      navigate("/room-payments");
+    }
+  };
 
   if (loading) {
     return (
@@ -184,7 +159,7 @@ const InvoiceDetailPage: React.FC = () => {
           <Button
             label="Volver a Pagos"
             icon="pi pi-arrow-left"
-            onClick={() => navigate("/room-payments")}
+            onClick={handleBack}
             className="p-button-outlined"
           />
         </div>
@@ -199,7 +174,7 @@ const InvoiceDetailPage: React.FC = () => {
         <div className="flex items-center gap-4">
           <Button
             icon="pi pi-arrow-left"
-            onClick={() => navigate("/room-payments")}
+            onClick={handleBack}
             className="p-button-text p-button-plain p-button-rounded text-gray-400"
           />
           <div>
@@ -226,7 +201,7 @@ const InvoiceDetailPage: React.FC = () => {
             label="Ir a Pagos"
             icon="pi pi-money-bill"
             className="bg-blue-600 text-white font-bold"
-            onClick={() => navigate("/room-payments")}
+            onClick={handleBack}
           />
         </div>
       </div>
@@ -558,88 +533,7 @@ const InvoiceDetailPage: React.FC = () => {
         </div>
 
         {/* Tabla de Pagos/Abonos */}
-        {payments && payments.length > 0 && (
-          <div className="mb-12">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <i className="pi pi-money-bill text-gray-600"></i>
-              Historial de Pagos y Abonos
-            </h3>
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="py-3 px-4 text-left text-xs font-medium text-gray-600 uppercase">
-                      Fecha y Hora
-                    </th>
-                    <th className="py-3 px-4 text-left text-xs font-medium text-gray-600 uppercase">
-                      Método de Pago
-                    </th>
-                    <th className="py-3 px-4 text-right text-xs font-medium text-gray-600 uppercase">
-                      Monto
-                    </th>
-                    <th className="py-3 px-4 text-center text-xs font-medium text-gray-600 uppercase">
-                      Tipo
-                    </th>
-                    <th className="py-3 px-4 text-left text-xs font-medium text-gray-600 uppercase">
-                      Registrado por
-                    </th>
-                    <th className="py-3 px-4 text-left text-xs font-medium text-gray-600 uppercase">
-                      Observación
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {payments.map((payment) => (
-                    <tr key={payment.id}>
-                      <td className="py-3 px-4">
-                        <div className="flex flex-col">
-                          <span className="text-sm text-gray-900">
-                            {new Date(
-                              payment.payment_date,
-                            ).toLocaleDateString()}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {new Date(
-                              payment.payment_date,
-                            ).toLocaleTimeString()}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="text-sm text-gray-900">
-                          {payment.payment_method?.name || "No especificado"}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <span className="text-sm font-medium text-gray-900">
-                          $ {Number(payment.amount).toLocaleString()}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <span
-                          className={`text-xs font-medium px-2 py-1 rounded ${getPaymentTypeColor(payment.payment_type)}`}
-                        >
-                          {getPaymentTypeDisplay(payment.payment_type)}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="text-sm text-gray-900">
-                          {payment.employee?.first_name}{" "}
-                          {payment.employee?.last_name || "Sistema"}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="text-sm text-gray-600 italic">
-                          {payment.observation || "Sin observación"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        <PaymentHistoryTable payments={payments} />
 
         {/* Información Adicional */}
         {stay && stay.person_count > 1 && (

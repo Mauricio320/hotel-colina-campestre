@@ -1,19 +1,12 @@
-import React from 'react';
-import { Button } from 'primereact/button';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { Stay } from '@/types';
+import React from "react";
+import { Button } from "primereact/button";
+import { InputTextarea } from "primereact/inputtextarea";
+import { Stay } from "@/types";
+import { GetReservationPaymentStatus } from "@/util/helper/helpers";
 
 interface StayInfoCardProps {
   activeStay: Stay;
   onGoToCheckOut: () => void;
-  checkInObservation: string;
-  onCheckInObservationChange: (value: string) => void;
-  paymentStatus: {
-    isFullyPaid: boolean;
-    pendingAmount: number;
-    canCheckIn: boolean;
-    needsPayment: boolean;
-  };
   onCheckInAction: () => void;
   onConfirmCheckIn: () => void;
 }
@@ -21,12 +14,10 @@ interface StayInfoCardProps {
 export const StayInfoCard: React.FC<StayInfoCardProps> = ({
   activeStay,
   onGoToCheckOut,
-  checkInObservation,
-  onCheckInObservationChange,
-  paymentStatus,
   onCheckInAction,
   onConfirmCheckIn,
 }) => {
+  const paymentStatus = GetReservationPaymentStatus(activeStay);
   const pendingAmount = activeStay.total_price - activeStay.paid_amount;
 
   return (
@@ -57,7 +48,7 @@ export const StayInfoCard: React.FC<StayInfoCardProps> = ({
               Abonado
             </span>
             <span className="text-sm font-black text-emerald-600">
-              $ {activeStay.paid_amount?.toLocaleString() || '0'}
+              $ {activeStay.paid_amount?.toLocaleString() || "0"}
             </span>
           </div>
           <div className="flex flex-col p-3 bg-gray-50 rounded-xl">
@@ -65,7 +56,7 @@ export const StayInfoCard: React.FC<StayInfoCardProps> = ({
               Total
             </span>
             <span className="text-sm font-black text-emerald-800">
-              $ {activeStay.total_price?.toLocaleString() || '0'}
+              $ {activeStay.total_price?.toLocaleString() || "0"}
             </span>
           </div>
           <div className="flex flex-col p-3 bg-red-50 rounded-xl">
@@ -79,7 +70,7 @@ export const StayInfoCard: React.FC<StayInfoCardProps> = ({
         </div>
       </div>
 
-      {activeStay.status === 'Active' ? (
+      {activeStay.status === "Active" ? (
         <Button
           label="Realizar Check-out"
           className="bg-[#ff3d47] border-none text-white w-full py-4 text-lg font-black rounded-2xl"
@@ -87,22 +78,7 @@ export const StayInfoCard: React.FC<StayInfoCardProps> = ({
         />
       ) : (
         <div className="flex flex-col gap-4">
-          {activeStay.paid_amount >= activeStay.total_price && (
-            <div className="md:col-span-3 flex flex-col gap-1">
-              <label className="text-sm font-black text-gray-700">
-                Observación del Check-in (Opcional)
-              </label>
-              <InputTextarea
-                value={checkInObservation}
-                onChange={(e) => onCheckInObservationChange(e.target.value)}
-                placeholder="Agregar observación del check-in..."
-                rows={3}
-                className="w-full bg-gray-50 border-gray-100"
-              />
-            </div>
-          )}
-
-          {paymentStatus.canCheckIn ? (
+          {paymentStatus?.canCheckIn ? (
             <Button
               label="Check-in"
               className="bg-emerald-600 border-none text-white w-full py-4 text-lg font-black rounded-2xl shadow-lg"

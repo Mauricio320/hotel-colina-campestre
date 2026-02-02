@@ -319,8 +319,6 @@ export const useStays = () => {
             data.paymentData.amount,
             data.stayData.total_price || 0,
           );
-        console.log({ paymentType, data });
-
         const statusName =
           data.stayData.status === "Active" ? "Ocupado" : "Reservado";
         const { data: statusData } = await supabase
@@ -544,4 +542,63 @@ export const CheckAvailability = async (
   );
 
   return { data: uniqueStays, error: null };
+};
+
+export const UpdateStay = async ({
+  id,
+  ...updates
+}: { id: string } & Partial<Stay>) => {
+  const { data, error } = await supabase
+    .from("stays")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const useStaysByAccommodationType = (accommodation_type_id: string) => {
+  return useQuery({
+    queryKey: ["stays", "accommodation_type_id", accommodation_type_id],
+    queryFn: async () => {
+      // 1. Estancias directas (Cabañas completas)
+      const { data: directStays, error: error1 } = await supabase
+        .from("stays")
+        .select(
+          "*, room:rooms(room_number), guest:guests(first_name, last_name),accommodation_type:accommodation_types!inner(name)",
+        )
+        .eq("accommodation_type_id", accommodation_type_id)
+        .order("created_at", { ascending: false });
+
+      if (error1) throw error1;
+
+      // 2. Estancias por habitación (Habitaciones dentro de Casas)
+      const { data: roomStays, error: error2 } = await supabase
+        .from("stays")
+        .select(
+          "*, room:rooms(room_number), guest:guests(first_name, last_name)",
+        )
+        .eq("room.accommodation_type_id", accommodation_type_id)
+        .order("created_at", { ascending: false });
+
+      if (error2) throw error2;
+
+      // Combinar y desduplicar por ID
+      const allStays = [...(directStays || []), ...(roomStays || [])];
+      const uniqueStays = Array.from(
+        new Map(allStays.map((item) => [item.id, item])).values(),
+      );
+
+      // Reordenar por fecha descendente
+      uniqueStays.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
+
+      return uniqueStays;
+    },
+    enabled: !!accommodation_type_id,
+  });
 };

@@ -1,12 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { paymentApi, paymentHelpers } from "@/services/payment/paymentApi";
-import {
-  Payment,
-  CreatePaymentDto,
-  StayWithPaymentDto,
-  PaymentSummary,
-  PaymentType,
-} from "@/types";
+import { CreatePaymentDto, StayWithPaymentDto } from "@/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 /**
  * Custom hook for payment management with React Query
@@ -227,4 +221,13 @@ export const usePayments = () => {
     // Raw access to helpers for components
     paymentHelpers,
   };
+};
+
+export const GetPaymentSummary = (stayId: string) => {
+  return useQuery({
+    queryKey: ["payments", "summary", stayId],
+    queryFn: () => paymentApi.getStayPaymentSummary(stayId),
+    enabled: !!stayId,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+  });
 };

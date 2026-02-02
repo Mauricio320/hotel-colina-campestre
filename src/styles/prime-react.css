@@ -23,9 +23,17 @@
   --hotel-spacing: 0.75rem;
 }
 
+.bg-primary-h {
+  background-color: #eeebe4 !important;
+}
+
 /* ============ Personalización de Botones Principales ============ */
 .p-button {
   min-height: 40px !important;
+}
+
+.p-button.p-button-icon-only {
+  min-height: 10px !important;
 }
 /* Botones de Check-in (éxito/primary) */
 .p-button.p-button-success,
@@ -105,7 +113,7 @@
 
 /* Botones de texto (text-only) */
 .p-button.p-button-text {
-  color: var(--hotel-text-secondary) !important;
+  /* color: var(--hotel-text-secondary) !important; */
   padding: 0.5rem !important;
   transition: all 0.2s ease !important;
 }
@@ -260,7 +268,7 @@ html {
   background-color: var(--hotel-surface) !important;
   color: var(--hotel-text-primary) !important;
   resize: vertical !important;
-  min-height: 100px !important;
+  /* min-height: 100px !important; */
 }
 
 .p-tabview .p-tabview-nav {

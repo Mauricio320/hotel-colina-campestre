@@ -225,7 +225,6 @@ const CheckInPage: React.FC = () => {
         data.check_out_date.toLocaleDateString("sv-SE"),
       );
       hideBlockUI();
-      console.log(currentConflicts);
 
       if (currentConflicts && currentConflicts.length > 0) {
         setConflicts(currentConflicts);

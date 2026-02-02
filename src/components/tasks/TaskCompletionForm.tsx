@@ -13,7 +13,7 @@ interface TaskCompletionFormProps {
   onSubmit: () => void;
   submitLabel: string;
   placeholder?: string;
-  actionColor?: "blue" | "gray";
+  actionColor?: string;
 }
 
 export const TaskCompletionForm: React.FC<TaskCompletionFormProps> = ({
@@ -36,8 +36,11 @@ export const TaskCompletionForm: React.FC<TaskCompletionFormProps> = ({
         <Dropdown
           value={selectedEmployeeId}
           onChange={(e) => onEmployeeChange(e.value)}
-          options={employees}
-          optionLabel={(emp) => `${emp.first_name} ${emp.last_name}`}
+          options={employees.map((emp) => ({
+            ...emp,
+            fullName: `${emp.first_name} ${emp.last_name}`,
+          }))}
+          optionLabel="fullName"
           optionValue="id"
           placeholder="Seleccione el encargado"
           className="w-full p-2 border-emerald-200"
@@ -60,7 +63,7 @@ export const TaskCompletionForm: React.FC<TaskCompletionFormProps> = ({
       <Button
         label={submitLabel}
         icon="pi pi-check-circle"
-        className={`bg-${actionColor === "blue" ? "blue-600" : "gray-700"} border-none text-white w-full py-4 text-lg font-black rounded-2xl shadow-lg`}
+        className={`${actionColor} border-none text-white w-full py-4 text-lg font-black rounded-2xl shadow-lg`}
         onClick={onSubmit}
         disabled={!selectedEmployeeId}
       />

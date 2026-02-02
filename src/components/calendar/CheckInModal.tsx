@@ -1,16 +1,13 @@
-import React from 'react';
-import { Dialog } from 'primereact/dialog';
-import { Button } from 'primereact/button';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { Room, Stay } from '@/types';
+import { Room, Stay } from "@/types";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import React from "react";
 
 interface CheckInModalProps {
   visible: boolean;
   onHide: () => void;
   selectedRoom: Room | null;
   activeStay: Stay | null;
-  checkInObservation: string;
-  onCheckInObservationChange: (value: string) => void;
   onConfirmCheckIn: () => void;
 }
 
@@ -19,8 +16,6 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({
   onHide,
   selectedRoom,
   activeStay,
-  checkInObservation,
-  onCheckInObservationChange,
   onConfirmCheckIn,
 }) => {
   return (
@@ -40,22 +35,8 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({
             {selectedRoom?.room_number} - Check-in
           </h3>
           <p className="text-sm text-gray-600">
-            {activeStay ? 'Check-in de reserva' : 'Check-in directo'}
+            {activeStay ? "Check-in de reserva" : "Check-in directo"}
           </p>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-black text-gray-700">
-            Observación del Check-in (Opcional)
-          </label>
-          <InputTextarea
-            value={checkInObservation}
-            onChange={(e) => onCheckInObservationChange(e.target.value)}
-            placeholder="Agregar observación del check-in..."
-            rows={3}
-            className="w-full bg-gray-50 border-gray-100"
-            autoFocus
-          />
         </div>
 
         <div className="grid grid-cols-2 gap-4 mt-4">

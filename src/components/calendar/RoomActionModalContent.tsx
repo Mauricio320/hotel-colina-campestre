@@ -11,7 +11,7 @@ import {
 } from "@/util/enums/status-rooms.enum";
 import dayjs from "dayjs";
 import { Button } from "primereact/button";
-import React from "react";
+
 import { useNavigate } from "react-router-dom";
 
 interface RoomActionModalContentProps {
@@ -58,10 +58,6 @@ export const RoomActionModalContent = ({
   };
   const handleGoToBooking = () => {
     const url = `/booking/${id}?${params.join("&")}`;
-    navigate(url);
-  };
-  const handleGoToCheckOut = () => {
-    const url = `/check-out/${id}?stayId=${activeStay.id}`;
     navigate(url);
   };
 

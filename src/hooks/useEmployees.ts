@@ -55,3 +55,12 @@ export const useEmployeesByRole = (roleName: string) => {
     enabled: !!roleName,
   });
 };
+
+export const FetchEmployeesByRole = async (roleName: string) => {
+  const { data, error } = await supabase
+    .from("employees")
+    .select("*, role:roles!inner(*)")
+    .eq("role.name", roleName);
+  if (error) throw error;
+  return data as Employee[];
+};

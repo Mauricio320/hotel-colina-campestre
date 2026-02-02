@@ -21,3 +21,10 @@ export enum AccommodationTypeEnum {
   HABITACION = "Habitación",
   APARTAMENTO = "Apartamento",
 }
+
+export enum EmployeeRolesEnum {
+  ADMINISTRADOR = "Admin",
+  RECEPCIONISTA = "Recepcionista",
+  ACOM = "Limpieza",
+  MANTENIMIENTO = "Mantenimiento",
+}
