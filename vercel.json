@@ -2,5 +2,15 @@
   "buildCommand": "yarn build",
   "outputDirectory": "dist",
   "installCommand": "yarn install",
-  "framework": "vite"
+  "framework": "vite",
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    }
+  },
+  "functions": {
+    "src/App.tsx": {
+      "runtime": "nodejs18.x"
+    }
+  }
 }
