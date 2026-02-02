@@ -1,40 +1,39 @@
-import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PrimeReactProvider } from "primereact/api";
 import { ProgressSpinner } from "primereact/progressspinner";
+import React from "react";
+import {
+  Navigate,
+  Route,
+  BrowserRouter as Router,
+  Routes,
+} from "react-router-dom";
 
 // Hooks
-import { useAuth, AuthProvider } from "@/hooks/useAuth";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 
 // Components
 import Layout from "@/components/layout/Layout";
 import Login from "@/pages/auth/Login";
 import RegisterAdmin from "@/pages/auth/RegisterAdmin";
-import Dashboard from "@/pages/dashboard/Dashboard";
+import BookingMovements from "@/pages/bookings/BookingMovements";
 import CalendarView from "@/pages/calendar/CalendarView";
-import CheckInPage from "@/pages/stays/CheckInPage";
-import BookingPage from "@/pages/stays/BookingPage";
-import CheckOutPage from "@/pages/stays/CheckOutPage";
-import RoomManagement from "@/pages/rooms/RoomManagement";
-import RoomFormPage from "@/pages/rooms/RoomFormPage";
-import RoomHistoryPage from "@/pages/rooms/RoomHistoryPage";
-import GuestManagement from "@/pages/guests/GuestManagement";
+import Dashboard from "@/pages/dashboard/Dashboard";
 import EmployeeManagement from "@/pages/employees/EmployeeManagement";
-import CleaningLogs from "@/pages/logs/CleaningLogs";
-import MaintenanceLogs from "@/pages/logs/MaintenanceLogs";
-import Settings from "@/pages/settings/Settings";
+import GuestManagement from "@/pages/guests/GuestManagement";
+import CleaningLogs from "./pages/logs/CleaningLogs";
+import MaintenanceLogs from "./pages/logs/MaintenanceLogs";
+import InvoiceDetailPage from "@/pages/payments/InvoiceDetailPage";
+import PaymentsInvoice from "@/pages/payments/PaymentsInvoice";
+import RoomPayments from "@/pages/payments/RoomPayments";
 import MyProfile from "@/pages/profile/MyProfile";
 import Reports from "@/pages/reports/Reports";
-import BookingMovements from "@/pages/bookings/BookingMovements";
-import RoomPayments from "@/pages/payments/RoomPayments";
-import PaymentsInvoice from "@/pages/payments/PaymentsInvoice";
-import InvoiceDetailPage from "@/pages/payments/InvoiceDetailPage";
+import RoomFormPage from "@/pages/rooms/RoomFormPage";
+import RoomHistoryPage from "@/pages/rooms/RoomHistoryPage";
+import RoomManagement from "@/pages/rooms/RoomManagement";
+import Settings from "@/pages/settings/Settings";
+import CheckInPage from "@/pages/stays/CheckInPage";
+import CheckOutPage from "@/pages/stays/CheckOutPage";
 
 const queryClient = new QueryClient();
 
