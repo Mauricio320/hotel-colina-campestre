@@ -21,8 +21,8 @@ import CalendarView from "@/pages/calendar/CalendarView";
 import Dashboard from "@/pages/dashboard/Dashboard";
 import EmployeeManagement from "@/pages/employees/EmployeeManagement";
 import GuestManagement from "@/pages/guests/GuestManagement";
-import CleaningLogs from "./pages/logs/CleaningLogs";
-import MaintenanceLogs from "./pages/logs/MaintenanceLogs";
+import CleaningLogs from "@/pages/logs/CleaningLogs";
+import MaintenanceLogs from "@/pages/logs/MaintenanceLogs";
 import InvoiceDetailPage from "@/pages/payments/InvoiceDetailPage";
 import PaymentsInvoice from "@/pages/payments/PaymentsInvoice";
 import RoomPayments from "@/pages/payments/RoomPayments";
@@ -153,7 +153,7 @@ const AppContent: React.FC = () => {
 };
 
 import { BlockUIProvider } from "@/context/BlockUIContext";
-import { CheckInPayment } from "./pages/stays/CheckInPayment";
+import { CheckInPayment } from "@/pages/stays/CheckInPayment";
 
 const App: React.FC = () => {
   return (

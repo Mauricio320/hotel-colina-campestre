@@ -1,29 +1,35 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { useEmployeeWithSync } from './useEmployee';
-import { useAuthMutations } from './useAuthMutations';
-import { getCurrentSession, onAuthStateChange } from '@/services/auth/authApi';
-import { AuthUser } from '@/services/auth/types';
-import { Employee } from '@/types';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
+import { useEmployeeWithSync } from "@/hooks/useEmployee";
+import { useAuthMutations } from "@/hooks/useAuthMutations";
+import { getCurrentSession, onAuthStateChange } from "@/services/auth/authApi";
+import { AuthUser } from "@/services/auth/types";
+import { Employee } from "@/types";
 
 // Updated interface with React Query integration
 export interface AuthContextType {
   // Supabase auth state
   user: AuthUser | null;
   isAuthenticated: boolean;
-  
+
   // Employee data from React Query
   employee: Employee | null;
   employeeLoading: boolean;
   employeeError: any;
-  
+
   // Combined states
   loading: boolean; // Auth loading + employee loading
   dbError: string | null;
-  
+
   // Actions (from React Query mutations)
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  
+
   // Loading states for mutations
   isLoggingIn: boolean;
   isLoggingOut: boolean;
@@ -37,23 +43,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<AuthUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
-  
+
   const initialized = useRef(false);
   const initializing = useRef(false);
 
   // React Query hooks
-  const { 
-    data: employee, 
-    isLoading: employeeLoading, 
-    error: employeeError 
+  const {
+    data: employee,
+    isLoading: employeeLoading,
+    error: employeeError,
   } = useEmployeeWithSync(user?.id || null);
-  
-  const { 
-    login, 
-    logout, 
-    isLoggingIn, 
-    isLoggingOut 
-  } = useAuthMutations();
+
+  const { login, logout, isLoggingIn, isLoggingOut } = useAuthMutations();
 
   // Combined loading state
   const loading = authLoading || employeeLoading;
@@ -65,21 +66,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const initialize = async () => {
       initializing.current = true;
-      
+
       try {
         const { session } = await getCurrentSession();
         const currentUser = session?.user ?? null;
         setUser(currentUser);
-        
+
         // Handle employee error
         if (employeeError) {
           const errorMessage = employeeError?.message;
-          if (errorMessage === 'DATABASE_NOT_READY') {
-            setDbError('DATABASE_NOT_READY');
+          if (errorMessage === "DATABASE_NOT_READY") {
+            setDbError("DATABASE_NOT_READY");
           }
         }
       } catch (error) {
-        console.error('Auth initialization error:', error);
+        console.error("Auth initialization error:", error);
       } finally {
         setAuthLoading(false);
         initializing.current = false;
@@ -96,10 +97,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
-      if (event === 'SIGNED_IN') {
+      if (event === "SIGNED_IN") {
         // React Query will handle employee data fetching automatically
         setAuthLoading(false);
-      } else if (event === 'SIGNED_OUT') {
+      } else if (event === "SIGNED_OUT") {
         // React Query will handle cache clearing
         setAuthLoading(false);
       }
@@ -115,15 +116,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setDbError(null);
     } catch (error: any) {
       const errorMessage = error.message;
-      
-      if (errorMessage === 'DATABASE_NOT_READY') {
-        setDbError('DATABASE_NOT_READY');
-      } else if (errorMessage === 'INVALID_CREDENTIALS') {
-        throw new Error('Credenciales inválidas');
-      } else if (errorMessage === 'NETWORK_ERROR') {
-        throw new Error('Error de conexión. Intente nuevamente.');
+
+      if (errorMessage === "DATABASE_NOT_READY") {
+        setDbError("DATABASE_NOT_READY");
+      } else if (errorMessage === "INVALID_CREDENTIALS") {
+        throw new Error("Credenciales inválidas");
+      } else if (errorMessage === "NETWORK_ERROR") {
+        throw new Error("Error de conexión. Intente nuevamente.");
       } else {
-        throw new Error('Error al iniciar sesión. Intente nuevamente.');
+        throw new Error("Error al iniciar sesión. Intente nuevamente.");
       }
     }
   };
@@ -135,7 +136,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(null);
       setDbError(null);
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
       // Force logout even if API call fails
       setUser(null);
     }
@@ -145,20 +146,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     // Auth state
     user,
     isAuthenticated: !!user,
-    
+
     // Employee data
     employee: employee || null,
     employeeLoading,
     employeeError,
-    
+
     // Combined states
     loading,
     dbError,
-    
+
     // Actions
     login: handleLogin,
     logout: handleLogout,
-    
+
     // Mutation states
     isLoggingIn,
     isLoggingOut,
@@ -176,7 +177,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

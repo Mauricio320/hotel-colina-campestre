@@ -36,6 +36,7 @@ const PaymentsInvoice: React.FC = () => {
       )
       .eq("stay.room.category", category)
       .order("payment_date", { ascending: false });
+    console.log(data);
 
     if (error) {
       console.error("Error fetching payments:", error);

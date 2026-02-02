@@ -12,11 +12,11 @@ import dayjs from "dayjs";
 import { Dialog } from "primereact/dialog";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { StayInfoCard } from "../forms/StayInfoCard";
-import { TaskCompletionForm } from "../tasks/TaskCompletionForm";
-import { CalendarTable } from "./CalendarTable";
-import { RoomActionModal } from "./RoomActionModal";
-import { RoomActionModalHeaderInfo } from "./RoomActionModalHeaderInfo";
+import { StayInfoCard } from "@/components/forms/StayInfoCard";
+import { TaskCompletionForm } from "@/components/tasks/TaskCompletionForm";
+import { CalendarTable } from "@/components/calendar/CalendarTable";
+import { RoomActionModal } from "@/components/calendar/RoomActionModal";
+import { RoomActionModalHeaderInfo } from "@/components/calendar/RoomActionModalHeaderInfo";
 import { GetReservationPaymentStatus } from "@/util/helper/helpers";
 
 interface CalendarGridProps {
