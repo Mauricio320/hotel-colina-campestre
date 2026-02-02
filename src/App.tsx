@@ -21,8 +21,8 @@ import CalendarView from "@/pages/calendar/CalendarView";
 import Dashboard from "@/pages/dashboard/Dashboard";
 import EmployeeManagement from "@/pages/employees/EmployeeManagement";
 import GuestManagement from "@/pages/guests/GuestManagement";
-import CleaningLogs from "./pages/logs/CleaningLogs.tsx";
-import MaintenanceLogs from "./pages/logs/MaintenanceLogs.tsx";
+import CleaningLogs from "@/pages/logs/CleaningLogs.tsx";
+import MaintenanceLogs from "@/pages/logs/MaintenanceLogs.tsx";
 import InvoiceDetailPage from "@/pages/payments/InvoiceDetailPage";
 import PaymentsInvoice from "@/pages/payments/PaymentsInvoice";
 import RoomPayments from "@/pages/payments/RoomPayments";
@@ -140,8 +140,8 @@ const AppContent: React.FC = () => {
           path="/employees"
           element={<EmployeeManagement userRole={roleName} />}
         />
-        <Route path="/logs/cleaning" element={<CleaningLogs />} />
-        <Route path="/logs/maintenance" element={<MaintenanceLogs />} />
+        {/* <Route path="/logs/cleaning" element={<CleaningLogs />} />
+        <Route path="/logs/maintenance" element={<MaintenanceLogs />} /> */}
         <Route path="/settings" element={<Settings userRole={roleName} />} />
         <Route path="/profile" element={<MyProfile />} />
         <Route path="/reports" element={<Reports userRole={roleName} />} />
