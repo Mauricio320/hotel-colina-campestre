@@ -559,45 +559,46 @@ export const UpdateStay = async ({
   return data;
 };
 
-export const useStaysByAccommodationType = (accommodation_type_id: string) => {
+export const useStaysByAccommodationType = ({
+  accommodation_type_id,
+  page = 0,
+  pageSize = 10,
+  orderNumber = "",
+  docNumber = "",
+  isReservation = null,
+}: {
+  accommodation_type_id: string;
+  page?: number;
+  pageSize?: number;
+  orderNumber?: string;
+  docNumber?: string;
+  isReservation?: boolean | null;
+}) => {
   return useQuery({
-    queryKey: ["stays", "accommodation_type_id", accommodation_type_id],
+    queryKey: [
+      "stays",
+      "accommodation_type_id",
+      accommodation_type_id,
+      page,
+      pageSize,
+      orderNumber,
+      docNumber,
+      isReservation,
+    ],
     queryFn: async () => {
-      // 1. Estancias directas (Cabañas completas)
-      const { data: directStays, error: error1 } = await supabase
-        .from("stays")
-        .select(
-          "*, room:rooms(room_number), guest:guests(first_name, last_name),accommodation_type:accommodation_types!inner(name)",
-        )
-        .eq("accommodation_type_id", accommodation_type_id)
-        .order("created_at", { ascending: false });
+      const { data, error } = await supabase.rpc("get_stays_paginated", {
+        p_accommodation_type_id: accommodation_type_id,
+        p_page: page,
+        p_page_size: pageSize,
+        p_order_number: orderNumber,
+        p_doc_number: docNumber,
+        p_is_reservation: isReservation,
+      });
 
-      if (error1) throw error1;
+      if (error) throw error;
 
-      // 2. Estancias por habitación (Habitaciones dentro de Casas)
-      const { data: roomStays, error: error2 } = await supabase
-        .from("stays")
-        .select(
-          "*, room:rooms(room_number), guest:guests(first_name, last_name)",
-        )
-        .eq("room.accommodation_type_id", accommodation_type_id)
-        .order("created_at", { ascending: false });
-
-      if (error2) throw error2;
-
-      // Combinar y desduplicar por ID
-      const allStays = [...(directStays || []), ...(roomStays || [])];
-      const uniqueStays = Array.from(
-        new Map(allStays.map((item) => [item.id, item])).values(),
-      );
-
-      // Reordenar por fecha descendente
-      uniqueStays.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-      );
-
-      return uniqueStays;
+      const result = data as { data: any[]; count: number };
+      return { data: result.data || [], count: result.count || 0 };
     },
     enabled: !!accommodation_type_id,
   });

@@ -4,11 +4,12 @@ import { Payment } from "@/types";
 import { InputText } from "primereact/inputtext";
 import { TabPanel, TabView } from "primereact/tabview";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const RoomPayments: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState(0);
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || 0);
 
   const [payments, setPayments] = useState<{ [key: string]: Payment[] }>({});
   const [globalFilter, setGlobalFilter] = useState("");
@@ -28,25 +29,6 @@ const RoomPayments: React.FC = () => {
       };
     }
   };
-
-  const header = (
-    <div className="flex flex-wrap gap-4 justify-between items-center p-2">
-      <div>
-        <h3 className="m-0 text-xl font-black text-emerald-900 tracking-tight">
-          Registro de Pagos por Habitación
-        </h3>
-      </div>
-      <span className="p-input-icon-left w-full sm:w-72">
-        <i className="pi pi-search text-emerald-400" />
-        <InputText
-          type="search"
-          onInput={(e: any) => setGlobalFilter(e.target.value)}
-          placeholder="Buscar por orden, huésped o habitación..."
-          className="p-inputtext-sm w-full rounded-xl border-emerald-100"
-        />
-      </span>
-    </div>
-  );
 
   const calculatePending = (row: any) => {
     const stayPayments = payments[row.id] || [];
@@ -104,7 +86,7 @@ const RoomPayments: React.FC = () => {
               calculatePending={calculatePending}
               accommodation_type_id={cat.id}
               globalFilter={globalFilter}
-              header={header}
+              activeTab={activeTab} // Pasamos la tab activa
             />
           </TabPanel>
         ))}

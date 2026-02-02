@@ -143,7 +143,7 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
                 </td>
                 <td className="py-3 px-4 text-right">
                   <span className="text-sm font-medium text-gray-900">
-                    $ {Number(payment.amount).toLocaleString()}
+                    {Number(payment.amount).toLocaleString()}
                   </span>
                 </td>
                 <td className="py-3 px-4 text-center">
