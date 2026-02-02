@@ -3,8 +3,8 @@ import { AccommodationTypeEnum } from "@/util/enums/status-rooms.enum";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import React, { useState } from "react";
-import { RoomActionModalContent } from "./RoomActionModalContent";
-import { RoomActionModalHeaderInfo } from "./RoomActionModalHeaderInfo";
+import { RoomActionModalContent } from "@/components/calendar/RoomActionModalContent";
+import { RoomActionModalHeaderInfo } from "@/components/calendar/RoomActionModalHeaderInfo";
 
 interface RoomActionModalProps {
   visible: boolean;
