@@ -136,19 +136,24 @@ export const RoomsQueryCtegory = (id: string) => {
     queryFn: async ({ signal }) => {
       const { data: accommodationType } = await supabase
         .from("stays")
-        .select(`*`)
+        .select(
+          `*, 
+          room:rooms(*),  
+          guest:guests(*),
+          room_statuses(*)`,
+        )
         .eq("accommodation_type_id", id)
         .eq("active", true)
         .abortSignal(signal);
-
-      console.log(accommodationType, "aslknd");
 
       const { data } = await supabase
         .from("rooms")
         .select(
           `*, 
-          status:room_statuses(*), rates:room_rates(*), stays(id, check_in_date, check_out_date, active, person_count,paid_amount, 
-            room_statuses(*)))`,
+          status:room_statuses(*), rates:room_rates(*), stays(*, 
+          room:rooms(*),  
+          guest:guests(*),
+          room_statuses(*))`,
         )
         .eq("is_active", true)
         .eq("accommodation_type_id", id)
@@ -156,10 +161,11 @@ export const RoomsQueryCtegory = (id: string) => {
         .abortSignal(signal)
         .order("room_number");
 
-      return (data as unknown as Room[]).forEach((room) => {
+      return (data as unknown as Room[]).map((room) => {
         accommodationType.forEach((stay) => {
           room.stays.push(stay);
         });
+        return room;
       });
     },
     refetchOnWindowFocus: false,

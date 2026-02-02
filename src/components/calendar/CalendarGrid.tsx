@@ -3,15 +3,15 @@ import { AccommodationType, Room, RoomStatus, Stay } from "@/types";
 import { RoomStatusEnum } from "@/util/enums/status-rooms.enum";
 import dayjs from "dayjs";
 import { Button } from "primereact/button";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { RoomActionModal } from "./RoomActionModal";
 import { UseQueryResult } from "@tanstack/react-query";
 import { RoomsQueryCtegory } from "@/hooks/useRooms";
+import { useBlockUI } from "@/context/BlockUIContext";
 
 interface CalendarGridProps {
   getActiveStay: (room: Room, date: Date) => Stay | undefined;
   accommodationType: AccommodationType;
-  filteredRooms: Room[];
   activeStay?: Stay;
   activeTab: number;
   days: Date[];
@@ -21,20 +21,32 @@ interface CalendarGridProps {
 
 export const CalendarGrid: React.FC<CalendarGridProps> = ({
   accommodationType,
-  getActiveStay,
-  filteredRooms,
   activeStay,
   roomStatuses,
   refectCalendar,
   activeTab,
   days,
 }) => {
+  const { hideBlockUI, showBlockUI } = useBlockUI();
   const [showActionModal, setShowActionModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [room, setRoom] = useState<Room | null>(null);
-  const { data } = RoomsQueryCtegory(accommodationType.id);
+  const { data, isLoading } = RoomsQueryCtegory(accommodationType.id);
 
-  console.log(data);
+  useEffect(() => {
+    if (isLoading) {
+      showBlockUI("Cargando habitaciones");
+    } else {
+      hideBlockUI();
+    }
+  }, [isLoading]);
+
+  const getActiveStay = (room: Room, date: Date) => {
+    const dateStr = dayjs(date).format("YYYY-MM-DD");
+    return room.stays?.find(
+      (s) => dateStr >= s.check_in_date && dateStr <= s.check_out_date,
+    );
+  };
 
   const handleRoomClick = (room: Room, date: Date) => {
     setRoom(room);
@@ -48,25 +60,16 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
         className="overflow-x-auto bg-white
        rounded-xl shadow-sm border mt-4 bg-[#eeebe4]"
       >
-        {accommodationType.is_rentable && (
-          <div className="p-4 flex justify-end">
-            <Button
-              label={`Alquiler ${accommodationType.name}`}
-              className="p-button-plain bg-[#faf8f5] border  text-gray-600 font-bold  p-2 h-full"
-              onClick={() => setShowActionModal(true)}
-            />
-          </div>
-        )}
         <table className="w-full border-collapse min-w-[800px]">
           <thead>
             <tr className="border">
-              <th className="p-4 text-left font-bold text-gray-400 w-[75px] border-r sticky top-0 z-10 bg-[#eeebe4] shadow-sm">
-                Hab..
+              <th className="p-2 text-center font-bold text-gray-400 w-[60px] min-w-[60px] border-r sticky top-0 z-10 bg-[#eeebe4] shadow-sm">
+                <span className="text-[10px]">HAB.</span>
               </th>
               {days.map((d) => (
                 <th
                   key={d.getTime()}
-                  className="p-4 text-center border-r last:border-r-0 sticky top-0 z-10 bg-[#faf8f5]hadow-sm"
+                  className="p-4 text-center border-r last:border-r-0 sticky top-0 z-10 bg-[#eeebe4] shadow-sm min-w-[120px] w-[120px]"
                 >
                   <div className="flex flex-col">
                     <span className="text-[10px] font-bold uppercase text-gray-400">
@@ -88,50 +91,53 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
             </tr>
           </thead>
           <tbody>
-            {filteredRooms.map((room) => (
+            {(data ?? []).map((room) => (
               <tr
                 key={room.id}
                 className="border-b last:border-b-0 hover:bg-emerald-50/30 transition-colors"
               >
-                <td className="p-2 border-r bg-[#eeebe4]/50">
-                  <div className="flex flex-col gap-1 items-start px-1">
-                    <div className="flex items-center gap-1.5 bg-[#f3f0e9] px-1 py-1 rounded-xl border border-[#e5e0d3] w-fit">
-                      <i className="pi pi-bed text-[#8b7e6a] text-xs"></i>
-                      <span className="text-base font-bold text-[12px] text-[#0f2d52]">
-                        {room.room_number}
+                <td className="p-1 border-r bg-[#eeebe4]/70 w-[60px] max-w-[60px]">
+                  <div className="flex flex-col items-center leading-tight">
+                    <span className="text-[11px] font-black text-emerald-800">
+                      #{room.room_number}
+                    </span>
+                    <div className="flex flex-col items-center opacity-60 scale-[0.85] origin-top">
+                      <span className="text-[11px] font-bold whitespace-nowrap text-gray-700">
+                        {room.beds_double}D | {room.beds_single}S - MAX:{" "}
+                        {room.beds_double * 2 + room.beds_single}
                       </span>
                     </div>
-                    <span className="text-[8px] font-black text-[#eeebe4]0 uppercase">
-                      MAX: {room.beds_double * 2 + room.beds_single} PAX
-                    </span>
                   </div>
                 </td>
                 {days.map((d) => {
                   const stay = getActiveStay(room, d);
+                  console.log(stay, "asndkjas");
+
                   const dateStr = dayjs(d).format("YYYY-MM-DD");
                   let statusColor =
-                    STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color ||
-                    "bg-green-500";
+                    stay?.["room_statuses"].color ||
+                    STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color;
                   let cellContent = null;
 
                   if (stay) {
-                    statusColor =
-                      stay.status === "Active"
-                        ? STATUS_MAP[RoomStatusEnum.OCUPADO]?.color ||
-                          "bg-red-500"
-                        : STATUS_MAP[RoomStatusEnum.RESERVED]?.color ||
-                          "bg-yellow-500";
+                    const isFullRental = !stay.room_id;
                     cellContent = (
-                      <span className="text-[8px] px-1 truncate">
-                        {stay.guest?.first_name} {stay.guest?.last_name}
-                      </span>
+                      <div className="flex flex-col items-center leading-none gap-0.5 w-full">
+                        <span className="text-[9px] font-black opacity-90 uppercase">
+                          {isFullRental ? "🏠" : "🛏️"}
+                        </span>
+
+                        <span className="text-[12px] mt-1 flex items-center">
+                          #{stay.order_number} - {stay.guest?.first_name}
+                        </span>
+                      </div>
                     );
                   } else if (
                     room.status_date === dateStr &&
                     room.status?.name !== RoomStatusEnum.DISPONIBLE
                   ) {
-                    statusColor =
-                      STATUS_MAP[room.status.name]?.color || statusColor;
+                    statusColor = STATUS_MAP[room.status.name]?.color;
+
                     cellContent = (
                       <span className="text-[8px] font-bold uppercase">
                         {room.status.name}
@@ -142,7 +148,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
                   return (
                     <td
                       key={d.getTime()}
-                      className="p-1 border-r last:border-r-0 cursor-pointer bg-[#faf8f5]"
+                      className="p-1 border-r last:border-r-0 cursor-pointer bg-[#faf8f5] w-[120px] min-w-[120px]"
                       onClick={() => handleRoomClick(room, d)}
                     >
                       <div

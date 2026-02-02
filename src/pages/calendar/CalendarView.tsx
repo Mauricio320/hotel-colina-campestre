@@ -71,8 +71,8 @@ const CalendarView: React.FC = () => {
   );
 
   useEffect(() => {
-    isLoading ? showBlockUI(`Cargando Calendario`) : hideBlockUI();
-  }, [isLoading]);
+    showBlockUI(`Cargando Calendario`);
+  }, []);
 
   useEffect(() => {
     const tabIndex = parseTabParam(accommodationTypesQuery.data?.length || 0);
@@ -409,7 +409,6 @@ const CalendarView: React.FC = () => {
                 }, 500);
               }}
               roomStatuses={roomStatuses?.data || []}
-              filteredRooms={filteredRooms}
               getActiveStay={getActiveStay}
               accommodationType={type}
               activeStay={activeStay}
