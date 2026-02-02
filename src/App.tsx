@@ -10,10 +10,10 @@ import {
 } from "react-router-dom";
 
 // Hooks
-import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { AuthProvider, useAuth } from "./hooks/useAuth";
 
 // Components
-import Layout from "@/components/layout/Layout";
+import Layout from "./components/layout/Layout";
 import Login from "@/pages/auth/Login";
 import RegisterAdmin from "@/pages/auth/RegisterAdmin";
 import BookingMovements from "@/pages/bookings/BookingMovements";
@@ -152,7 +152,7 @@ const AppContent: React.FC = () => {
   );
 };
 
-import { BlockUIProvider } from "@/context/BlockUIContext";
+import { BlockUIProvider } from "./context/BlockUIContext";
 import { CheckInPayment } from "@/pages/stays/CheckInPayment";
 
 const App: React.FC = () => {

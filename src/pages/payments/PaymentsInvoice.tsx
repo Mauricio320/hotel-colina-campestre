@@ -27,14 +27,15 @@ const PaymentsInvoice: React.FC = () => {
         `
         *,
         stay:stays(
-        *
+          order_number,
+          guest:guests(first_name, last_name),
+          room:rooms!inner(room_number, category)
         ),
-        `,
+        payment_method:payment_methods(name),
+        employee:employees(first_name, last_name)`,
       )
       .eq("stay.room.category", category)
       .order("payment_date", { ascending: false });
-    console.log(data);
-
     if (error) {
       console.error("Error fetching payments:", error);
       return [];
