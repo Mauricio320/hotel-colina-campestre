@@ -356,6 +356,17 @@ const CheckInPage: React.FC = () => {
         }
       />
 
+      <StayDetailsForm
+        title="Detalles de la Estadía"
+        checkInDate={checkInDate}
+        register={register}
+        setValue={setValue}
+        control={control}
+        settings={settings}
+        maxCapacity={2}
+        watch={watch}
+      />
+
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <GuestDataForm
           register={register}
@@ -370,17 +381,6 @@ const CheckInPage: React.FC = () => {
           guestFound={guestFound}
           searchMessage={searchMessage}
           watchDocNumber={watchDocNumber}
-        />
-
-        <StayDetailsForm
-          title="Detalles de la Estadía"
-          checkInDate={checkInDate}
-          register={register}
-          setValue={setValue}
-          control={control}
-          settings={settings}
-          maxCapacity={2}
-          watch={watch}
         />
 
         <CorporateClientSelector
