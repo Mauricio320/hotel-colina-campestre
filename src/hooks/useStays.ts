@@ -7,6 +7,7 @@ import {
 import { CreatePriceOverrides } from "@/services/price-overrides/priceOverridesApi";
 import { CreateRoomHistory } from "@/services/room-history/roomHistoryApi";
 import { StayCreateService } from "@/services/stays/staysApi";
+import { stayGuestsApi } from "@/services/stay-guests/stayGuestsApi";
 import {
   CreatePaymentDto,
   Payment,
@@ -456,6 +457,7 @@ export interface CreateOnStayWithPaymentParams {
         room_id: string;
         accommodation_type_id?: undefined;
       };
+  additionalGuestIds?: string[];
 }
 
 export const useCreateOnStayWithPayment = async ({
@@ -465,6 +467,7 @@ export const useCreateOnStayWithPayment = async ({
   payment,
   keyId,
   stay,
+  additionalGuestIds = [],
 }: CreateOnStayWithPaymentParams) => {
   const { data: stayData } = await createStay({
     staySet: { ...stay, ...keyId },
@@ -493,6 +496,14 @@ export const useCreateOnStayWithPayment = async ({
       ...price_overrides,
       stay_id: stayData?.id,
     });
+  }
+
+  if (additionalGuestIds.length > 0 && stayData?.id) {
+    const stayGuests = additionalGuestIds.map((guestId) => ({
+      guest_id: guestId,
+      is_primary_guest: false,
+    }));
+    await stayGuestsApi.addMultipleGuests(stayData.id, stayGuests);
   }
 
   return stayData;

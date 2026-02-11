@@ -10,11 +10,9 @@ import {
   useMatch,
 } from "react-router-dom";
 
-import GuestDataForm from "@/components/stays/GuestDataForm";
 import PaymentSection from "@/components/stays/PaymentSection";
 import StayDetailsForm from "@/components/stays/StayDetailsForm";
-import AdditionalGuestsManager from "@/components/stays/AdditionalGuestsManager";
-import { stayGuestsApi } from "@/services/stay-guests/stayGuestsApi";
+import AllGuestsForm from "@/components/stays/AllGuestsForm";
 import { useUniversalRoomQuery } from "@/hooks/useUniversalRoomQuery";
 
 import AvailabilityConflictModal from "@/components/stays/AvailabilityConflictModal";
@@ -153,23 +151,6 @@ const CheckInPage: React.FC = () => {
       }
     }
   }, [personCount, setValue, watch]);
-
-  // Datos del huésped principal para pre-poblar
-  const primaryGuestData = {
-    doc_type: watch("doc_type"),
-    department: watch("department"),
-    address: watch("address"),
-    email: watch("email"),
-    phone: watch("phone"),
-    city: watch("city"),
-  };
-
-  const handleGuestDataChange = (index: number, data: Partial<Guest>) => {
-    const currentGuests = watch("additional_guests") || [];
-    const updatedGuests = [...currentGuests];
-    updatedGuests[index] = { ...updatedGuests[index], ...data };
-    setValue("additional_guests", updatedGuests);
-  };
 
   const validateNoDuplicateDocs = (formData: any) => {
     const primaryDoc = formData.doc_number;
@@ -322,6 +303,26 @@ const CheckInPage: React.FC = () => {
         city: data.city,
         address: data.address,
       });
+
+      const additionalGuests = data.additional_guests || [];
+      const additionalGuestIds: string[] = [];
+
+      for (const additionalGuest of additionalGuests) {
+        if (additionalGuest.doc_number && additionalGuest.first_name) {
+          const savedGuest = await upsertGuest.mutateAsync({
+            doc_type: additionalGuest.doc_type || "CC",
+            doc_number: additionalGuest.doc_number,
+            first_name: additionalGuest.first_name,
+            last_name: additionalGuest.last_name,
+            phone: additionalGuest.phone,
+            email: additionalGuest.email,
+            city: additionalGuest.city,
+            address: additionalGuest.address,
+          });
+          additionalGuestIds.push(savedGuest.id);
+        }
+      }
+
       const isApartmentAction = action === AccommodationTypeEnum.APARTAMENTO;
 
       const room_status_current_id = getStatusId(RoomStatusEnum.DISPONIBLE);
@@ -385,6 +386,7 @@ const CheckInPage: React.FC = () => {
           final_price: finalPriceInfo.total,
           authorized_by: authorizedBy?.id,
         },
+        additionalGuestIds,
       });
 
       navigate(tabParam ? `/calendar?tab=${tabParam}` : "/calendar");
@@ -435,33 +437,36 @@ const CheckInPage: React.FC = () => {
         }
       />
 
-      <StayDetailsForm
-        title="Detalles de la Estadía"
-        checkInDate={checkInDate}
-        roomRates={roomRates}
-        register={register}
-        settings={settings}
-        control={control}
-        setValue={setValue}
-        watch={watch}
-        maxCapacity={10}
-      />
-
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-        <GuestDataForm
-          title="Datos del Huésped Principal"
+      <div className="pb-5">
+        <StayDetailsForm
+          title="Detalles de la Estadía"
+          checkInDate={checkInDate}
+          roomRates={roomRates}
           register={register}
+          settings={settings}
           control={control}
           setValue={setValue}
+          watch={watch}
+          maxCapacity={10}
+        />
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+        <AllGuestsForm
           searching={searching}
           searchGuest={searchGuest}
-          cityOptions={cityOptions}
-          selectedDepartment={selectedDepartment}
-          colombiaData={colombiaData}
           guestNotFound={guestNotFound}
           guestFound={guestFound}
           searchMessage={searchMessage}
           watchDocNumber={watchDocNumber}
+          personCount={personCount}
+          selectedDepartment={selectedDepartment}
+          colombiaData={colombiaData}
+          cityOptions={cityOptions}
+          register={register}
+          control={control}
+          setValue={setValue}
+          watch={watch}
+          findGuestByDoc={findGuestByDoc}
         />
 
         <CorporateClientSelector

@@ -3,7 +3,6 @@ import { Employee } from "@/types";
 import { createClient } from "@supabase/supabase-js";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { Divider } from "primereact/divider";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { Message } from "primereact/message";
@@ -77,9 +76,18 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
     }
   };
 
+  const header = (
+    <div className="flex items-center gap-2">
+      <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
+        <i className="pi pi-percentage text-orange-600 text-sm"></i>
+      </div>
+      <span className="font-bold text-gray-800">Autorización de Descuento</span>
+    </div>
+  );
+
   return (
     <Dialog
-      header="Autorización de Descuento (Cliente Empresarial)"
+      header={header}
       visible={visible}
       onHide={onHide}
       className="w-full max-w-md"
@@ -90,73 +98,73 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
       <div className="flex flex-col gap-4">
         {error && <Message severity="error" text={error} className="w-full" />}
 
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-bold text-gray-600">
-            Administrador
-          </label>
-          <Dropdown
-            value={selectedAdmin}
-            options={admins}
-            onChange={(e) => setSelectedAdmin(e.value)}
-            optionLabel="fullName"
-            placeholder="Seleccione un administrador"
-            className="w-full"
-            filter
-            loading={employeesLoading}
-          />
-        </div>
+        <div className="bg-[#f5f2eb] rounded-xl p-4">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">
+                Administrador
+              </label>
+              <Dropdown
+                value={selectedAdmin}
+                options={admins}
+                onChange={(e) => setSelectedAdmin(e.value)}
+                optionLabel="fullName"
+                placeholder="Seleccione"
+                className="w-full"
+                filter
+                loading={employeesLoading}
+              />
+            </div>
 
-        <div className="bg-gray-100 h-1 w-full my-2"></div>
+            <div className="h-px bg-gray-300 my-1"></div>
 
-        <div className="bg-gray-50 p-4 rounded-xl flex flex-col gap-3">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-500">Valor Actual:</span>
-            <span className="font-bold text-gray-800">
-              {currentTotal.toLocaleString("es-CO", {
-                style: "currency",
-                currency: "COP",
-                maximumFractionDigits: 0,
-              })}
-            </span>
-          </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-600">Valor Actual</span>
+              <span className="font-bold text-gray-800">
+                ${currentTotal.toLocaleString()}
+              </span>
+            </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-bold text-gray-400 uppercase">
-              Valor del Descuento
-            </label>
-            <InputNumber
-              value={discountAmount}
-              onValueChange={(e) => setDiscountAmount(Math.round(e.value || 0))}
-              mode="decimal"
-              prefix="$ "
-              useGrouping={true}
-              minFractionDigits={0}
-              maxFractionDigits={0}
-              className="w-full"
-              inputClassName="w-full text-xl font-bold text-red-600"
-              autoFocus
-              min={0}
-              max={currentTotal}
-            />
-          </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">
+                Valor del Descuento
+              </label>
+              <InputNumber
+                value={discountAmount}
+                onValueChange={(e) => setDiscountAmount(Math.round(e.value || 0))}
+                mode="currency"
+                currency="COP"
+                minFractionDigits={0}
+                maxFractionDigits={0}
+                className="w-full"
+                inputClassName="w-full text-lg font-bold text-red-600"
+                autoFocus
+                min={0}
+                max={currentTotal}
+                placeholder="$0"
+              />
+            </div>
 
-          <Divider className="my-1" />
+            <div className="h-px bg-gray-300 my-1"></div>
 
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600 font-bold">Total Final:</span>
-            <span className="text-2xl font-black text-green-600">
-              {finalTotal.toLocaleString("es-CO", {
-                style: "currency",
-                currency: "COP",
-                maximumFractionDigits: 0,
-              })}
-            </span>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-700 font-bold">Total Final</span>
+              <span className="text-xl font-black text-emerald-700">
+                ${finalTotal.toLocaleString()}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="flex gap-2 mt-2">
+        <div className="flex gap-2">
           <Button
-            label="Confirmar Descuento"
+            label="Cancelar"
+            icon="pi pi-times"
+            onClick={onHide}
+            className="p-button-outlined p-button-secondary flex-1"
+          />
+          <Button
+            label="Confirmar"
             icon="pi pi-check"
             onClick={handleConfirm}
             className="p-button-warning flex-1"
