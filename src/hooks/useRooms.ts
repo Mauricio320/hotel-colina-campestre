@@ -130,7 +130,7 @@ export const useRooms = (category?: string) => {
   return { roomsQuery, updateStatus, upsertRoom };
 };
 
-export const RoomsQueryCtegory = (id: string) => {
+export const RoomsQueryCategory = (id: string) => {
   return useQuery({
     queryKey: ["rooms", id],
     queryFn: async ({ signal }) => {
@@ -139,7 +139,7 @@ export const RoomsQueryCtegory = (id: string) => {
         .select(
           `*, 
           room:rooms(*),  
-          guest:guests(*),
+          guest:guests!stays_guest_id_fkey(*),
           room_statuses(*)`,
         )
         .eq("accommodation_type_id", id)
@@ -149,15 +149,18 @@ export const RoomsQueryCtegory = (id: string) => {
       const { data } = await supabase
         .from("rooms")
         .select(
-          `*, 
-          status:room_statuses(*), 
-          rates:room_rates(*), 
-          stays(*, 
-            room:rooms(*),  
-            guest:guests(*),
-            room_statuses(*)
-          ),
-          accommodation_types(*)`,
+          `
+    *,
+    status:room_statuses(*),
+    rates:room_rates(*),
+    stays!stays_room_id_fkey(
+      *,
+      room:rooms(*),
+      guest:guests!stays_guest_id_fkey(*),
+      room_statuses(*)
+    ),
+    accommodation_types(*)
+  `,
         )
         .eq("is_active", true)
         .eq("accommodation_type_id", id)

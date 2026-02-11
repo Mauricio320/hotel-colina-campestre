@@ -98,6 +98,7 @@ export interface Stay {
   room_status_id?: string;
   active?: boolean;
   room_statuses?: RoomStatus;
+  additional_guests?: StayGuest[];
 }
 
 export interface PaymentMethod {
@@ -149,6 +150,14 @@ export interface AccommodationType {
   price: number;
   is_rentable: boolean;
   created_at: string;
+}
+
+export interface StayGuest {
+  stay_id: string;
+  guest_id: string;
+  is_primary_guest: boolean;
+  created_at: string;
+  guest?: Guest;
 }
 
 export interface RoomHistory {

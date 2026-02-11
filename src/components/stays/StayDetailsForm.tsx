@@ -3,9 +3,9 @@ import { Control, UseFormSetValue } from "react-hook-form";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { Checkbox } from "primereact/checkbox";
-import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Controller } from "react-hook-form";
+import { RoomRate } from "@/types";
 
 export interface StayDetailsFormProps {
   title: string;
@@ -19,6 +19,7 @@ export interface StayDetailsFormProps {
     iva: number;
     mat: number;
   };
+  roomRates?: RoomRate[];
 }
 
 const StayDetailsForm: React.FC<StayDetailsFormProps> = ({
@@ -30,6 +31,7 @@ const StayDetailsForm: React.FC<StayDetailsFormProps> = ({
   checkInDate,
   maxCapacity,
   settings,
+  roomRates = [],
 }) => {
   const personCount = watch("person_count");
   const extraMattressCount = watch("extra_mattress_count");
@@ -91,22 +93,16 @@ const StayDetailsForm: React.FC<StayDetailsFormProps> = ({
             name="person_count"
             control={control}
             render={({ field }) => (
-              <InputNumber
+              <Dropdown
                 id={field.name}
                 value={field.value}
-                onValueChange={(e) => field.onChange(e.value)}
-                min={1}
-                showButtons
-                buttonLayout="horizontal"
-                step={1}
-                decrementButtonClassName="p-button-secondary"
-                incrementButtonClassName="p-button-secondary"
-                incrementButtonIcon="pi pi-plus"
-                decrementButtonIcon="pi pi-minus"
+                onChange={(e) => field.onChange(e.value)}
+                options={roomRates.map((rate) => ({
+                  label: `${rate.person_count} persona${rate.person_count > 1 ? "s" : ""} - $${rate.rate.toLocaleString()}`,
+                  value: rate.person_count,
+                }))}
+                placeholder="Seleccione número de huéspedes"
                 className="w-full"
-                inputClassName="w-full"
-                minFractionDigits={0}
-                maxFractionDigits={0}
               />
             )}
           />

@@ -4,6 +4,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { DocsTypesConst } from "@/util/const/types-docs.const";
+import { Guest } from "@/types";
 
 interface ColombiaData {
   departamento: string;
@@ -26,6 +27,11 @@ interface GuestDataFormProps {
     text: string;
   };
   watchDocNumber: string;
+  index?: number;
+  initialData?: Partial<Guest>;
+  onDataChange?: (data: Partial<Guest>) => void;
+  excludeDocNumber?: string;
+  title?: string;
 }
 
 export const GuestDataForm: React.FC<GuestDataFormProps> = ({
@@ -41,21 +47,48 @@ export const GuestDataForm: React.FC<GuestDataFormProps> = ({
   guestFound = false,
   searchMessage = { type: null, text: "" },
   watchDocNumber,
+  index,
+  initialData,
+  excludeDocNumber,
+  title,
 }) => {
+  // Pre-poblar formulario con datos iniciales si se proporcionan
+  React.useEffect(() => {
+    if (initialData && index !== undefined) {
+      Object.keys(initialData).forEach((key) => {
+        const fieldPath =
+          index === undefined ? key : `additional_guests.${index}.${key}`;
+        setValue(fieldPath, initialData[key]);
+      });
+    }
+    console.log("Tenemos problemas", initialData, index, setValue);
+  }, [index]);
+
+  const formTitle =
+    title ||
+    (index === undefined
+      ? "Datos del Huésped Principal"
+      : `Datos del Huésped ${index + 1}`);
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
       <div className="flex items-center gap-2 mb-1">
         <i className="pi pi-users text-gray-600"></i>
-        <h3 className="font-bold text-gray-700">Datos del Huésped</h3>
+        <h3 className="font-bold text-gray-700">{formTitle}</h3>
       </div>
-      <p className="text-xs text-gray-400 font-medium mb-6">
-        Busque por número de documento o ingrese los datos del nuevo huésped
-      </p>
+      {index === undefined && (
+        <p className="text-xs text-gray-400 font-medium mb-6">
+          Busque por número de documento o ingrese los datos del nuevo huésped
+        </p>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-12 gap-4">
         <div className="md:col-span-2">
           <Controller
-            name="doc_type"
+            name={
+              index === undefined
+                ? "doc_type"
+                : `additional_guests.${index}.doc_type`
+            }
             control={control}
             render={({ field }) => (
               <Dropdown
@@ -68,7 +101,20 @@ export const GuestDataForm: React.FC<GuestDataFormProps> = ({
         </div>
         <div className="md:col-span-8 p-inputgroup">
           <InputText
-            {...register("doc_number", { required: true })}
+            {...register(
+              index === undefined
+                ? "doc_number"
+                : `additional_guests.${index}.doc_number`,
+              {
+                required: true,
+                validate: (value) => {
+                  if (excludeDocNumber && value === excludeDocNumber) {
+                    return "Este documento ya está siendo usado por el huésped principal";
+                  }
+                  return true;
+                },
+              },
+            )}
             placeholder="Número de documento"
           />
         </div>
@@ -117,21 +163,36 @@ export const GuestDataForm: React.FC<GuestDataFormProps> = ({
         <div className="md:col-span-6 flex flex-col gap-1">
           <label className="text-xs font-bold text-gray-700">Nombres *</label>
           <InputText
-            {...register("first_name", { required: true })}
+            {...register(
+              index === undefined
+                ? "first_name"
+                : `additional_guests.${index}.first_name`,
+              { required: true },
+            )}
             className="w-full bg-white "
           />
         </div>
         <div className="md:col-span-6 flex flex-col gap-1">
           <label className="text-xs font-bold text-gray-700">Apellidos *</label>
           <InputText
-            {...register("last_name", { required: true })}
+            {...register(
+              index === undefined
+                ? "last_name"
+                : `additional_guests.${index}.last_name`,
+              { required: true },
+            )}
             className="w-full bg-white "
           />
         </div>
         <div className="md:col-span-6 flex flex-col gap-1">
           <label className="text-xs font-bold text-gray-700">Teléfono *</label>
           <InputText
-            {...register("phone", { required: true })}
+            {...register(
+              index === undefined
+                ? "phone"
+                : `additional_guests.${index}.phone`,
+              { required: true },
+            )}
             className="w-full bg-white "
           />
         </div>
@@ -139,7 +200,14 @@ export const GuestDataForm: React.FC<GuestDataFormProps> = ({
           <label className="text-xs font-bold text-gray-700">
             Correo Electrónico
           </label>
-          <InputText {...register("email")} className="w-full bg-white " />
+          <InputText
+            {...register(
+              index === undefined
+                ? "email"
+                : `additional_guests.${index}.email`,
+            )}
+            className="w-full bg-white "
+          />
         </div>
 
         <div className="md:col-span-6 flex flex-col gap-1">
@@ -147,7 +215,11 @@ export const GuestDataForm: React.FC<GuestDataFormProps> = ({
             Departamento
           </label>
           <Controller
-            name="department"
+            name={
+              index === undefined
+                ? "department"
+                : `additional_guests.${index}.department`
+            }
             control={control}
             render={({ field }) => (
               <Dropdown
@@ -157,7 +229,12 @@ export const GuestDataForm: React.FC<GuestDataFormProps> = ({
                 className="w-full bg-white "
                 onChange={(e) => {
                   field.onChange(e.value);
-                  setValue("city", "");
+                  setValue(
+                    index === undefined
+                      ? "city"
+                      : `additional_guests.${index}.city`,
+                    "",
+                  );
                 }}
                 filter
               />
@@ -167,7 +244,9 @@ export const GuestDataForm: React.FC<GuestDataFormProps> = ({
         <div className="md:col-span-6 flex flex-col gap-1">
           <label className="text-xs font-bold text-gray-700">Municipio</label>
           <Controller
-            name="city"
+            name={
+              index === undefined ? "city" : `additional_guests.${index}.city`
+            }
             control={control}
             render={({ field }) => (
               <Dropdown
@@ -187,7 +266,14 @@ export const GuestDataForm: React.FC<GuestDataFormProps> = ({
         </div>
         <div className="md:col-span-12 flex flex-col gap-1">
           <label className="text-xs font-bold text-gray-700">Dirección</label>
-          <InputText {...register("address")} className="w-full bg-white " />
+          <InputText
+            {...register(
+              index === undefined
+                ? "address"
+                : `additional_guests.${index}.address`,
+            )}
+            className="w-full bg-white "
+          />
         </div>
       </div>
     </div>

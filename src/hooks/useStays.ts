@@ -25,9 +25,10 @@ export const useStays = () => {
       try {
         const { data, error } = await supabase
           .from("stays")
-          .select("*, room:rooms(*), guest:guests(*)")
+          .select("*, room:rooms(*), guest:guests!stays_guest_id_fkey(*)")
           .abortSignal(signal) // Vinculamos la señal de aborto de React Query
           .order("created_at", { ascending: false });
+        console.log(data);
 
         if (error) throw error;
         return data as Stay[];

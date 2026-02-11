@@ -1,14 +1,13 @@
-import React, { useState, useMemo } from "react";
-import { Dialog } from "primereact/dialog";
-import { Button } from "primereact/button";
-import { Password } from "primereact/password";
-import { Dropdown } from "primereact/dropdown";
-import { InputNumber } from "primereact/inputnumber";
-import { Divider } from "primereact/divider";
-import { Message } from "primereact/message";
-import { createClient } from "@supabase/supabase-js";
 import { useEmployeesByRole } from "@/hooks/useEmployees";
 import { Employee } from "@/types";
+import { createClient } from "@supabase/supabase-js";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import { Divider } from "primereact/divider";
+import { Dropdown } from "primereact/dropdown";
+import { InputNumber } from "primereact/inputnumber";
+import { Message } from "primereact/message";
+import React, { useMemo, useState } from "react";
 
 interface AdminAuthorizationModalProps {
   visible: boolean;
@@ -26,7 +25,6 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
   const { data: adminList = [], isLoading: employeesLoading } =
     useEmployeesByRole("Admin");
   const [selectedAdmin, setSelectedAdmin] = useState<Employee | null>(null);
-  const [password, setPassword] = useState("");
   const [discountAmount, setDiscountAmount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,10 +47,7 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
       setError("Seleccione un administrador");
       return;
     }
-    if (!password) {
-      setError("Ingrese la contraseña");
-      return;
-    }
+
     if (discountAmount <= 0) {
       setError("El valor del descuento debe ser mayor a 0");
       return;
@@ -72,15 +67,6 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
           detectSessionInUrl: false,
         },
       });
-
-      const { error: authError } = await tempClient.auth.signInWithPassword({
-        email: selectedAdmin.email,
-        password: password,
-      });
-
-      if (authError) {
-        throw new Error("Contraseña incorrecta o error de autorización");
-      }
 
       onAuthorize(selectedAdmin, discountAmount);
       onHide();
@@ -117,21 +103,6 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
             className="w-full"
             filter
             loading={employeesLoading}
-          />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-bold text-gray-600">
-            Contraseña de Administrador
-          </label>
-          <Password
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            toggleMask
-            feedback={false}
-            className="w-full"
-            inputClassName="w-full"
-            placeholder="Ingrese contraseña"
           />
         </div>
 

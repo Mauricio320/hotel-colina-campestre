@@ -1,6 +1,6 @@
 import { useBlockUI } from "@/context/BlockUIContext";
 import { FetchEmployeesByRole } from "@/hooks/useEmployees";
-import { RoomsQueryCtegory } from "@/hooks/useRooms";
+import { RoomsQueryCategory } from "@/hooks/useRooms";
 import { useRoomsActions } from "@/hooks/useRoomsActions";
 import { AccommodationType, Employee, Room, RoomStatus, Stay } from "@/types";
 import {
@@ -20,7 +20,6 @@ import { RoomActionModalHeaderInfo } from "@/components/calendar/RoomActionModal
 import { GetReservationPaymentStatus } from "@/util/helper/helpers";
 
 interface CalendarGridProps {
-  getActiveStay: (room: Room, date: Date) => Stay | undefined;
   accommodationType: AccommodationType;
   refectCalendar: () => void;
   roomStatuses: RoomStatus[];
@@ -35,7 +34,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   activeTab,
   days,
 }) => {
-  const { data, isLoading } = RoomsQueryCtegory(accommodationType.id);
+  const { data, isLoading } = RoomsQueryCategory(accommodationType.id);
   const { hideBlockUI, showBlockUI } = useBlockUI();
   const { updateRoomStatus } = useRoomsActions();
   const navigate = useNavigate();

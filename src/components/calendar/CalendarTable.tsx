@@ -73,7 +73,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
 
                 const dateStr = dayjs(d).format("YYYY-MM-DD");
                 let statusColor =
-                  stay?.["room_statuses"].color ||
+                  stay?.room_statuses?.color ||
                   STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color;
                 let cellContent = null;
 

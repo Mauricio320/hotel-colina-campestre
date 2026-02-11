@@ -28,7 +28,7 @@ const InvoiceDetailPage: React.FC = () => {
           .select(
             `
             *,
-            guest:guests(*),
+            guest:guests!stays_guest_id_fkey(*),
             room:rooms(*),
             payment_method:payment_methods(name),
             price_override:price_overrides(*,employee:employees(first_name, last_name))

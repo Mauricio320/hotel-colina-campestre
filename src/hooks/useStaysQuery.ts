@@ -9,7 +9,7 @@ export const useStaysQuery = () => {
       try {
         const { data, error } = await supabase
           .from("stays")
-          .select("*, room:rooms(*), guest:guests(*)")
+          .select("*, room:rooms(*), guest:guests!stays_guest_id_fkey(*)")
           .abortSignal(signal)
           .order("created_at", { ascending: false });
 
@@ -42,7 +42,7 @@ export const useStayById = (stayId: string | undefined) => {
       const { data, error } = await supabase
         .from("stays")
         .select(
-          "*, guest:guests(*), room:rooms(*), accommodation_type:accommodation_types(*)",
+          "*, guest:guests!stays_guest_id_fkey(*), room:rooms(*), accommodation_type:accommodation_types(*)",
         )
         .eq("id", stayId)
         .single();

@@ -13,6 +13,8 @@ import {
 import GuestDataForm from "@/components/stays/GuestDataForm";
 import PaymentSection from "@/components/stays/PaymentSection";
 import StayDetailsForm from "@/components/stays/StayDetailsForm";
+import AdditionalGuestsManager from "@/components/stays/AdditionalGuestsManager";
+import { stayGuestsApi } from "@/services/stay-guests/stayGuestsApi";
 import { useUniversalRoomQuery } from "@/hooks/useUniversalRoomQuery";
 
 import AvailabilityConflictModal from "@/components/stays/AvailabilityConflictModal";
@@ -31,18 +33,18 @@ import {
   useCreateOnStayWithPayment,
 } from "@/hooks/useStays";
 import { generateStayObservation } from "@/util/helper/stayHelpers";
-import { Employee, PaymentType } from "@/types";
+import { Employee, PaymentType, Guest } from "@/types";
 import {
   AccommodationTypeEnum,
   RoomStatusEnum,
 } from "@/util/enums/status-rooms.enum";
+import { useRoomRates } from "@/hooks/useRoomRates";
 
 const CheckInPage: React.FC = () => {
   const { colombiaData, loadingGeo } = useColombiaGeography();
 
   const { findGuestByDoc, upsertGuest } = useGuests();
   const { data: roomStatuses } = useRoomStatuses();
-  const location = useLocation();
   const isCheckInMode = !!useMatch("/check-in/:roomId");
 
   const getStatusId = (name: RoomStatusEnum) =>
@@ -60,6 +62,7 @@ const CheckInPage: React.FC = () => {
   const tabParam = searchParams.get("tab");
   const action = searchParams.get("action") as AccommodationTypeEnum;
 
+  const { data: roomRates } = useRoomRates(roomId);
   const { data: universalData, isLoading } = useUniversalRoomQuery(
     roomId,
     action,
@@ -79,31 +82,33 @@ const CheckInPage: React.FC = () => {
   const [isConflictModalVisible, setIsConflictModalVisible] = useState(false);
   const [conflicts, setConflicts] = useState<any[]>([]);
 
-  const { control, register, handleSubmit, setValue, watch } = useForm({
-    defaultValues: {
-      doc_type: "CC",
-      doc_number: "",
-      first_name: "",
-      last_name: "",
-      phone: "",
-      email: "",
-      department: "",
-      city: "",
-      address: "",
-      check_in_date: searchParams.get("date")
-        ? new Date(searchParams.get("date")! + "T12:00:00")
-        : new Date(),
-      check_out_date: null as Date | null,
-      person_count: 1,
-      extra_mattress_count: 0,
-      is_invoice_requested: false,
-      observation: "",
-      payment_method_id: "",
-      paid_amount: 0,
-      room_status_current_id: null,
-      new_status_id: null,
-    },
-  });
+  const { control, register, handleSubmit, setValue, watch, setError } =
+    useForm({
+      defaultValues: {
+        doc_type: "CC",
+        doc_number: "",
+        first_name: "",
+        last_name: "",
+        phone: "",
+        email: "",
+        department: "",
+        city: "",
+        address: "",
+        check_in_date: searchParams.get("date")
+          ? new Date(searchParams.get("date")! + "T12:00:00")
+          : new Date(),
+        check_out_date: null as Date | null,
+        person_count: 1,
+        extra_mattress_count: 0,
+        is_invoice_requested: false,
+        observation: "",
+        payment_method_id: "",
+        paid_amount: 0,
+        room_status_current_id: null,
+        new_status_id: null,
+        additional_guests: [],
+      },
+    });
 
   const personCount = watch("person_count");
   const checkInDate = watch("check_in_date");
@@ -112,6 +117,77 @@ const CheckInPage: React.FC = () => {
   const invoiceRequested = watch("is_invoice_requested");
   const watchDocNumber = watch("doc_number");
   const selectedDepartment = watch("department");
+
+  // Actualizar array de huéspedes adicionales cuando cambia personCount
+  useEffect(() => {
+    const currentCount = watch("additional_guests")?.length || 0;
+    const newCount = Math.max(0, personCount - 1);
+
+    if (newCount !== currentCount) {
+      if (newCount > currentCount) {
+        // Agregar nuevos huéspedes al array
+        const newGuests = Array.from(
+          { length: newCount - currentCount },
+          () => ({
+            doc_type: "CC",
+            doc_number: "",
+            first_name: "",
+            last_name: "",
+            phone: "",
+            email: "",
+            city: "",
+            address: "",
+            department: "",
+          }),
+        );
+        setValue("additional_guests", [
+          ...(watch("additional_guests") || []),
+          ...newGuests,
+        ]);
+      } else {
+        // Recortar array
+        setValue(
+          "additional_guests",
+          watch("additional_guests")?.slice(0, newCount) || [],
+        );
+      }
+    }
+  }, [personCount, setValue, watch]);
+
+  // Datos del huésped principal para pre-poblar
+  const primaryGuestData = {
+    doc_type: watch("doc_type"),
+    department: watch("department"),
+    address: watch("address"),
+    email: watch("email"),
+    phone: watch("phone"),
+    city: watch("city"),
+  };
+
+  const handleGuestDataChange = (index: number, data: Partial<Guest>) => {
+    const currentGuests = watch("additional_guests") || [];
+    const updatedGuests = [...currentGuests];
+    updatedGuests[index] = { ...updatedGuests[index], ...data };
+    setValue("additional_guests", updatedGuests);
+  };
+
+  const validateNoDuplicateDocs = (formData: any) => {
+    const primaryDoc = formData.doc_number;
+    const additionalDocs =
+      formData.additional_guests
+        ?.map((g: any) => g.doc_number)
+        .filter(Boolean) || [];
+
+    if (additionalDocs.includes(primaryDoc)) {
+      setError("additional_guests.0.doc_number", {
+        type: "manual",
+        message: "El documento ya está siendo usado por el huésped principal",
+      });
+      return false;
+    }
+
+    return true;
+  };
 
   useEffect(() => {
     if (paymentMethods?.length > 0)
@@ -198,6 +274,7 @@ const CheckInPage: React.FC = () => {
     extraMattressCount,
     invoiceRequested,
     settings,
+    roomRates,
   });
 
   const finalPriceInfo = useMemo(() => {
@@ -214,6 +291,7 @@ const CheckInPage: React.FC = () => {
 
   const onSubmit = async (data: any) => {
     if (!data.check_out_date) return alert("Seleccione una fecha de salida");
+
     showBlockUI("Procesando check-in...");
     const isApartmentAction = action === AccommodationTypeEnum.APARTAMENTO;
 
@@ -308,6 +386,7 @@ const CheckInPage: React.FC = () => {
           authorized_by: authorizedBy?.id,
         },
       });
+
       navigate(tabParam ? `/calendar?tab=${tabParam}` : "/calendar");
     } catch (e: any) {
       alert("Error: " + e.message);
@@ -359,16 +438,18 @@ const CheckInPage: React.FC = () => {
       <StayDetailsForm
         title="Detalles de la Estadía"
         checkInDate={checkInDate}
+        roomRates={roomRates}
         register={register}
-        setValue={setValue}
-        control={control}
         settings={settings}
-        maxCapacity={2}
+        control={control}
+        setValue={setValue}
         watch={watch}
+        maxCapacity={10}
       />
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <GuestDataForm
+          title="Datos del Huésped Principal"
           register={register}
           control={control}
           setValue={setValue}

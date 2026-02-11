@@ -9,7 +9,6 @@ import { useRooms } from "@/hooks/useRooms";
 import { useRoomStatuses } from "@/hooks/useRoomStatuses";
 import { useStays } from "@/hooks/useStays";
 import { useUrlParams } from "@/hooks/useUrlParams";
-import { Room } from "@/types";
 import dayjs from "dayjs";
 import { TabPanel, TabView } from "primereact/tabview";
 import React, { useEffect, useMemo, useState } from "react";
@@ -57,17 +56,6 @@ const CalendarView: React.FC = () => {
     });
   }, [startDate]);
 
-  const getActiveStay = (room: Room, date: Date) => {
-    const dateStr = dayjs(date).format("YYYY-MM-DD");
-    return staysQuery.data?.find(
-      (s) =>
-        s.room_id === room.id &&
-        dateStr >= s.check_in_date &&
-        dateStr <= s.check_out_date &&
-        (s.status === "Active" || s.status === "Reserved"),
-    );
-  };
-
   if (isLoading) return <SkeletonUI />;
 
   if (isError)
@@ -95,15 +83,8 @@ const CalendarView: React.FC = () => {
         {accommodationTypesQuery.data?.map((type) => (
           <TabPanel key={type.id} header={type.name}>
             <CalendarGrid
-              refectCalendar={() => {
-                setTimeout(() => {
-                  roomsQuery.refetch().then(() => {
-                    hideBlockUI();
-                  });
-                }, 500);
-              }}
+              refectCalendar={() => roomsQuery.refetch()}
               roomStatuses={roomStatuses?.data || []}
-              getActiveStay={getActiveStay}
               accommodationType={type}
               activeTab={activeTab}
               days={days}
