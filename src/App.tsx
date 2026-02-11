@@ -23,6 +23,8 @@ import EmployeeManagement from "@/pages/employees/EmployeeManagement";
 import GuestManagement from "@/pages/guests/GuestManagement";
 import CleaningLogs from "@/pages/logs/CleaningLogs.tsx";
 import MaintenanceLogs from "@/pages/logs/MaintenanceLogs.tsx";
+import CleaningTaskPage from "@/pages/logs/CleaningTaskPage";
+import MaintenanceTaskPage from "@/pages/logs/MaintenanceTaskPage";
 import InvoiceDetailPage from "@/pages/payments/InvoiceDetailPage";
 import PaymentsInvoice from "@/pages/payments/PaymentsInvoice";
 import RoomPayments from "@/pages/payments/RoomPayments";
@@ -34,6 +36,8 @@ import RoomManagement from "@/pages/rooms/RoomManagement";
 import Settings from "@/pages/settings/Settings";
 import CheckInPage from "@/pages/stays/CheckInPage";
 import CheckOutPage from "@/pages/stays/CheckOutPage";
+import CancelReservationPage from "@/pages/stays/CancelReservationPage";
+import MoveReservationPage from "@/pages/stays/MoveReservationPage";
 
 const queryClient = new QueryClient();
 
@@ -140,8 +144,10 @@ const AppContent: React.FC = () => {
           path="/employees"
           element={<EmployeeManagement userRole={roleName} />}
         />
-        {/* <Route path="/logs/cleaning" element={<CleaningLogs />} />
-        <Route path="/logs/maintenance" element={<MaintenanceLogs />} /> */}
+        <Route path="/limpieza/:stayId" element={<CleaningTaskPage />} />
+        <Route path="/mantenimiento/:stayId" element={<MaintenanceTaskPage />} />
+        <Route path="/cancelar-reserva/:stayId" element={<CancelReservationPage />} />
+        <Route path="/mover-reserva/:stayId" element={<MoveReservationPage />} />
         <Route path="/settings" element={<Settings userRole={roleName} />} />
         <Route path="/profile" element={<MyProfile />} />
         <Route path="/reports" element={<Reports userRole={roleName} />} />

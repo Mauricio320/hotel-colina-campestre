@@ -33,11 +33,11 @@ export const RoomActionModal: React.FC<RoomActionModalProps> = ({
     useState<AccommodationTypeEnum>(AccommodationTypeEnum.HABITACION);
 
   const modalHeader = (
-    <div className="flex items-center gap-3">
-      <i className="pi pi-building text-2xl text-gray-700"></i>
-      <span className="text-2xl font-black text-gray-800 tracking-tight">
-        Acciones
-      </span>
+    <div className="flex items-center gap-2">
+      <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+        <i className="pi pi-bolt text-emerald-600 text-sm"></i>
+      </div>
+      <span className="font-bold text-gray-800">Acciones</span>
     </div>
   );
 
@@ -46,9 +46,11 @@ export const RoomActionModal: React.FC<RoomActionModalProps> = ({
       header={modalHeader}
       visible={visible}
       onHide={onHide}
-      className="w-full max-w-xl"
+      className="w-full max-w-[500px]"
+      breakpoints={{ "960px": "90vw", "641px": "95vw" }}
+      dismissableMask
     >
-      <div className="flex flex-col gap-5 py-2">
+      <div className="flex flex-col gap-4 py-2">
         <Dropdown
           options={[
             { label: "Habitación", value: AccommodationTypeEnum.HABITACION },

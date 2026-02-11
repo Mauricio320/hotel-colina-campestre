@@ -3,16 +3,15 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
+  useMatch,
   useNavigate,
   useParams,
   useSearchParams,
-  useLocation,
-  useMatch,
 } from "react-router-dom";
 
+import AllGuestsForm from "@/components/stays/AllGuestsForm";
 import PaymentSection from "@/components/stays/PaymentSection";
 import StayDetailsForm from "@/components/stays/StayDetailsForm";
-import AllGuestsForm from "@/components/stays/AllGuestsForm";
 import { useUniversalRoomQuery } from "@/hooks/useUniversalRoomQuery";
 
 import AvailabilityConflictModal from "@/components/stays/AvailabilityConflictModal";
@@ -23,6 +22,7 @@ import { useBlockUI } from "@/context/BlockUIContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useColombiaGeography } from "@/hooks/useColombiaGeography";
 import { useGuests } from "@/hooks/useGuests";
+import { useRoomRates } from "@/hooks/useRoomRates";
 import { useRoomStatuses } from "@/hooks/useRoomStatuses";
 import { usePaymentMethods, useSettings } from "@/hooks/useSettings";
 import { useStayPricing } from "@/hooks/useStayPricing";
@@ -30,13 +30,12 @@ import {
   CheckAvailability,
   useCreateOnStayWithPayment,
 } from "@/hooks/useStays";
-import { generateStayObservation } from "@/util/helper/stayHelpers";
-import { Employee, PaymentType, Guest } from "@/types";
+import { Employee, PaymentType } from "@/types";
 import {
   AccommodationTypeEnum,
   RoomStatusEnum,
 } from "@/util/enums/status-rooms.enum";
-import { useRoomRates } from "@/hooks/useRoomRates";
+import { generateStayObservation } from "@/util/helper/stayHelpers";
 
 const CheckInPage: React.FC = () => {
   const { colombiaData, loadingGeo } = useColombiaGeography();
@@ -151,24 +150,6 @@ const CheckInPage: React.FC = () => {
       }
     }
   }, [personCount, setValue, watch]);
-
-  const validateNoDuplicateDocs = (formData: any) => {
-    const primaryDoc = formData.doc_number;
-    const additionalDocs =
-      formData.additional_guests
-        ?.map((g: any) => g.doc_number)
-        .filter(Boolean) || [];
-
-    if (additionalDocs.includes(primaryDoc)) {
-      setError("additional_guests.0.doc_number", {
-        type: "manual",
-        message: "El documento ya está siendo usado por el huésped principal",
-      });
-      return false;
-    }
-
-    return true;
-  };
 
   useEffect(() => {
     if (paymentMethods?.length > 0)

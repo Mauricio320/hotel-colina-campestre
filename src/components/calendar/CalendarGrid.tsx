@@ -155,25 +155,18 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
       RoomStatusEnum.LIMPIEZA,
     ];
 
-    const genericModalCheckOut = [
-      RoomStatusEnum.RESERVADO,
-      RoomStatusEnum.OCUPADO,
-    ];
-
     const isGeneric = genericModalObservation.includes(
       roomC.status?.name as RoomStatusEnum,
     );
 
-    const isCheckOut = genericModalCheckOut.includes(
-      stay?.room_statuses?.name as RoomStatusEnum,
-    );
+    const hasActiveStay = stay && (stay.status === "Active" || stay.status === "Reserved");
 
-    if (isCheckOut) {
+    if (hasActiveStay) {
       setShowAbonoCheckOutModal(true);
       return;
     }
 
-    if (isGeneric && isDate) {
+    if (stay && isGeneric && isDate) {
       showBlockUI("Cargando");
       const taskEmployees = await FetchEmployeesByRole(roomC.status?.name);
       setEmployeeList(taskEmployees);
@@ -269,11 +262,17 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
 
       <Dialog
         header={
-          paymentStatus?.canCheckIn ? "Check-in reserva" : "Abonar reserva"
+          activeStay?.status === "Active" 
+            ? "Check-out" 
+            : paymentStatus?.canCheckIn 
+              ? "Reserva" 
+              : "Abonar reserva"
         }
         visible={showAbonoCheckOutModal}
         onHide={() => setShowAbonoCheckOutModal(false)}
-        className="w-full max-w-xl"
+        className="w-full max-w-[500px]"
+        breakpoints={{ "960px": "90vw", "641px": "95vw" }}
+        dismissableMask
       >
         <div className="flex flex-col gap-5 py-2">
           <RoomActionModalHeaderInfo
@@ -286,6 +285,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
             onCheckInAction={handleCheckInAction}
             onGoToCheckOut={handleGoToCheckOut}
             activeStay={activeStay}
+            selectedDate={selectedDate}
           />
         </div>
       </Dialog>

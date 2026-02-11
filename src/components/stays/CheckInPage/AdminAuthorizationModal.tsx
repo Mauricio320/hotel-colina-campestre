@@ -1,6 +1,5 @@
 import { useEmployeesByRole } from "@/hooks/useEmployees";
 import { Employee } from "@/types";
-import { createClient } from "@supabase/supabase-js";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -56,17 +55,6 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
     setError(null);
 
     try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-      const tempClient = createClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-          detectSessionInUrl: false,
-        },
-      });
-
       onAuthorize(selectedAdmin, discountAmount);
       onHide();
     } catch (err: any) {

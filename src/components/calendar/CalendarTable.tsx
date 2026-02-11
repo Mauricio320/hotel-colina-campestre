@@ -76,9 +76,13 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                   stay?.room_statuses?.color ||
                   STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color;
                 let cellContent = null;
+                let isCheckOutDay = false;
 
                 if (stay) {
                   const isFullRental = !stay.room_id;
+                  // Verificar si es el día de salida
+                  isCheckOutDay = dateStr === stay.check_out_date;
+
                   cellContent = (
                     <div className="flex flex-col items-center leading-none gap-0.5 w-full">
                       <span className="text-[9px] font-black opacity-90 uppercase">
@@ -106,14 +110,31 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                 return (
                   <td
                     key={d.getTime()}
-                    className="p-1 border-r border-b last:border-r-0 cursor-pointer bg-[#faf8f5] w-[120px] min-w-[120px]"
-                    onClick={() => handleRoomClick(room, d, stay)}
+                    className="p-1 border-r border-b last:border-r-0 bg-[#faf8f5] w-[120px] min-w-[120px]"
                   >
-                    <div
-                      className={`h-10 w-full rounded-lg flex items-center justify-center text-white font-bold transition-all ${statusColor} shadow-sm overflow-hidden`}
-                    >
-                      {cellContent}
-                    </div>
+                    {isCheckOutDay ? (
+                      <div className="h-10 w-full rounded-lg flex overflow-hidden shadow-sm">
+                        {/* Mitad izquierda: ocupada - abre modal de estadía */}
+                        <div
+                          className={`${statusColor} h-full w-1/2 flex items-center justify-center rounded-l-lg rounded-r-none border-r border-white/30 cursor-pointer hover:opacity-90`}
+                          onClick={() => handleRoomClick(room, d, stay || null)}
+                        >
+                          {cellContent}
+                        </div>
+                        {/* Mitad derecha: disponible - abre modal de acciones */}
+                        <div
+                          className={`${STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color} h-full w-1/2 flex items-center justify-center rounded-r-lg rounded-l-none cursor-pointer hover:opacity-90`}
+                          onClick={() => handleRoomClick(room, d, null)}
+                        ></div>
+                      </div>
+                    ) : (
+                      <div
+                        className={`h-10 w-full rounded-lg flex items-center justify-center text-white font-bold transition-all ${statusColor} shadow-sm overflow-hidden cursor-pointer`}
+                        onClick={() => handleRoomClick(room, d, stay)}
+                      >
+                        {cellContent}
+                      </div>
+                    )}
                   </td>
                 );
               })}

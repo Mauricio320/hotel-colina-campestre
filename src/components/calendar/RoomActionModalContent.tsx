@@ -27,10 +27,10 @@ interface RoomActionModalContentProps {
 }
 
 export const RoomActionModalContent = ({
+  activeStay,
   accommodationTypeEnum,
   accommodationType,
   roomStatuses,
-  activeStay,
   activeTab,
   onHide,
   room,
@@ -135,17 +135,19 @@ export const RoomActionModalContent = ({
         handleRoomStatusChange={handleRoomStatusChange}
         onGoToCheckIn={handleGoToCheckIn}
         onGoToBooking={handleGoToBooking}
+        activeStay={activeStay}
       />
     );
   }
   return <div></div>;
 };
 
-interface ActionsButtons {
+interface ActionsButtonsProps {
   handleRoomStatusChange: (action: string) => Promise<void>;
   accommodationTypeEnum: AccommodationTypeEnum;
   onGoToCheckIn: () => void;
   onGoToBooking: () => void;
+  activeStay?: Stay | null;
 }
 
 const ActionsButtons = ({
@@ -153,30 +155,53 @@ const ActionsButtons = ({
   accommodationTypeEnum,
   onGoToCheckIn,
   onGoToBooking,
-}: ActionsButtons) => {
+  activeStay,
+}: ActionsButtonsProps) => {
+  const navigate = useNavigate();
+
+  const handleLimpieza = () => {
+    if (activeStay?.id) {
+      navigate(`/limpieza/${activeStay.id}`);
+    } else {
+      handleRoomStatusChange(RoomActionEnum.LIMPIEZA);
+    }
+  };
+
+  const handleMantenimiento = () => {
+    if (activeStay?.id) {
+      navigate(`/mantenimiento/${activeStay.id}`);
+    } else {
+      handleRoomStatusChange(RoomActionEnum.MANTENIMIENTO);
+    }
+  };
+
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 gap-3">
       <Button
+        icon="pi pi-sign-in"
         label="Check-in"
-        className="bg-[#ff3d47] border-none text-white font-black py-4 rounded-2xl shadow-sm"
+        className="p-3 bg-[#ff3d47] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
         onClick={onGoToCheckIn}
       />
       <Button
+        icon="pi pi-calendar"
         label="Reservar"
-        className="bg-[#f9b000] border-none text-white font-black py-4 rounded-2xl shadow-sm"
+        className="p-3 bg-[#f9b000] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
         onClick={onGoToBooking}
       />
       <Button
+        icon="pi pi-sparkles"
         label="Limpieza"
-        className="bg-[#2d79ff] border-none text-white font-black py-4 rounded-2xl shadow-sm"
+        className="p-3 bg-[#2d79ff] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
         hidden={accommodationTypeEnum === AccommodationTypeEnum.APARTAMENTO}
-        onClick={() => handleRoomStatusChange(RoomActionEnum.LIMPIEZA)}
+        onClick={handleLimpieza}
       />
       <Button
-        label="Mant."
-        className="bg-[#6e7687] border-none text-white font-black py-4 rounded-2xl shadow-sm"
+        icon="pi pi-wrench"
+        label="Mantenimiento"
+        className="p-3 bg-[#6e7687] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
         hidden={accommodationTypeEnum === AccommodationTypeEnum.APARTAMENTO}
-        onClick={() => handleRoomStatusChange(RoomActionEnum.MANTENIMIENTO)}
+        onClick={handleMantenimiento}
       />
     </div>
   );
