@@ -159,7 +159,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
       roomC.status?.name as RoomStatusEnum,
     );
 
-    const hasActiveStay = stay && (stay.status === "Active" || stay.status === "Reserved");
+    const hasActiveStay =
+      stay && (stay.status === "Active" || stay.status === "Reserved");
 
     if (hasActiveStay) {
       setShowAbonoCheckOutModal(true);
@@ -262,10 +263,10 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
 
       <Dialog
         header={
-          activeStay?.status === "Active" 
-            ? "Check-out" 
-            : paymentStatus?.canCheckIn 
-              ? "Reserva" 
+          activeStay?.status === "Active"
+            ? "Check-outs"
+            : paymentStatus?.canCheckIn
+              ? "Reserva"
               : "Abonar reserva"
         }
         visible={showAbonoCheckOutModal}

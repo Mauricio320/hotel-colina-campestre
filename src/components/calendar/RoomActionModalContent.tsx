@@ -53,11 +53,20 @@ export const RoomActionModalContent = ({
   ];
 
   const handleGoToCheckIn = () => {
-    const url = `/check-in/${id}?${params.join("&")}`;
+    const queryParams = [...params];
+    if (activeStay?.id) {
+      queryParams.push(`stay_id=${activeStay.id}`);
+    }
+    const url = `/check-in/${id}?${queryParams.join("&")}`;
     navigate(url);
   };
+
   const handleGoToBooking = () => {
-    const url = `/booking/${id}?${params.join("&")}`;
+    const queryParams = [...params];
+    if (activeStay?.id) {
+      queryParams.push(`stay_id=${activeStay.id}`);
+    }
+    const url = `/booking/${id}?${queryParams.join("&")}`;
     navigate(url);
   };
 
@@ -136,6 +145,8 @@ export const RoomActionModalContent = ({
         onGoToCheckIn={handleGoToCheckIn}
         onGoToBooking={handleGoToBooking}
         activeStay={activeStay}
+        room={room}
+        accommodationType={accommodationType}
       />
     );
   }
@@ -148,6 +159,8 @@ interface ActionsButtonsProps {
   onGoToCheckIn: () => void;
   onGoToBooking: () => void;
   activeStay?: Stay | null;
+  room?: Room;
+  accommodationType?: AccommodationType;
 }
 
 const ActionsButtons = ({
@@ -156,23 +169,31 @@ const ActionsButtons = ({
   onGoToCheckIn,
   onGoToBooking,
   activeStay,
+  room,
+  accommodationType,
 }: ActionsButtonsProps) => {
   const navigate = useNavigate();
 
   const handleLimpieza = () => {
-    if (activeStay?.id) {
-      navigate(`/limpieza/${activeStay.id}`);
-    } else {
-      handleRoomStatusChange(RoomActionEnum.LIMPIEZA);
-    }
+    const roomId = accommodationTypeEnum === AccommodationTypeEnum.HABITACION
+      ? room?.id
+      : accommodationType?.id;
+
+    if (!roomId) return;
+
+    const queryParams = activeStay?.id ? `?stay_id=${activeStay.id}` : "";
+    navigate(`/limpieza/${roomId}${queryParams}`);
   };
 
   const handleMantenimiento = () => {
-    if (activeStay?.id) {
-      navigate(`/mantenimiento/${activeStay.id}`);
-    } else {
-      handleRoomStatusChange(RoomActionEnum.MANTENIMIENTO);
-    }
+    const roomId = accommodationTypeEnum === AccommodationTypeEnum.HABITACION
+      ? room?.id
+      : accommodationType?.id;
+
+    if (!roomId) return;
+
+    const queryParams = activeStay?.id ? `?stay_id=${activeStay.id}` : "";
+    navigate(`/mantenimiento/${roomId}${queryParams}`);
   };
 
   return (

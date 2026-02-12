@@ -23,13 +23,13 @@ export const StayInfoCard: React.FC<StayInfoCardProps> = ({
   const navigate = useNavigate();
   const paymentStatus = GetReservationPaymentStatus(activeStay);
   const pendingAmount = activeStay.total_price - activeStay.paid_amount;
-  
+
   const nights = dayjs(activeStay.check_out_date).diff(
     dayjs(activeStay.check_in_date),
-    "day"
+    "day",
   );
 
-  const isToday = selectedDate 
+  const isToday = selectedDate
     ? dayjs(selectedDate).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD")
     : true;
 
@@ -106,7 +106,9 @@ export const StayInfoCard: React.FC<StayInfoCardProps> = ({
             <span className="text-[10px] font-bold text-gray-400 uppercase">
               Saldo
             </span>
-            <span className={`text-sm font-bold ${pendingAmount > 0 ? "text-red-600" : "text-emerald-600"}`}>
+            <span
+              className={`text-sm font-bold ${pendingAmount > 0 ? "text-red-600" : "text-emerald-600"}`}
+            >
               ${pendingAmount.toLocaleString()}
             </span>
           </div>
@@ -147,13 +149,21 @@ export const StayInfoCard: React.FC<StayInfoCardProps> = ({
               icon="pi pi-sparkles"
               label="Limpieza"
               className="p-3 bg-[#2d79ff] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
-              onClick={() => navigate(`/limpieza/${activeStay.id}`)}
+              onClick={() =>
+                navigate(
+                  `/limpieza/${activeStay.room_id}?stay_id=${activeStay.id}`,
+                )
+              }
             />
             <Button
               icon="pi pi-wrench"
               label="Mantenimiento"
               className="p-3 bg-[#6e7687] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
-              onClick={() => navigate(`/mantenimiento/${activeStay.id}`)}
+              onClick={() =>
+                navigate(
+                  `/mantenimiento/${activeStay.room_id}?stay_id=${activeStay.id}`,
+                )
+              }
             />
           </div>
         )}
