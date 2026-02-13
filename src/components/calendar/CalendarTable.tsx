@@ -17,7 +17,6 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
   days,
   getActiveStay,
   handleRoomClick,
-  getNextStay,
 }) => {
   const getStayStartingOnDate = (room: Room, date: Date) => {
     const dateStr = dayjs(date).format("YYYY-MM-DD");

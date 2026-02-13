@@ -11,6 +11,7 @@ interface StayInfoCardProps {
   onCheckInAction: () => void;
   onConfirmCheckIn: () => void;
   selectedDate?: Date | null;
+  activeTab: number;
 }
 
 export const StayInfoCard: React.FC<StayInfoCardProps> = ({
@@ -18,6 +19,7 @@ export const StayInfoCard: React.FC<StayInfoCardProps> = ({
   onGoToCheckOut,
   onCheckInAction,
   onConfirmCheckIn,
+  activeTab,
   selectedDate,
 }) => {
   const navigate = useNavigate();
@@ -151,7 +153,7 @@ export const StayInfoCard: React.FC<StayInfoCardProps> = ({
               className="p-3 bg-[#2d79ff] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
               onClick={() =>
                 navigate(
-                  `/limpieza/${activeStay.room_id}?stay_id=${activeStay.id}`,
+                  `/limpieza/${activeStay.room_id}?stay_id=${activeStay.id}&tab=${activeTab}`,
                 )
               }
             />
@@ -161,26 +163,34 @@ export const StayInfoCard: React.FC<StayInfoCardProps> = ({
               className="p-3 bg-[#6e7687] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
               onClick={() =>
                 navigate(
-                  `/mantenimiento/${activeStay.room_id}?stay_id=${activeStay.id}`,
+                  `/mantenimiento/${activeStay.room_id}?stay_id=${activeStay.id}&tab=${activeTab}`,
                 )
               }
             />
           </div>
         )}
 
-        {activeStay.status === "Reserved" && (
+        {activeStay?.origin_was_reservation && (
           <div className="grid grid-cols-2 gap-3">
             <Button
               icon="pi pi-times-circle"
               label="Cancelar Reserva"
               className="p-3 bg-red-500 border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
-              onClick={() => navigate(`/cancelar-reserva/${activeStay.id}`)}
+              onClick={() =>
+                navigate(
+                  `/cancelar-reserva/${activeStay.id}?room_id=${activeStay.room_id}&tab=${activeTab}`,
+                )
+              }
             />
             <Button
               icon="pi pi-calendar-plus"
               label="Mover Reserva"
               className="p-3 bg-cyan-600 border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
-              onClick={() => navigate(`/mover-reserva/${activeStay.id}`)}
+              onClick={() =>
+                navigate(
+                  `/mover-reserva/${activeStay.id}?room_id=${activeStay.id}&tab=${activeTab}`,
+                )
+              }
             />
           </div>
         )}

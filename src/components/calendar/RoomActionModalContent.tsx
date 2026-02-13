@@ -147,6 +147,7 @@ export const RoomActionModalContent = ({
         activeStay={activeStay}
         room={room}
         accommodationType={accommodationType}
+        activeTab={activeTab}
       />
     );
   }
@@ -161,6 +162,7 @@ interface ActionsButtonsProps {
   activeStay?: Stay | null;
   room?: Room;
   accommodationType?: AccommodationType;
+  activeTab: number;
 }
 
 const ActionsButtons = ({
@@ -171,28 +173,35 @@ const ActionsButtons = ({
   activeStay,
   room,
   accommodationType,
+  activeTab,
 }: ActionsButtonsProps) => {
   const navigate = useNavigate();
 
   const handleLimpieza = () => {
-    const roomId = accommodationTypeEnum === AccommodationTypeEnum.HABITACION
-      ? room?.id
-      : accommodationType?.id;
+    const roomId =
+      accommodationTypeEnum === AccommodationTypeEnum.HABITACION
+        ? room?.id
+        : accommodationType?.id;
 
     if (!roomId) return;
 
-    const queryParams = activeStay?.id ? `?stay_id=${activeStay.id}` : "";
+    const queryParams = activeStay?.id
+      ? `?stay_id=${activeStay.id}&tab=${activeTab}`
+      : "";
     navigate(`/limpieza/${roomId}${queryParams}`);
   };
 
   const handleMantenimiento = () => {
-    const roomId = accommodationTypeEnum === AccommodationTypeEnum.HABITACION
-      ? room?.id
-      : accommodationType?.id;
+    const roomId =
+      accommodationTypeEnum === AccommodationTypeEnum.HABITACION
+        ? room?.id
+        : accommodationType?.id;
 
     if (!roomId) return;
 
-    const queryParams = activeStay?.id ? `?stay_id=${activeStay.id}` : "";
+    const queryParams = activeStay?.id
+      ? `?stay_id=${activeStay.id}&tab=${activeTab}`
+      : "";
     navigate(`/mantenimiento/${roomId}${queryParams}`);
   };
 

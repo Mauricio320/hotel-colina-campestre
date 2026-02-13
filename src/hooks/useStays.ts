@@ -6,7 +6,7 @@ import {
 } from "@/services/payment/paymentApi";
 import { CreatePriceOverrides } from "@/services/price-overrides/priceOverridesApi";
 import { CreateRoomHistory } from "@/services/room-history/roomHistoryApi";
-import { StayCreateService } from "@/services/stays/staysApi";
+import { StayCreateService, cancelStay } from "@/services/stays/staysApi";
 import { stayGuestsApi } from "@/services/stay-guests/stayGuestsApi";
 import {
   CreatePaymentDto,
@@ -422,12 +422,22 @@ export const useStays = () => {
     },
   });
 
+  const cancelStayMutation = useMutation({
+    mutationFn: cancelStay,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stays"] });
+      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      queryClient.invalidateQueries({ queryKey: ["room_history"] });
+    },
+  });
+
   return {
     staysQuery,
     createStay,
     createStayWithPayment,
     registerPayment,
     registerCheckInReserva,
+    cancelStay: cancelStayMutation,
   };
 };
 

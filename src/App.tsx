@@ -144,10 +144,19 @@ const AppContent: React.FC = () => {
           path="/employees"
           element={<EmployeeManagement userRole={roleName} />}
         />
-        <Route path="/limpieza/:stayId" element={<CleaningTaskPage />} />
-        <Route path="/mantenimiento/:stayId" element={<MaintenanceTaskPage />} />
-        <Route path="/cancelar-reserva/:stayId" element={<CancelReservationPage />} />
-        <Route path="/mover-reserva/:stayId" element={<MoveReservationPage />} />
+        <Route path="/limpieza/:room_id" element={<CleaningTaskPage />} />
+        <Route
+          path="/mantenimiento/:room_id"
+          element={<MaintenanceTaskPage />}
+        />
+        <Route
+          path="/cancelar-reserva/:stayId"
+          element={<CancelReservationPage />}
+        />
+        <Route
+          path="/mover-reserva/:stayId"
+          element={<MoveReservationPage />}
+        />
         <Route path="/settings" element={<Settings userRole={roleName} />} />
         <Route path="/profile" element={<MyProfile />} />
         <Route path="/reports" element={<Reports userRole={roleName} />} />

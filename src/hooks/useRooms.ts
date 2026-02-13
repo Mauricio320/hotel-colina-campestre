@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/config/supabase";
-import { Room, RoomRate } from "@/types";
+import { Room, RoomRate, Stay } from "@/types";
 
 export const useRooms = (category?: string) => {
   const queryClient = useQueryClient();
@@ -170,7 +170,7 @@ export const RoomsQueryCategory = (id: string) => {
 
       return (data as unknown as Room[]).map((room) => {
         accommodationType.forEach((stay) => {
-          room.stays.push(stay);
+          room.stays.push(stay as unknown as Stay);
         });
         return room;
       });
@@ -189,7 +189,7 @@ export const useRoomById = (roomId: string | null) => {
       if (!roomId) return null;
       const { data, error } = await supabase
         .from("rooms")
-        .select("*, rates:room_rates(*)")
+        .select("*, rates:room_rates(*), accommodation_types(name)")
         .eq("id", roomId)
         .single();
 

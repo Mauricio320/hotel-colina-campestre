@@ -252,6 +252,23 @@ Audit log for room status changes.
 
 Dynamic pricing based on person count per room.
 
+---
+
+### cleaning_logs
+
+Registros de limpieza realizadas en las habitaciones (separado de room_history).
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | uuid | PK | Unique identifier |
+| room_id | uuid | FK → rooms | Habitación que fue limpiada |
+| stay_id | uuid | FK → stays | Estancia asociada (optional) |
+| employee_id | uuid | FK → employees | Empleado de limpieza que realizó el aseo |
+| cleaning_type | text | NOT NULL | Tipo de limpieza: 'Aseo parcial' o 'Aseo general' |
+| date | date | NOT NULL | Fecha en que se realizó la limpieza (puede venir por URL) |
+| observation | text | | Observaciones adicionales sobre la limpieza |
+| created_at | timestamptz | DEFAULT now() | When cleaning was registered |
+
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | id | uuid | PK | Unique identifier |
@@ -286,6 +303,9 @@ room_history (stay_id) → stays
 room_history (previous_status_id, new_status_id) → room_statuses
 room_history (employee_id) → employees
 room_rates (room_id) → rooms
+cleaning_logs (room_id) → rooms
+cleaning_logs (stay_id) → stays
+cleaning_logs (employee_id) → employees
 ```
 
 ---
