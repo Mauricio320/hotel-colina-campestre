@@ -1,5 +1,6 @@
 import { CalendarTable } from "@/components/calendar/CalendarTable";
 import { RoomActionModal } from "@/components/calendar/RoomActionModal";
+import { RoomOccupiedModal } from "@/components/calendar/RoomOccupiedModal";
 import { RoomActionModalHeaderInfo } from "@/components/calendar/RoomActionModalHeaderInfo";
 import { StayInfoCard } from "@/components/forms/StayInfoCard";
 import { useBlockUI } from "@/context/BlockUIContext";
@@ -14,7 +15,6 @@ import { useNavigate } from "react-router-dom";
 
 interface CalendarGridProps {
   accommodationType: AccommodationType;
-  refectCalendar: () => void;
   roomStatuses: RoomStatus[];
   activeTab: number;
   days: Date[];
@@ -23,16 +23,20 @@ interface CalendarGridProps {
 export const CalendarGrid: React.FC<CalendarGridProps> = ({
   accommodationType,
   roomStatuses,
-  refectCalendar,
   activeTab,
   days,
 }) => {
-  const { data, isLoading } = RoomsQueryCategory(accommodationType.id);
+  const {
+    data,
+    isLoading,
+    refetch: refectCalendar,
+  } = RoomsQueryCategory(accommodationType.id);
   const { hideBlockUI, showBlockUI } = useBlockUI();
 
   const navigate = useNavigate();
 
   const [showAbonoCheckOutModal, setShowAbonoCheckOutModal] = useState(false);
+  const [showOccupiedModal, setShowOccupiedModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [activeStay, setActiveStay] = useState<Stay | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
@@ -63,9 +67,14 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
     setSelectedDate(date);
     setActiveStay(stay);
 
-    const hasActiveStay = stay?.origin_was_reservation;
+    // Si hay una estadía activa (habitación ocupada)
+    if (stay?.status === "Active") {
+      setShowOccupiedModal(true);
+      return;
+    }
 
-    if (hasActiveStay) {
+    // Si hay una reserva (origin_was_reservation)
+    if (stay?.origin_was_reservation) {
       setShowAbonoCheckOutModal(true);
       return;
     }
@@ -76,9 +85,9 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   const handleGoToCheckOut = () => {
     const id = activeStay?.id;
 
-    const accommodationTypeEnum = activeStay.accommodation_type_id
-      ? AccommodationTypeEnum.APARTAMENTO
-      : AccommodationTypeEnum.HABITACION;
+    const accommodationTypeEnum = activeStay?.room_id
+      ? AccommodationTypeEnum.HABITACION
+      : AccommodationTypeEnum.APARTAMENTO;
 
     const params = [`tab=${activeTab}`, `action=${accommodationTypeEnum}`];
     const url = `/check-out/${id}?${params.join("&")}`;
@@ -90,6 +99,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
     const url = `/check-in-payment/${activeStay?.id}?${params.join("&")}`;
     navigate(url);
   };
+  
+  
 
   return (
     <section>
@@ -99,6 +110,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
         getActiveStay={getActiveStay}
         handleRoomClick={handleRoomClick}
       />
+
+      {/* Modal para habitaciones disponibles (Check-in / Reservar) */}
       <RoomActionModal
         roomStatuses={roomStatuses}
         onHide={() => setShowActionModal(false)}
@@ -111,13 +124,23 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
         room={room}
       />
 
+      {/* Modal para habitaciones ocupadas (Check-out) */}
+      <RoomOccupiedModal
+        visible={showOccupiedModal}
+        onHide={() => setShowOccupiedModal(false)}
+        stay={activeStay}
+        room={room}
+        accommodationType={accommodationType}
+        date={selectedDate}
+        activeTab={activeTab}
+      />
+
+      {/* Modal para reservas (Abonar / Check-in) */}
       <Dialog
         header={
-          activeStay?.status === "Active"
-            ? "Check-outs"
-            : paymentStatus?.canCheckIn
-              ? "Reserva"
-              : "Abonar reserva"
+          paymentStatus?.canCheckIn
+            ? "Reserva"
+            : "Abonar reserva"
         }
         visible={showAbonoCheckOutModal}
         onHide={() => setShowAbonoCheckOutModal(false)}
@@ -127,7 +150,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
       >
         <div className="flex flex-col gap-5 py-2">
           <RoomActionModalHeaderInfo
-            accommodationTypeEnum={AccommodationTypeEnum.HABITACION}
+            accommodationTypeEnum={room ? AccommodationTypeEnum.HABITACION : AccommodationTypeEnum.APARTAMENTO}
             date={selectedDate}
             room={room}
           />

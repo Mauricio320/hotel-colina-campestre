@@ -188,7 +188,7 @@ export const StayInfoCard: React.FC<StayInfoCardProps> = ({
               className="p-3 bg-cyan-600 border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
               onClick={() =>
                 navigate(
-                  `/mover-reserva/${activeStay.id}?room_id=${activeStay.id}&tab=${activeTab}`,
+                  `/mover-reserva/${activeStay.id}?room_id=${activeStay.room_id}&accommodation_type_id=${activeStay?.room?.accommodation_type_id}&tab=${activeTab}`,
                 )
               }
             />

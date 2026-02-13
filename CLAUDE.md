@@ -94,41 +94,172 @@ src/
 
 ## Architecture Patterns
 
-### Data Fetching with TanStack Query
+### Three-Layer Architecture (Supabase Integration)
 
-All server state is managed via TanStack Query hooks in `/src/hooks/`:
+The project follows a strict three-layer architecture for data operations:
 
-```typescript
-// Pattern: useQuery for reads, useMutation for writes
-export const useGuests = () => {
-  const queryClient = useQueryClient();
-
-  const guestsQuery = useQuery({
-    queryKey: ['guests'],
-    queryFn: () => guestApi.fetchAll(),
-    staleTime: 1000 * 60 * 5
-  });
-
-  const upsertGuest = useMutation({
-    mutationFn: (guestData: Partial<Guest>) => guestApi.upsert(guestData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guests'] });
-    },
-  });
-
-  return { guestsQuery, upsertGuest };
-};
+```
+Component → Hook (TanStack Query) → Service (Supabase)
 ```
 
-### API Layer
+**Rule: Components NEVER call Supabase directly. Always use hooks.**
 
-Services in `/src/services/` use the Supabase client from `/src/config/supabase.ts`:
+---
+
+### Layer 1: Services (`/src/services/{table-name}/`)
+
+Services contain direct Supabase operations. One file per table with the same name:
 
 ```typescript
+// src/services/stays/staysApi.ts
 import { supabase } from "@/config/supabase";
+import { Stay } from "@/types";
 
 export const StayCreateService = (stayData: Stay) => {
   return supabase.from("stays").insert(stayData).select().single();
+};
+
+export const cancelStay = async (params: CancelStayParams): Promise<void> => {
+  // Direct Supabase operations
+  const { error } = await supabase
+    .from("stays")
+    .update({ status: "Cancelled" })
+    .eq("id", params.stayId);
+
+  if (error) throw error;
+};
+```
+
+**Naming conventions:**
+- Folder: `src/services/{table-name}/` (e.g., `stays/`, `rooms/`, `guests/`)
+- File: Same as table name (e.g., `staysApi.ts`, `roomsApi.ts`)
+- Functions: Descriptive action names (e.g., `createStay`, `updateRoom`, `fetchGuestById`)
+
+---
+
+### Layer 2: Hooks (`/src/hooks/`)
+
+Hooks wrap services with TanStack Query. File name matches the hook name:
+
+```typescript
+// src/hooks/useStays.ts
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { StayCreateService, cancelStay } from "@/services/stays/staysApi";
+
+export const useStays = () => {
+  const queryClient = useQueryClient();
+
+  // Read operations use useQuery
+  const staysQuery = useQuery({
+    queryKey: ["stays"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("stays")
+        .select("*, room:rooms(*), guest:guests(*)")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data as Stay[];
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // Write operations use useMutation
+  const cancelStayMutation = useMutation({
+    mutationFn: cancelStay,  // Calls service function
+    onSuccess: () => {
+      // Invalidate related queries
+      queryClient.invalidateQueries({ queryKey: ["stays"] });
+      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+    },
+  });
+
+  return {
+    staysQuery,
+    cancelStay: cancelStayMutation,
+  };
+};
+```
+
+**Naming conventions:**
+- File: `use{TableName}.ts` for queries, `use{Action}{Table}` for specific actions
+- Examples: `useStays.ts`, `useMoveStay.ts`, `useCancelStay.ts`
+- Returns: Object with `{table}Query` for reads, mutation functions for writes
+
+---
+
+### Layer 3: Components (`/src/pages/` and `/src/components/`)
+
+Components only use hooks, never Supabase directly:
+
+```typescript
+// src/pages/stays/SomePage.tsx
+import { useStays } from "@/hooks/useStays";
+import { useMoveStay } from "@/hooks/useMoveStay";
+
+const SomePage = () => {
+  // Use hooks for data fetching
+  const { staysQuery, cancelStay } = useStays();
+  const moveStay = useMoveStay();
+
+  const handleMove = async (data) => {
+    // Call mutation from hook
+    await moveStay.mutateAsync({
+      stayId: data.stayId,
+      newRoomId: data.newRoomId,
+      // ...
+    });
+  };
+
+  if (staysQuery.isLoading) return <Loading />;
+  if (staysQuery.error) return <Error message={staysQuery.error.message} />;
+
+  return <div>{/* Render staysQuery.data */}</div>;
+};
+```
+
+---
+
+### Complete Example Flow
+
+**Scenario:** Moving a reservation to another room
+
+1. **Service** (`src/services/stays/stayMovesApi.ts`):
+```typescript
+export const moveStay = async (params: MoveStayParams): Promise<void> => {
+  // Direct Supabase operations
+  const { error } = await supabase
+    .from("stays")
+    .update({ room_id: params.newRoomId })
+    .eq("id", params.stayId);
+
+  if (error) throw error;
+};
+```
+
+2. **Hook** (`src/hooks/useMoveStay.ts`):
+```typescript
+export const useMoveStay = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (params: MoveStayParams) => moveStay(params),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stays"] });
+      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+    },
+  });
+};
+```
+
+3. **Component** (`src/pages/stays/MoveReservationPage.tsx`):
+```typescript
+const MoveReservationPage = () => {
+  const moveStay = useMoveStay();
+
+  const onSubmit = async (data) => {
+    await moveStay.mutateAsync(data);
+  };
 };
 ```
 
@@ -149,6 +280,111 @@ Routes are defined in `App.tsx` with role-based protection:
 ### Global UI State
 
 `BlockUIContext` provides global loading overlay state for blocking UI during operations.
+
+### Forms with React Hook Form
+
+All forms must use **React Hook Form** for state management and validation:
+
+```typescript
+import { useForm, Controller } from "react-hook-form";
+import { Dropdown } from "primereact/dropdown";
+import { Calendar } from "primereact/calendar";
+import { InputTextarea } from "primereact/inputtextarea";
+
+interface FormData {
+  roomId: string;
+  checkInDate: Date;
+  checkOutDate: Date;
+  observation: string;
+}
+
+const MyForm = () => {
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<FormData>({
+    mode: "onChange",
+    defaultValues: {
+      roomId: "",
+      checkInDate: null,
+      checkOutDate: null,
+      observation: "",
+    },
+  });
+
+  const onSubmit = (data: FormData) => {
+    // Handle submission
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {/* Dropdown with error message */}
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-bold text-gray-700">
+          Habitación <span className="text-amber-500">*</span>
+        </label>
+        <Controller
+          name="roomId"
+          control={control}
+          rules={{ required: "Campo requerido" }}
+          render={({ field }) => (
+            <Dropdown
+              {...field}
+              options={roomOptions}
+              placeholder="Seleccionar habitación"
+              className={errors.roomId ? "p-invalid" : ""}
+            />
+          )}
+        />
+        {errors.roomId && (
+          <p className="text-xs text-red-500">{errors.roomId.message}</p>
+        )}
+      </div>
+
+      {/* Textarea with error message */}
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-bold text-gray-700">
+          Observación <span className="text-amber-500">*</span>
+        </label>
+        <Controller
+          name="observation"
+          control={control}
+          rules={{ required: "Campo requerido" }}
+          render={({ field }) => (
+            <InputTextarea
+              {...field}
+              placeholder="Ingrese la observación..."
+              rows={3}
+              className={`w-full border-gray-200 rounded-xl ${errors.observation ? "p-invalid" : ""}`}
+            />
+          )}
+        />
+        {errors.observation && (
+          <p className="text-xs text-red-500">{errors.observation.message}</p>
+        )}
+      </div>
+
+      {/* Submit button - no disabled state needed */}
+      <Button
+        type="submit"
+        label="Guardar"
+        className="bg-amber-500 hover:bg-amber-600 border-none text-white w-full py-4 text-lg font-black rounded-2xl"
+      />
+    </form>
+  );
+};
+```
+
+**Key patterns:**
+- Use `Controller` for PrimeReact components (Dropdown, Calendar, InputText, etc.)
+- Set `mode: "onChange"` for real-time validation
+- Use `watch()` to react to field changes
+- **Show error messages** using `errors.fieldName.message` - don't just disable the button
+- Add `p-invalid` class to PrimeReact components when there's an error
+- Mark required fields with `<span className="text-amber-500">*</span>`
+- **Button should NOT be disabled** - let users see validation errors when they try to submit
 
 ## Key Domain Concepts
 

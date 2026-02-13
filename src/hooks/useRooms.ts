@@ -143,7 +143,7 @@ export const RoomsQueryCategory = (id: string) => {
           room_statuses(*)`,
         )
         .eq("accommodation_type_id", id)
-        .eq("active", true)
+        .eq("cancelled", false)
         .abortSignal(signal);
 
       const { data } = await supabase
@@ -164,7 +164,7 @@ export const RoomsQueryCategory = (id: string) => {
         )
         .eq("is_active", true)
         .eq("accommodation_type_id", id)
-        .eq("stays.active", true)
+        .eq("stays.cancelled", false)
         .abortSignal(signal)
         .order("room_number");
 

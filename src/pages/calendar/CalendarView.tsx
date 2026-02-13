@@ -1,10 +1,8 @@
 import { CalendarGrid } from "@/components/calendar/CalendarGrid";
 import { CalendarHeader } from "@/components/calendar/CalendarHeader";
-import { ErrorState } from "@/components/ui/ErrorState";
 import { SkeletonUI } from "@/components/ui/SkeletonUI";
 import { useBlockUI } from "@/context/BlockUIContext";
 import { useAccommodationTypes } from "@/hooks/useAccommodationTypes";
-import { usePaymentMethods } from "@/hooks/usePaymentMethods";
 import { useRooms } from "@/hooks/useRooms";
 import { useRoomStatuses } from "@/hooks/useRoomStatuses";
 import { useStays } from "@/hooks/useStays";
@@ -14,7 +12,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import React, { useEffect, useMemo, useState } from "react";
 
 const CalendarView: React.FC = () => {
-  const { showBlockUI, hideBlockUI } = useBlockUI();
+  const { showBlockUI } = useBlockUI();
 
   const [activeTab, setActiveTab] = useState(0);
   const [startDate, setStartDate] = useState(dayjs().toDate());
@@ -23,20 +21,16 @@ const CalendarView: React.FC = () => {
   const { staysQuery } = useStays();
 
   const roomStatuses = useRoomStatuses();
-  const paymentMethods = usePaymentMethods();
 
   const { parseTabParam, scrollToTabView } = useUrlParams();
 
   const { fetchAll: accommodationTypesQuery } = useAccommodationTypes();
 
   const isLoading =
-    (roomsQuery.isLoading && !roomsQuery.data) ||
-    (staysQuery.isLoading && !staysQuery.data) ||
+    roomsQuery.isLoading ||
+    staysQuery.isLoading ||
     roomStatuses.isLoading ||
-    paymentMethods.fetchAll.isLoading ||
     accommodationTypesQuery.isLoading;
-
-  const isError = roomsQuery.isError || staysQuery.isError;
 
   useEffect(() => {
     showBlockUI(`Cargando Calendario`);
@@ -58,20 +52,6 @@ const CalendarView: React.FC = () => {
 
   if (isLoading) return <SkeletonUI />;
 
-  if (isError)
-    return (
-      <ErrorState
-        onRetry={() => {
-          roomsQuery.refetch();
-          staysQuery.refetch();
-          roomStatuses.refetch();
-          paymentMethods.fetchAll.refetch();
-          accommodationTypesQuery.refetch();
-        }}
-        onRefresh={() => window.location.reload()}
-      />
-    );
-
   return (
     <div className="flex flex-col gap-6">
       <CalendarHeader startDate={startDate} onStartDateChange={setStartDate} />
@@ -83,7 +63,6 @@ const CalendarView: React.FC = () => {
         {accommodationTypesQuery.data?.map((type) => (
           <TabPanel key={type.id} header={type.name}>
             <CalendarGrid
-              refectCalendar={() => roomsQuery.refetch()}
               roomStatuses={roomStatuses?.data || []}
               accommodationType={type}
               activeTab={activeTab}

@@ -97,7 +97,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                       </span>
 
                       <span className="text-[12px] mt-1 flex items-center">
-                        #{stay.order_number} - {stay.guest?.first_name}
+                        #{stay.order_number} - {stay.guest?.first_name} {String(stay.active)}
                       </span>
                     </div>
                   );

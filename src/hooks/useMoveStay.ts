@@ -1,5 +1,19 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { moveStay, MoveStayParams } from "@/services/stays/stayMovesApi";
+import {
+  checkRoomAvailability,
+  moveStay,
+  MoveStayParams
+} from "@/services/stays/stayMovesApi";
+import {
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+
+interface CheckAvailabilityParams {
+  roomId: string;
+  checkInDate: string;
+  checkOutDate: string;
+  excludeStayId: string;
+}
 
 export const useMoveStay = () => {
   const queryClient = useQueryClient();
@@ -11,5 +25,17 @@ export const useMoveStay = () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
       queryClient.invalidateQueries({ queryKey: ["room_history"] });
     },
+  });
+};
+
+export const useCheckRoomAvailability = () => {
+  return useMutation({
+    mutationFn: (params: CheckAvailabilityParams) =>
+      checkRoomAvailability(
+        params.roomId,
+        params.checkInDate,
+        params.checkOutDate,
+        params.excludeStayId
+      ),
   });
 };

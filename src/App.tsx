@@ -132,7 +132,6 @@ const AppContent: React.FC = () => {
         <Route path="/rooms/edit/:roomId" element={<RoomFormPage />} />
         <Route path="/rooms/history/:roomId" element={<RoomHistoryPage />} />
         <Route path="/check-in-payment/:stayId" element={<CheckInPayment />} />
-        <Route path="/booking-movements" element={<BookingMovements />} />
         <Route path="/room-payments" element={<RoomPayments />} />
         <Route path="/payments-invoice" element={<PaymentsInvoice />} />
         <Route path="/invoice/:stayId" element={<InvoiceDetailPage />} />

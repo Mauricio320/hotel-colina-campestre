@@ -67,7 +67,6 @@ const CancelReservationPage: React.FC = () => {
   };
 
   const confirmCancel = () => {
-    console.log("confirmCancel llamado, observacion:", observation);
     if (!observation.trim()) {
       console.log("Observacion vacia, retornando");
       return;
@@ -203,7 +202,6 @@ const CancelReservationPage: React.FC = () => {
             icon="pi pi-times-circle"
             className="bg-red-500 hover:bg-red-600 border-none text-white w-full py-4 text-lg font-black rounded-2xl shadow-lg mt-2"
             onClick={() => {
-              console.log("Boton clickeado, isFormValid:", isFormValid);
               confirmCancel();
             }}
             disabled={!isFormValid || cancelStay.isPending}

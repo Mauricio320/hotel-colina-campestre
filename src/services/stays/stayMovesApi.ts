@@ -13,13 +13,21 @@ export interface MoveStayParams {
   stayStatusId: string;
 }
 
+export interface ConflictingStay {
+  id: string;
+  order_number: number;
+  guest_name: string;
+  check_in_date: string;
+  check_out_date: string;
+  room?: {
+    id: string;
+    room_number: string;
+  };
+}
+
 export interface AvailabilityCheckResult {
   available: boolean;
-  conflictingStays?: Array<{
-    id: string;
-    order_number: number;
-    guest_name: string;
-  }>;
+  conflictingStays?: ConflictingStay[];
 }
 
 export const checkRoomAvailability = async (
@@ -30,11 +38,14 @@ export const checkRoomAvailability = async (
 ): Promise<AvailabilityCheckResult> => {
   const { data, error } = await supabase
     .from("stays")
-    .select("id, order_number, guest:guests!stays_guest_id_fkey(first_name, last_name)")
+    .select(
+      `id, order_number, check_in_date, check_out_date,
+      guest:guests!stays_guest_id_fkey(first_name, last_name),
+      room:rooms(id, room_number)`,
+    )
     .eq("room_id", roomId)
-    .eq("active", true)
+    .eq("cancelled", false)
     .neq("id", excludeStayId)
-    .or(`status.eq.Active,status.eq.Reserved`)
     .lt("check_in_date", checkOutDate)
     .gt("check_out_date", checkInDate);
 
@@ -46,9 +57,17 @@ export const checkRoomAvailability = async (
       conflictingStays: data.map((stay: any) => ({
         id: stay.id,
         order_number: stay.order_number,
+        check_in_date: stay.check_in_date,
+        check_out_date: stay.check_out_date,
         guest_name: stay.guest
           ? `${stay.guest.first_name} ${stay.guest.last_name}`
           : "Sin huésped",
+        room: stay.room
+          ? {
+              id: stay.room.id,
+              room_number: stay.room.room_number,
+            }
+          : undefined,
       })),
     };
   }
@@ -66,33 +85,24 @@ export const moveStay = async (params: MoveStayParams): Promise<void> => {
     moveDate,
     employeeId,
     observation,
-    stayStatusId,
   } = params;
 
   const isRoomChange = currentRoomId !== newRoomId;
 
-  const availability = await checkRoomAvailability(
-    newRoomId,
-    newCheckInDate,
-    newCheckOutDate,
-    stayId,
-  );
-
-  if (!availability.available) {
-    throw new Error(
-      `La habitación no está disponible para las fechas seleccionadas. Conflicto con reserva #${availability.conflictingStays?.[0]?.order_number}`,
-    );
+  // Validar que los IDs de habitación no estén vacíos
+  if (!currentRoomId || !newRoomId) {
+    throw new Error("Los IDs de habitación son requeridos");
   }
 
   const { data: currentRoomStatus } = await supabase
     .from("rooms")
-    .select("status_id")
+    .select("room_number")
     .eq("id", currentRoomId)
     .single();
 
   const { data: newRoomStatus } = await supabase
     .from("rooms")
-    .select("status_id")
+    .select("room_number")
     .eq("id", newRoomId)
     .single();
 
@@ -120,13 +130,9 @@ export const moveStay = async (params: MoveStayParams): Promise<void> => {
     .eq("id", stayId)
     .single();
 
-  const todayStr = new Date().toLocaleDateString("sv-SE");
   const isStayActive = stay?.status === "Active";
-  const isCheckInToday = stay?.check_in_date === todayStr;
 
-  const targetStatusId = isStayActive
-    ? occupiedStatus?.id
-    : reservedStatus?.id;
+  const targetStatusId = isStayActive ? occupiedStatus?.id : reservedStatus?.id;
 
   const { error: updateStayError } = await supabase
     .from("stays")
@@ -141,34 +147,14 @@ export const moveStay = async (params: MoveStayParams): Promise<void> => {
   if (updateStayError) throw updateStayError;
 
   if (isRoomChange) {
-    const { error: updateOldRoomError } = await supabase
-      .from("rooms")
-      .update({
-        status_id: availableStatus?.id,
-      })
-      .eq("id", currentRoomId);
-
-    if (updateOldRoomError) throw updateOldRoomError;
-
-    const { error: updateNewRoomError } = await supabase
-      .from("rooms")
-      .update({
-        status_id: targetStatusId,
-      })
-      .eq("id", newRoomId);
-
-    if (updateNewRoomError) throw updateNewRoomError;
-
     const historyRecordOldRoom: Omit<RoomHistory, "id" | "timestamp"> = {
       room_id: currentRoomId,
       stay_id: stayId,
-      previous_status_id: currentRoomStatus?.status_id,
+      previous_status_id: reservedStatus?.id,
       new_status_id: availableStatus?.id,
       employee_id: employeeId,
       action_type: "CAMBIO HABITACION",
-      observation:
-        observation ||
-        `Movimiento de reserva a habitación nueva. Fecha del movimiento: ${moveDate}`,
+      observation: `Movimiento de reserva a habitación ${newRoomStatus.room_number}. Fecha del movimiento: ${moveDate} | ${observation}`,
     };
 
     const { error: historyOldError } = await supabase
@@ -180,13 +166,11 @@ export const moveStay = async (params: MoveStayParams): Promise<void> => {
     const historyRecordNewRoom: Omit<RoomHistory, "id" | "timestamp"> = {
       room_id: newRoomId,
       stay_id: stayId,
-      previous_status_id: newRoomStatus?.status_id,
+      previous_status_id: availableStatus?.id,
       new_status_id: targetStatusId,
       employee_id: employeeId,
       action_type: "CAMBIO HABITACION",
-      observation:
-        observation ||
-        `Reserva recibida desde habitación anterior. Fecha del movimiento: ${moveDate}. Nuevas fechas: ${newCheckInDate} a ${newCheckOutDate}`,
+      observation: `Reserva recibida desde habitación ${currentRoomStatus.room_number}. Fecha del movimiento: ${moveDate}. Nuevas fechas: ${newCheckInDate} a ${newCheckOutDate} | ${observation}`,
     };
 
     const { error: historyNewError } = await supabase
@@ -198,13 +182,11 @@ export const moveStay = async (params: MoveStayParams): Promise<void> => {
     const historyRecord: Omit<RoomHistory, "id" | "timestamp"> = {
       room_id: newRoomId,
       stay_id: stayId,
-      previous_status_id: currentRoomStatus?.status_id,
+      previous_status_id: reservedStatus.id,
       new_status_id: targetStatusId,
       employee_id: employeeId,
       action_type: "CAMBIO FECHAS",
-      observation:
-        observation ||
-        `Cambio de fechas de la reserva. Fecha del movimiento: ${moveDate}. Nuevas fechas: ${newCheckInDate} a ${newCheckOutDate}`,
+      observation: `Cambio de fechas de la reserva. Fecha del movimiento: ${moveDate}. Nuevas fechas: ${newCheckInDate} a ${newCheckOutDate} | ${observation}`,
     };
 
     const { error: historyError } = await supabase

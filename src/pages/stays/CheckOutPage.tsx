@@ -48,7 +48,6 @@ const CheckOutPage: React.FC = () => {
           status: "Completed",
           observation: _observation,
           active: false,
-          room_status_id: disponibleStatus.id,
         })
         .eq("id", stay.id);
 

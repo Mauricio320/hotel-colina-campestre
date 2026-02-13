@@ -29,7 +29,6 @@ export const useStays = () => {
           .select("*, room:rooms(*), guest:guests!stays_guest_id_fkey(*)")
           .abortSignal(signal) // Vinculamos la señal de aborto de React Query
           .order("created_at", { ascending: false });
-        console.log(data);
 
         if (error) throw error;
         return data as Stay[];
