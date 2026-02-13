@@ -79,6 +79,8 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                 const stay = getActiveStay(room, d);
 
                 const dateStr = dayjs(d).format("YYYY-MM-DD");
+                const todayStr = dayjs().format("YYYY-MM-DD");
+                const isToday = dateStr === todayStr;
                 let statusColor =
                   stay?.room_statuses?.color ||
                   STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color;
@@ -87,8 +89,14 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
 
                 if (stay) {
                   const isFullRental = !stay.room_id;
+                  const isActive = stay.active !== false;
                   // Verificar si es el día de salida
                   isCheckOutDay = dateStr === stay.check_out_date;
+
+                  // Si el stay está inactivo, usar color azul grisáceo
+                  if (!isActive) {
+                    statusColor = 'bg-[#a8b6cd]';
+                  }
 
                   cellContent = (
                     <div className="flex flex-col items-center leading-none gap-0.5 w-full">
@@ -97,7 +105,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                       </span>
 
                       <span className="text-[12px] mt-1 flex items-center">
-                        #{stay.order_number} - {stay.guest?.first_name} {String(stay.active)}
+                        #{stay.order_number} - {stay.guest?.first_name}
                       </span>
                     </div>
                   );
@@ -114,6 +122,24 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                   );
                 }
 
+                // Indicador de limpieza para el día actual
+                const cleaningIndicator = isToday ? (
+                  room.cleaning_log && room.cleaning_log.length > 0 ? (
+                    <i
+                      className="pi pi-check-circle text-[15px] absolute top-2 right-2 text-green-200 font-bold"
+                      title="Limpieza realizada"
+                      style={{ WebkitTextStroke: '1px black' }}
+                    ></i>
+                  ) : (
+                    <span
+                      className="absolute top-2 right-2 text-[10px]"
+                      title="Pendiente por limpieza"
+                    >
+                      🧹
+                    </span>
+                  )
+                ) : null;
+
                 const nextStay = getStayStartingOnDate(room, d);
                 const hasNextStay = isCheckOutDay && nextStay;
 
@@ -126,15 +152,16 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                       <div className="h-10 w-full rounded-lg flex overflow-hidden">
                         {/* Mitad izquierda: ocupada - abre modal de estadía */}
                         <div
-                          className={`${statusColor} text-white font-bold h-full w-1/2 flex items-center  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; justify-center rounded-l-lg rounded-r-none border-r-2 border-white/50 cursor-pointer hover:opacity-90`}
+                          className={`${statusColor} text-white font-bold h-full w-1/2 flex items-center  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; justify-center rounded-l-lg rounded-r-none border-r-2 border-white/50 cursor-pointer hover:opacity-90 relative`}
                           onClick={() => handleRoomClick(room, d, stay || null)}
                         >
                           {cellContent}
+                          {cleaningIndicator}
                         </div>
                         {/* Mitad derecha: siguiente estancia si existe, sino disponible */}
                         {hasNextStay ? (
                           <div
-                            className={`${nextStay?.room_statuses?.color || statusColor} h-full w-1/2 flex items-center justify-center rounded-r-lg rounded-l-none cursor-pointer hover:opacity-90`}
+                            className={`${nextStay?.room_statuses?.color || statusColor} h-full w-1/2 flex items-center justify-center rounded-r-lg rounded-l-none cursor-pointer hover:opacity-90 relative`}
                             onClick={() =>
                               handleRoomClick(room, d, nextStay || null)
                             }
@@ -148,20 +175,24 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                                 {nextStay?.guest?.first_name}
                               </span>
                             </div>
+                            {cleaningIndicator}
                           </div>
                         ) : (
                           <div
-                            className={`${STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color} h-full w-1/2 flex items-center justify-center rounded-r-lg rounded-l-none cursor-pointer hover:opacity-90`}
+                            className={`${STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color} h-full w-1/2 flex items-center justify-center rounded-r-lg rounded-l-none cursor-pointer hover:opacity-90 relative`}
                             onClick={() => handleRoomClick(room, d, null)}
-                          ></div>
+                          >
+                            {cleaningIndicator}
+                          </div>
                         )}
                       </div>
                     ) : (
                       <div
-                        className={`h-10 text-gray-700 w-full rounded-lg flex items-center justify-center text-white font-bold transition-all ${statusColor}  overflow-hidden cursor-pointer`}
+                        className={`h-10 text-gray-700 w-full rounded-lg flex items-center justify-center text-white font-bold transition-all ${statusColor}  overflow-hidden cursor-pointer relative`}
                         onClick={() => handleRoomClick(room, d, stay)}
                       >
                         {cellContent}
+                        {cleaningIndicator}
                       </div>
                     )}
                   </td>

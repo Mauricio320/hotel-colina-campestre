@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/config/supabase";
 import { Room, RoomRate, Stay } from "@/types";
+import dayjs from "dayjs";
 
 export const useRooms = (category?: string) => {
   const queryClient = useQueryClient();
@@ -95,7 +96,7 @@ export const useRooms = (category?: string) => {
         .select("status_id, status_date")
         .eq("id", roomId)
         .single();
-      const targetDate = statusDate || new Date().toLocaleDateString("sv-SE");
+      const targetDate = statusDate || dayjs().format("YYYY-MM-DD");
 
       const { error: roomError } = await supabase
         .from("rooms")
@@ -134,11 +135,13 @@ export const RoomsQueryCategory = (id: string) => {
   return useQuery({
     queryKey: ["rooms", id],
     queryFn: async ({ signal }) => {
+      const todayStr = dayjs().format("YYYY-MM-DD");
+
       const { data: accommodationType } = await supabase
         .from("stays")
         .select(
-          `id, status, order_number, room_id, guest_id, employee_id, check_in_date, check_out_date, total_price, paid_amount, payment_method_id, has_extra_mattress, extra_mattress_price, is_invoice_requested, iva_amount, observation, origin_was_reservation, iva_percentage, person_count, extra_mattress_count, extra_mattress_unit_price, accommodation_type_id, room_status_id, active, 
-          room:rooms(*),  
+          `id, status, order_number, room_id, guest_id, employee_id, check_in_date, check_out_date, total_price, paid_amount, payment_method_id, has_extra_mattress, extra_mattress_price, is_invoice_requested, iva_amount, observation, origin_was_reservation, iva_percentage, person_count, extra_mattress_count, extra_mattress_unit_price, accommodation_type_id, room_status_id, active,
+          room:rooms(*),
           guest:guests!stays_guest_id_fkey(*),
           room_statuses(*)`,
         )
@@ -159,16 +162,22 @@ export const RoomsQueryCategory = (id: string) => {
       guest:guests!stays_guest_id_fkey(*),
       room_statuses(*)
     ),
+    cleaning_log: cleaning_logs(id),
     accommodation_types(*)
   `,
         )
         .eq("is_active", true)
         .eq("accommodation_type_id", id)
         .eq("stays.cancelled", false)
+        .eq("cleaning_log.date", todayStr)
         .abortSignal(signal)
         .order("room_number");
 
       return (data as unknown as Room[]).map((room) => {
+        // Si no hay cleaning_log, inicializar como array vacío
+        if (!room.cleaning_log) {
+          room.cleaning_log = [];
+        }
         accommodationType.forEach((stay) => {
           room.stays.push(stay as unknown as Stay);
         });

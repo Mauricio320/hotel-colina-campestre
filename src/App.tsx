@@ -13,16 +13,12 @@ import {
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 
 // Components
-import Layout from "./components/layout/Layout";
 import Login from "@/pages/auth/Login";
 import RegisterAdmin from "@/pages/auth/RegisterAdmin";
-import BookingMovements from "@/pages/bookings/BookingMovements";
 import CalendarView from "@/pages/calendar/CalendarView";
 import Dashboard from "@/pages/dashboard/Dashboard";
 import EmployeeManagement from "@/pages/employees/EmployeeManagement";
 import GuestManagement from "@/pages/guests/GuestManagement";
-import CleaningLogs from "@/pages/logs/CleaningLogs.tsx";
-import MaintenanceLogs from "@/pages/logs/MaintenanceLogs.tsx";
 import CleaningTaskPage from "@/pages/logs/CleaningTaskPage";
 import MaintenanceTaskPage from "@/pages/logs/MaintenanceTaskPage";
 import InvoiceDetailPage from "@/pages/payments/InvoiceDetailPage";
@@ -34,10 +30,11 @@ import RoomFormPage from "@/pages/rooms/RoomFormPage";
 import RoomHistoryPage from "@/pages/rooms/RoomHistoryPage";
 import RoomManagement from "@/pages/rooms/RoomManagement";
 import Settings from "@/pages/settings/Settings";
+import CancelReservationPage from "@/pages/stays/CancelReservationPage";
 import CheckInPage from "@/pages/stays/CheckInPage";
 import CheckOutPage from "@/pages/stays/CheckOutPage";
-import CancelReservationPage from "@/pages/stays/CancelReservationPage";
 import MoveReservationPage from "@/pages/stays/MoveReservationPage";
+import Layout from "./components/layout/Layout";
 
 const queryClient = new QueryClient();
 
@@ -166,8 +163,8 @@ const AppContent: React.FC = () => {
   );
 };
 
-import { BlockUIProvider } from "./context/BlockUIContext";
 import { CheckInPayment } from "@/pages/stays/CheckInPayment";
+import { BlockUIProvider } from "./context/BlockUIContext";
 
 const App: React.FC = () => {
   return (

@@ -33,6 +33,7 @@ export interface Room {
   rates?: RoomRate[];
   status?: RoomStatus;
   stays?: Stay[];
+  cleaning_log?: CleaningLog[];
 }
 
 export interface RoomRate {

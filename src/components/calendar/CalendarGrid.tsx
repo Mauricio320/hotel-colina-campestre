@@ -1,6 +1,7 @@
 import { CalendarTable } from "@/components/calendar/CalendarTable";
 import { RoomActionModal } from "@/components/calendar/RoomActionModal";
 import { RoomOccupiedModal } from "@/components/calendar/RoomOccupiedModal";
+import { StayInactiveModal } from "@/components/calendar/StayInactiveModal";
 import { RoomActionModalHeaderInfo } from "@/components/calendar/RoomActionModalHeaderInfo";
 import { StayInfoCard } from "@/components/forms/StayInfoCard";
 import { useBlockUI } from "@/context/BlockUIContext";
@@ -37,6 +38,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
 
   const [showAbonoCheckOutModal, setShowAbonoCheckOutModal] = useState(false);
   const [showOccupiedModal, setShowOccupiedModal] = useState(false);
+  const [showInactiveModal, setShowInactiveModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [activeStay, setActiveStay] = useState<Stay | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
@@ -66,6 +68,12 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
     setRoom(roomC);
     setSelectedDate(date);
     setActiveStay(stay);
+
+    // Si hay un stay inactivo (finalizado)
+    if (stay?.active === false) {
+      setShowInactiveModal(true);
+      return;
+    }
 
     // Si hay una estadía activa (habitación ocupada)
     if (stay?.status === "Active") {
@@ -128,6 +136,17 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
       <RoomOccupiedModal
         visible={showOccupiedModal}
         onHide={() => setShowOccupiedModal(false)}
+        stay={activeStay}
+        room={room}
+        accommodationType={accommodationType}
+        date={selectedDate}
+        activeTab={activeTab}
+      />
+
+      {/* Modal para stays inactivos (Ver orden / Limpieza / Mantenimiento) */}
+      <StayInactiveModal
+        visible={showInactiveModal}
+        onHide={() => setShowInactiveModal(false)}
         stay={activeStay}
         room={room}
         accommodationType={accommodationType}

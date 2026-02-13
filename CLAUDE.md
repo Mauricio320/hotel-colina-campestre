@@ -386,6 +386,36 @@ const MyForm = () => {
 - Mark required fields with `<span className="text-amber-500">*</span>`
 - **Button should NOT be disabled** - let users see validation errors when they try to submit
 
+## Date Handling
+
+**Always use Day.js** for date manipulation and formatting. Never use native JavaScript Date methods.
+
+```typescript
+import dayjs from "dayjs";
+
+// Format date for display
+const displayDate = dayjs(date).format("DD/MM/YYYY");
+
+// Format date for database (ISO format)
+const dbDate = dayjs().format("YYYY-MM-DD");
+
+// Date calculations
+const nights = dayjs(checkOut).diff(dayjs(checkIn), "day");
+
+// Compare dates
+const isAfter = dayjs(date1).isAfter(dayjs(date2));
+
+// Get today
+const today = dayjs().format("YYYY-MM-DD");
+```
+
+**Never use:**
+```typescript
+// ❌ Bad - Don't use native Date
+new Date().toLocaleDateString("sv-SE");
+new Date().toISOString();
+```
+
 ## Key Domain Concepts
 
 ### Stay Lifecycle
