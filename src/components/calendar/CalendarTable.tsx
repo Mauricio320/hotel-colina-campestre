@@ -23,6 +23,15 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
     return room.stays?.find((stay) => stay.check_in_date === dateStr);
   };
 
+  const getStayEndingOnDate = (room: Room, date: Date) => {
+    const dateStr = dayjs(date).format("YYYY-MM-DD");
+    return room.stays?.find(
+      (stay) =>
+        stay.check_out_date === dateStr &&
+        stay.origin_was_reservation === false,
+    );
+  };
+
   const todayStr = dayjs().format("YYYY-MM-DD");
   const todayRooms = data.filter((room) => {
     const hasCheckoutToday = room.stays?.some((stay) => {
@@ -154,10 +163,8 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                   if (stay) {
                     const isFullRental = !stay.room_id;
                     const isActive = stay.active !== false;
-                    // Verificar si es el día de salida
                     isCheckOutDay = dateStr === stay.check_out_date;
 
-                    // Si el stay está inactivo, usar color azul grisáceo
                     if (!isActive) {
                       statusColor = "bg-[#a8b6cd]";
                     }
@@ -207,6 +214,12 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                   const nextStay = getStayStartingOnDate(room, d);
                   const hasNextStay = isCheckOutDay && nextStay;
 
+                  const isCheckInDay = stay && dateStr === stay.check_in_date;
+                  const previousStay = isCheckInDay
+                    ? getStayEndingOnDate(room, d)
+                    : null;
+                  const hasPreviousStay = isCheckInDay && previousStay;
+
                   return (
                     <td
                       key={d.getTime()}
@@ -222,8 +235,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                             }
                           >
                             {cellContent}
-                            {cleaningIndicator}{" "}
-                            {String(stay?.origin_was_reservation)}
+                            {cleaningIndicator}
                           </div>
                           {/* Mitad derecha: siguiente estancia si existe, sino disponible */}
                           {hasNextStay ? (
@@ -239,8 +251,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                                 </span>
                                 <span className="text-[12px] mt-1 flex items-center">
                                   #{nextStay?.order_number} -{" "}
-                                  {nextStay?.guest?.first_name}{" "}
-                                  {String(stay?.origin_was_reservation)}
+                                  {nextStay?.guest?.first_name}
                                 </span>
                               </div>
                               {cleaningIndicator}
@@ -250,20 +261,48 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                               className={`${STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color} h-full w-1/2 flex items-center justify-center rounded-r-lg rounded-l-none cursor-pointer hover:opacity-90 relative`}
                               onClick={() => handleRoomClick(room, d, null)}
                             >
-                              {cleaningIndicator}{" "}
-                              {String(stay?.origin_was_reservation)}
+                              {cleaningIndicator}
                             </div>
                           )}
                         </div>
+                      ) : hasPreviousStay ? (
+                        <div className="h-10 w-full rounded-lg flex overflow-hidden">
+                          {/* Mitad izquierda: estadía anterior que termina */}
+                          <div
+                            className={`${statusColor} text-white font-bold h-full w-1/2 flex items-center justify-center rounded-l-lg rounded-r-none border-r-2 border-white/50 cursor-pointer hover:opacity-90 relative`}
+                            onClick={() =>
+                              handleRoomClick(room, d, previousStay)
+                            }
+                          >
+                            <div
+                              className={` flex flex-col items-center leading-none gap-0.5 w-full`}
+                            >
+                              <span className="text-[9px] font-black opacity-90 uppercase">
+                                {!previousStay?.room_id ? "🏠" : "🛏️"}
+                              </span>
+                              <span className="text-[12px] mt-1 flex items-center">
+                                #{previousStay?.order_number} -{" "}
+                                {previousStay?.guest?.first_name}
+                              </span>
+                            </div>
+                            {cleaningIndicator}
+                          </div>
+                          {/* Mitad derecha: nueva estadía (check-in) */}
+                          <div
+                            className={`${statusColor} h-full w-1/2 flex items-center justify-center rounded-r-lg rounded-l-none cursor-pointer hover:opacity-90 relative`}
+                            onClick={() => handleRoomClick(room, d, stay)}
+                          >
+                            {cellContent}
+                            {cleaningIndicator}
+                          </div>
+                        </div>
                       ) : (
-                        // TODO: PENDIENTE TERMINAR INDICADOR DE LAS HABITACIONES PARA LIMPIEZA Y LAZY LOAD PARA CARGAR LA INFORMACION
                         <div
                           className={`h-10 text-gray-700 w-full rounded-lg flex items-center justify-center text-white font-bold transition-all ${statusColor}  overflow-hidden cursor-pointer relative`}
                           onClick={() => handleRoomClick(room, d, stay)}
                         >
                           {cellContent}
-                          {cleaningIndicator}{" "}
-                          {String(stay?.origin_was_reservation)}
+                          {cleaningIndicator}
                         </div>
                       )}
                     </td>
