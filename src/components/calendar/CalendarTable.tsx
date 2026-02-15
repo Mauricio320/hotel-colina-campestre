@@ -265,28 +265,35 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                             </div>
                           )}
                         </div>
-                      ) : hasPreviousStay ? (
+                      ) : isCheckInDay ? (
                         <div className="h-10 w-full rounded-lg flex overflow-hidden">
-                          {/* Mitad izquierda: estadía anterior que termina */}
-                          <div
-                            className={`${statusColor} text-white font-bold h-full w-1/2 flex items-center justify-center rounded-l-lg rounded-r-none border-r-2 border-white/50 cursor-pointer hover:opacity-90 relative`}
-                            onClick={() =>
-                              handleRoomClick(room, d, previousStay)
-                            }
-                          >
+                          {/* Mitad izquierda: estadía anterior si existe, sino disponible */}
+                          {hasPreviousStay ? (
                             <div
-                              className={` flex flex-col items-center leading-none gap-0.5 w-full`}
+                              className={`${statusColor} text-white font-bold h-full w-1/2 flex items-center justify-center rounded-l-lg rounded-r-none border-r-2 border-white/50 cursor-pointer hover:opacity-90 relative`}
+                              onClick={() =>
+                                handleRoomClick(room, d, previousStay)
+                              }
                             >
-                              <span className="text-[9px] font-black opacity-90 uppercase">
-                                {!previousStay?.room_id ? "🏠" : "🛏️"}
-                              </span>
-                              <span className="text-[12px] mt-1 flex items-center">
-                                #{previousStay?.order_number} -{" "}
-                                {previousStay?.guest?.first_name}
-                              </span>
+                              <div className="flex flex-col items-center leading-none gap-0.5 w-full">
+                                <span className="text-[9px] font-black opacity-90 uppercase">
+                                  {!previousStay?.room_id ? "🏠" : "🛏️"}
+                                </span>
+                                <span className="text-[12px] mt-1 flex items-center">
+                                  #{previousStay?.order_number} -{" "}
+                                  {previousStay?.guest?.first_name}
+                                </span>
+                              </div>
+                              {cleaningIndicator}
                             </div>
-                            {cleaningIndicator}
-                          </div>
+                          ) : (
+                            <div
+                              className={`${STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color} h-full w-1/2 flex items-center justify-center rounded-l-lg rounded-r-none border-r-2 border-white/50 cursor-pointer hover:opacity-90 relative`}
+                              onClick={() => handleRoomClick(room, d, null)}
+                            >
+                              {cleaningIndicator}
+                            </div>
+                          )}
                           {/* Mitad derecha: nueva estadía (check-in) */}
                           <div
                             className={`${statusColor} h-full w-1/2 flex items-center justify-center rounded-r-lg rounded-l-none cursor-pointer hover:opacity-90 relative`}
