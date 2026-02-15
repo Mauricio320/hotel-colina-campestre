@@ -175,7 +175,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                           {isFullRental ? "🏠" : "🛏️"}
                         </span>
 
-                        <span className="text-[12px] mt-1 flex items-center">
+                        <span className="text-[12px] mt-1 flex items-center font-bold">
                           #{stay.order_number} - {stay.guest?.first_name}
                         </span>
                       </div>
@@ -197,7 +197,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                   const cleaningIndicator = isToday ? (
                     room.cleaning_log && room.cleaning_log.length > 0 ? (
                       <i
-                        className="pi pi-check-circle text-[15px] absolute top-2 right-2 text-green-200 font-bold"
+                        className="pi pi-check-circle text-[12px] absolute top-2 right-2 text-green-200 font-bold"
                         title="Limpieza realizada"
                         style={{ WebkitTextStroke: "1px black" }}
                       ></i>
