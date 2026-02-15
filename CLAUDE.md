@@ -446,6 +446,48 @@ import { supabase } from "@/config/supabase";
 import { useAuth } from "@/hooks/useAuth";
 ```
 
+## Code Style Guidelines
+
+### Self-Documenting Names
+
+Variables and function names must be descriptive enough to eliminate the need for comments.
+
+**Variable names:**
+```typescript
+// ❌ Bad - needs comment
+const t = dayjs().format("YYYY-MM-DD"); // today's date
+const hc = room.stays?.some(s => s.check_out_date === t); // has checkout
+
+// ✅ Good - self-explanatory
+const todayFormatted = dayjs().format("YYYY-MM-DD");
+const hasCheckoutToday = room.stays?.some(
+  stay => stay.check_out_date === todayFormatted
+);
+```
+
+**Function names:**
+```typescript
+// ❌ Bad - needs comment
+function process(data: Room[]) {
+  // filters rooms that need cleaning today
+  return data.filter(r => /* ... */);
+}
+
+// ✅ Good - intent is clear from the name
+function filterRoomsRequiringCleaningToday(rooms: Room[]) {
+  return rooms.filter(room => /* ... */);
+}
+```
+
+**Boolean variables:** Use prefixes like `is`, `has`, `should`, `can`:
+```typescript
+const isLoading = true;
+const hasActiveStay = room.stays?.some(stay => stay.active);
+const shouldShowCleaningIndicator = hasCheckoutToday || hasCheckInToday;
+```
+
+**Rule:** If you need a comment to explain what a variable or function does, rename it instead.
+
 ## Important Notes
 
 - **No test runner** is configured in this project (no jest, vitest, or similar)

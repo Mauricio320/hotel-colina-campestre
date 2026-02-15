@@ -140,7 +140,7 @@ export const RoomsQueryCategory = (id: string) => {
       const { data: accommodationType } = await supabase
         .from("stays")
         .select(
-          `id, status, order_number, room_id, guest_id, employee_id, check_in_date, check_out_date, total_price, paid_amount, payment_method_id, has_extra_mattress, extra_mattress_price, is_invoice_requested, iva_amount, observation, origin_was_reservation, iva_percentage, person_count, extra_mattress_count, extra_mattress_unit_price, accommodation_type_id, room_status_id, active,
+          `id, status, order_number, room_id, cancelled, guest_id, employee_id, check_in_date, check_out_date, total_price, paid_amount, payment_method_id, has_extra_mattress, extra_mattress_price, is_invoice_requested, iva_amount, observation, origin_was_reservation, iva_percentage, person_count, extra_mattress_count, extra_mattress_unit_price, accommodation_type_id, room_status_id, active,
           room:rooms(*),
           guest:guests!stays_guest_id_fkey(*),
           room_statuses(*)`,
