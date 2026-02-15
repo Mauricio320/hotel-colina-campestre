@@ -180,6 +180,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
             activeStay={activeStay}
             selectedDate={selectedDate}
             activeTab={activeTab}
+            room={room}
           />
         </div>
       </Dialog>

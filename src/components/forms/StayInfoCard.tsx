@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "primereact/button";
-import { Stay } from "@/types";
+import { Room, Stay } from "@/types";
 import { GetReservationPaymentStatus } from "@/util/helper/helpers";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +12,7 @@ interface StayInfoCardProps {
   onConfirmCheckIn: () => void;
   selectedDate?: Date | null;
   activeTab: number;
+  room?: Room;
 }
 
 export const StayInfoCard: React.FC<StayInfoCardProps> = ({
@@ -21,6 +22,7 @@ export const StayInfoCard: React.FC<StayInfoCardProps> = ({
   onConfirmCheckIn,
   activeTab,
   selectedDate,
+  room,
 }) => {
   const navigate = useNavigate();
   const paymentStatus = GetReservationPaymentStatus(activeStay);
@@ -34,6 +36,9 @@ export const StayInfoCard: React.FC<StayInfoCardProps> = ({
   const isToday = selectedDate
     ? dayjs(selectedDate).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD")
     : true;
+
+  // Verificar si ya tiene limpieza realizada
+  const hasCleaning = room?.cleaning_log && room.cleaning_log.length > 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -149,8 +154,9 @@ export const StayInfoCard: React.FC<StayInfoCardProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <Button
               icon="pi pi-sparkles"
-              label="Limpieza"
+              label={hasCleaning ? "Limpieza realizada" : "Limpieza"}
               className="p-3 bg-[#2d79ff] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
+              disabled={hasCleaning}
               onClick={() =>
                 navigate(
                   `/limpieza/${activeStay.room_id}?stay_id=${activeStay.id}&tab=${activeTab}`,
