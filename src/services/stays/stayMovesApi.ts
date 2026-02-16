@@ -34,9 +34,9 @@ export const checkRoomAvailability = async (
   roomId: string,
   checkInDate: string,
   checkOutDate: string,
-  excludeStayId: string,
+  excludeStayId?: string,
 ): Promise<AvailabilityCheckResult> => {
-  const { data, error } = await supabase
+  let query = supabase
     .from("stays")
     .select(
       `id, order_number, check_in_date, check_out_date,
@@ -45,9 +45,14 @@ export const checkRoomAvailability = async (
     )
     .eq("room_id", roomId)
     .eq("cancelled", false)
-    .neq("id", excludeStayId)
     .lt("check_in_date", checkOutDate)
     .gt("check_out_date", checkInDate);
+
+  if (excludeStayId) {
+    query = query.neq("id", excludeStayId);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw error;
 

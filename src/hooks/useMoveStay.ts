@@ -12,7 +12,7 @@ interface CheckAvailabilityParams {
   roomId: string;
   checkInDate: string;
   checkOutDate: string;
-  excludeStayId: string;
+  excludeStayId?: string;
 }
 
 export const useMoveStay = () => {

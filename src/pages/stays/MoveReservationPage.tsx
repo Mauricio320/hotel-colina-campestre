@@ -17,6 +17,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import AvailabilityConflictModal from "@/components/stays/AvailabilityConflictModal";
 import dayjs from "dayjs";
 import { Room, Stay } from "@/types";
+import { FormattedConflicts } from "@/util/helper/formattedConflicts";
 
 interface RoomOption {
   label: string;
@@ -153,33 +154,14 @@ const MoveReservationPage: React.FC = () => {
       });
 
       if (!result.available && result.conflictingStays) {
-        // Transformar el resultado al formato esperado por el modal
-        const formattedConflicts: Stay[] = result.conflictingStays.map(
-          (conflict) =>
-            ({
-              id: conflict.id,
-              order_number: conflict.order_number,
-              check_in_date: conflict.check_in_date,
-              check_out_date: conflict.check_out_date,
-              guest: {
-                first_name: conflict.guest_name.split(" ")[0] || "",
-                last_name:
-                  conflict.guest_name.split(" ").slice(1).join(" ") || "",
-              },
-              room: conflict.room
-                ? {
-                    id: conflict.room.id,
-                    room_number: conflict.room.room_number,
-                  }
-                : undefined,
-            }) as Stay,
+        const formattedConflicts: Stay[] = FormattedConflicts(
+          result.conflictingStays,
         );
         setConflicts(formattedConflicts);
         setShowConflictModal(true);
         return;
       }
 
-      // Si no hay conflictos, mostrar confirmación
       const changes: string[] = [];
       if (isRoomChanged) {
         changes.push(`habitación a ${selectedRoom?.room_number}`);

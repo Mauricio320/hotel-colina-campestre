@@ -137,7 +137,11 @@ interface RoomsQueryCategoryParams {
   endDate: string;
 }
 
-export const RoomsQueryCategory = ({ id, startDate, endDate }: RoomsQueryCategoryParams) => {
+export const RoomsQueryAndStayCategory = ({
+  id,
+  startDate,
+  endDate,
+}: RoomsQueryCategoryParams) => {
   return useQuery({
     queryKey: ["rooms", id, startDate, endDate],
     queryFn: async ({ signal }) => {
@@ -197,6 +201,29 @@ export const RoomsQueryCategory = ({ id, startDate, endDate }: RoomsQueryCategor
             room.stays.push(stay as unknown as Stay);
           }
         });
+        return room;
+      });
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 0,
+    gcTime: 0,
+    retry: 1,
+  });
+};
+
+export const RoomsQueryCategory = (id: string) => {
+  return useQuery({
+    queryKey: ["rooms", id],
+    queryFn: async ({ signal }) => {
+      const { data } = await supabase
+        .from("rooms")
+        .select(`*, accommodation_types(*)`)
+        .eq("is_active", true)
+        .eq("accommodation_type_id", id)
+        .abortSignal(signal)
+        .order("room_number");
+
+      return (data as unknown as Room[]).map((room) => {
         return room;
       });
     },

@@ -6,7 +6,7 @@ import { StayInactiveModal } from "@/components/calendar/StayInactiveModal";
 import { RoomActionModalHeaderInfo } from "@/components/calendar/RoomActionModalHeaderInfo";
 import { StayInfoCard } from "@/components/forms/StayInfoCard";
 import { useBlockUI } from "@/context/BlockUIContext";
-import { RoomsQueryCategory } from "@/hooks/useRooms";
+import { RoomsQueryAndStayCategory } from "@/hooks/useRooms";
 import { AccommodationType, Room, RoomStatus, Stay } from "@/types";
 import { AccommodationTypeEnum } from "@/util/enums/status-rooms.enum";
 import { GetReservationPaymentStatus } from "@/util/helper/helpers";
@@ -39,7 +39,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
     data,
     isLoading,
     refetch: refectCalendar,
-  } = RoomsQueryCategory({
+  } = RoomsQueryAndStayCategory({
     id: accommodationType.id,
     startDate: startDateStr,
     endDate: endDateStr,

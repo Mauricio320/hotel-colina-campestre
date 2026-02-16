@@ -30,12 +30,15 @@ import {
   CheckAvailability,
   useCreateOnStayWithPayment,
 } from "@/hooks/useStays";
-import { Employee, PaymentType } from "@/types";
+import { Employee, PaymentType, Stay } from "@/types";
 import {
   AccommodationTypeEnum,
   RoomStatusEnum,
 } from "@/util/enums/status-rooms.enum";
 import { generateStayObservation } from "@/util/helper/stayHelpers";
+import dayjs from "dayjs";
+import { useCheckRoomAvailability } from "@/hooks/useMoveStay";
+import { FormattedConflicts } from "@/util/helper/formattedConflicts";
 
 const CheckInPage: React.FC = () => {
   const { colombiaData, loadingGeo } = useColombiaGeography();
@@ -50,7 +53,7 @@ const CheckInPage: React.FC = () => {
   const { showBlockUI, hideBlockUI } = useBlockUI();
   const { settings } = useSettings();
   const { paymentMethods } = usePaymentMethods();
-
+  const checkAvailability = useCheckRoomAvailability();
   const { employee } = useAuth();
 
   const { roomId } = useParams<{ roomId: string }>();
@@ -253,25 +256,8 @@ const CheckInPage: React.FC = () => {
 
   const onSubmit = async (data: any) => {
     if (!data.check_out_date) return alert("Seleccione una fecha de salida");
-
     showBlockUI("Procesando check-in...");
-    const isApartmentAction = action === AccommodationTypeEnum.APARTAMENTO;
-
-    if (isApartmentAction) {
-      showBlockUI("Verificando disponibilidad...");
-      const { data: currentConflicts } = await CheckAvailability(
-        roomId,
-        data.check_in_date.toLocaleDateString("sv-SE"),
-        data.check_out_date.toLocaleDateString("sv-SE"),
-      );
-      hideBlockUI();
-
-      if (currentConflicts && currentConflicts.length > 0) {
-        setConflicts(currentConflicts);
-        setIsConflictModalVisible(true);
-        return;
-      }
-    }
+    if (!(await verifyStay(data))) return;
 
     try {
       const guest = await upsertGuest.mutateAsync({
@@ -378,6 +364,45 @@ const CheckInPage: React.FC = () => {
       setTimeout(() => {
         hideBlockUI();
       }, 1000);
+    }
+
+    hideBlockUI();
+  };
+
+  const verifyStay = async (data: any) => {
+    const isApartmentAction = action === AccommodationTypeEnum.APARTAMENTO;
+    if (isApartmentAction) {
+      showBlockUI("Verificando disponibilidad...");
+      const { data: currentConflicts } = await CheckAvailability(
+        roomId,
+        data.check_in_date.toLocaleDateString("sv-SE"),
+        data.check_out_date.toLocaleDateString("sv-SE"),
+      );
+      hideBlockUI();
+
+      if (currentConflicts && currentConflicts.length > 0) {
+        setConflicts(currentConflicts);
+        setIsConflictModalVisible(true);
+        return false;
+      }
+    } else {
+      const result = await checkAvailability.mutateAsync({
+        roomId: roomId,
+        checkInDate: data.check_in_date.toLocaleDateString("sv-SE"),
+        checkOutDate: data.check_out_date.toLocaleDateString("sv-SE"),
+      });
+
+      if (!result.available && result.conflictingStays) {
+        const formattedConflicts: Stay[] = FormattedConflicts(
+          result.conflictingStays,
+        );
+        setConflicts(formattedConflicts);
+        setIsConflictModalVisible(true);
+        hideBlockUI();
+        return false;
+      }
+
+      return true;
     }
   };
 

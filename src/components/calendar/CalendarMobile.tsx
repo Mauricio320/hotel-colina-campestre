@@ -248,7 +248,8 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                                   isToday ? "bg-emerald-50" : ""
                                 }`}
                                 onClick={() =>
-                                  handleRoomClick?.(room, d, stay || null)
+                                  // console.log(stay)
+                                  handleRoomClick?.(room, d, null)
                                 }
                               >
                                 {/* Indicador de día actual */}
@@ -283,7 +284,7 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                           return (
                             <div
                               key={stay.id}
-                              className={`absolute h-10  ${colorClass} shadow-md flex flex-col justify-center px-2 overflow-hidden cursor-pointer`}
+                              className={`absolute h-[90%]  ${colorClass} shadow-md flex flex-col justify-center px-2 overflow-hidden cursor-pointer`}
                               style={{
                                 left: `${leftPercent}%`,
                                 width: `${Math.max(widthPercent, 5)}%`, // Mínimo 5% para que se vea algo
@@ -299,7 +300,7 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                                   {/* {!stay.room_id ? "🏠" : "🛏️"} */}
                                 </span>
                                 <span className="text-xs font-bold text-white truncate">
-                                  #{stay.order_number} 
+                                  #{stay.order_number}
                                 </span>
                               </div>
                               <span className="text-[10px] text-white/90 truncate">
@@ -326,7 +327,7 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                             }}
                           >
                             <span className="text-xs font-bold text-white text-center">
-                              {room.status.name} 
+                              {room.status.name}
                             </span>
                           </div>
                         )}
