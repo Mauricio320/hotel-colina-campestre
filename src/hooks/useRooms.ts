@@ -131,9 +131,15 @@ export const useRooms = (category?: string) => {
   return { roomsQuery, updateStatus, upsertRoom };
 };
 
-export const RoomsQueryCategory = (id: string) => {
+interface RoomsQueryCategoryParams {
+  id: string;
+  startDate: string;
+  endDate: string;
+}
+
+export const RoomsQueryCategory = ({ id, startDate, endDate }: RoomsQueryCategoryParams) => {
   return useQuery({
-    queryKey: ["rooms", id],
+    queryKey: ["rooms", id, startDate, endDate],
     queryFn: async ({ signal }) => {
       const todayStr = dayjs().format("YYYY-MM-DD");
 
@@ -147,6 +153,9 @@ export const RoomsQueryCategory = (id: string) => {
         )
         .eq("accommodation_type_id", id)
         .eq("cancelled", false)
+        // Solo cargar estadías que intersecten con el rango de fechas
+        .lte("check_in_date", endDate)
+        .gte("check_out_date", startDate)
         .abortSignal(signal);
 
       const { data } = await supabase
@@ -169,6 +178,9 @@ export const RoomsQueryCategory = (id: string) => {
         .eq("is_active", true)
         .eq("accommodation_type_id", id)
         .eq("stays.cancelled", false)
+        // Filtrar stays que intersecten con el rango de fechas
+        .lte("stays.check_in_date", endDate)
+        .gte("stays.check_out_date", startDate)
         .eq("cleaning_log.date", todayStr)
         .abortSignal(signal)
         .order("room_number");
@@ -178,8 +190,12 @@ export const RoomsQueryCategory = (id: string) => {
         if (!room.cleaning_log) {
           room.cleaning_log = [];
         }
+        // Filtrar stays del accommodationType para evitar duplicados
+        const roomStayIds = new Set(room.stays.map((s) => s.id));
         accommodationType.forEach((stay) => {
-          room.stays.push(stay as unknown as Stay);
+          if (!roomStayIds.has(stay.id)) {
+            room.stays.push(stay as unknown as Stay);
+          }
         });
         return room;
       });

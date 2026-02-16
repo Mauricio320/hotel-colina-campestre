@@ -32,11 +32,18 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   startDate,
   onStartDateChange,
 }) => {
+  const startDateStr = dayjs(days[0]).format("YYYY-MM-DD");
+  const endDateStr = dayjs(days[days.length - 1]).format("YYYY-MM-DD");
+
   const {
     data,
     isLoading,
     refetch: refectCalendar,
-  } = RoomsQueryCategory(accommodationType.id);
+  } = RoomsQueryCategory({
+    id: accommodationType.id,
+    startDate: startDateStr,
+    endDate: endDateStr,
+  });
   const { hideBlockUI, showBlockUI } = useBlockUI();
 
   const navigate = useNavigate();
@@ -117,12 +124,12 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
 
   return (
     <section>
-      {/* <CalendarTable
+      <CalendarTable
         data={data ?? []}
         days={days}
         getActiveStay={getActiveStay}
         handleRoomClick={handleRoomClick}
-      /> */}
+      />
 
       {/* Vista mobile del calendario */}
       <CalendarMobile

@@ -241,39 +241,19 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                             const isToday = dateStr === todayStr;
                             const stay = getActiveStay(room, d);
 
-                            // Verificar si es día de check-in o check-out
-                            const isCheckIn =
-                              stay && dateStr === stay.check_in_date;
-                            const isCheckOut =
-                              stay && dateStr === stay.check_out_date;
-
                             return (
                               <div
                                 key={d.getTime()}
                                 className={`flex-1 min-w-[70px] border-r last:border-r-0 flex flex-col items-center justify-end pb-1 cursor-pointer ${
-                                  isToday ? "bg-emerald-50/30" : ""
+                                  isToday ? "bg-emerald-50" : ""
                                 }`}
-                                onClick={() => handleRoomClick?.(room, d, stay || null)}
+                                onClick={() =>
+                                  handleRoomClick?.(room, d, stay || null)
+                                }
                               >
                                 {/* Indicador de día actual */}
-                                {isToday && (
-                                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mb-1"></div>
-                                )}
+
                                 {/* Marcadores de check-in/check-out */}
-                                {(isCheckIn || isCheckOut) && stay && (
-                                  <div className="flex flex-col items-center">
-                                    {isCheckIn && (
-                                      <span className="text-[7px] text-emerald-600 font-bold">
-                                        IN
-                                      </span>
-                                    )}
-                                    {isCheckOut && (
-                                      <span className="text-[7px] text-red-500 font-bold">
-                                        OUT
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
                               </div>
                             );
                           })}
@@ -298,26 +278,28 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                               stay.startOffset -
                               stay.endOffset) /
                               days.length) *
-                            100;
+                            99;
 
                           return (
                             <div
                               key={stay.id}
-                              className={`absolute h-10 rounded-lg ${colorClass} shadow-md flex flex-col justify-center px-2 overflow-hidden cursor-pointer`}
+                              className={`absolute h-10  ${colorClass} shadow-md flex flex-col justify-center px-2 overflow-hidden cursor-pointer`}
                               style={{
                                 left: `${leftPercent}%`,
                                 width: `${Math.max(widthPercent, 5)}%`, // Mínimo 5% para que se vea algo
                                 top: "50%",
                                 transform: "translateY(-50%)",
                               }}
-                              onClick={() => handleRoomClick?.(room, days[startIndex], stay)}
+                              onClick={() =>
+                                handleRoomClick?.(room, days[startIndex], stay)
+                              }
                             >
                               <div className="flex items-center gap-1">
                                 <span className="text-xs">
-                                  {!stay.room_id ? "🏠" : "🛏️"}
+                                  {/* {!stay.room_id ? "🏠" : "🛏️"} */}
                                 </span>
                                 <span className="text-xs font-bold text-white truncate">
-                                  #{stay.order_number}
+                                  #{stay.order_number} 
                                 </span>
                               </div>
                               <span className="text-[10px] text-white/90 truncate">
@@ -344,7 +326,7 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                             }}
                           >
                             <span className="text-xs font-bold text-white text-center">
-                              {room.status.name}
+                              {room.status.name} 
                             </span>
                           </div>
                         )}
