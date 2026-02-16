@@ -87,7 +87,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
               </span>
             </div>
             <div className="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100">
-              <span className="text-sm">🧹</span>
+              <span className="text-sm">🧹⚠️</span>
               <span className="text-xs font-semibold text-amber-700">
                 Pendientes: {pendingCleaning}
               </span>
@@ -170,14 +170,14 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                     }
 
                     cellContent = (
-                      <div className="flex flex-col items-center leading-none gap-0.5 w-full">
-                        <span className="text-[9px] font-black opacity-90 uppercase">
-                          {isFullRental ? "🏠" : "🛏️"}
-                        </span>
+                      <div className="leading-none gap-0.5 w-full">
+                        <div className="text-[9px] font-black opacity-90 uppercase">
+                          {/* {isFullRental ? "🏠" : "🛏️"} */}u
+                        </div>
 
-                        <span className="text-[12px] mt-1 flex items-center font-bold">
+                        <div className="text-[12px] flex justify-center mt-1  items-center font-bold">
                           #{stay.order_number} - {stay.guest?.first_name}
-                        </span>
+                        </div>
                       </div>
                     );
                   } else if (
@@ -197,16 +197,17 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                   const cleaningIndicator = isToday ? (
                     room.cleaning_log && room.cleaning_log.length > 0 ? (
                       <i
-                        className="pi pi-check-circle text-[12px] absolute top-2 right-2 text-green-200 font-bold"
+                        className="pi pi-check-circle text-[12px] absolute top-1 right-2 text-green-200 font-bold"
                         title="Limpieza realizada"
                         style={{ WebkitTextStroke: "1px black" }}
                       ></i>
                     ) : (
                       <span
-                        className="absolute top-2 right-2 text-[10px]"
+                        className="absolute top-1 right-2 text-[10px]"
                         title="Pendiente por limpieza"
                       >
-                        🧹
+                        🧹{" "}
+                        {todayRooms.find((t) => t.id === room.id) ? "⚠️" : ""}
                       </span>
                     )
                   ) : null;

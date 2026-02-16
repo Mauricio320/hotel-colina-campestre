@@ -1,12 +1,11 @@
-import React from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  getAdminRole,
   getEmployeeByAuthId,
   syncUserProfile,
-  getAdminRole,
 } from "@/services/auth/employeeApi";
 import { authQueryKeys } from "@/services/queryKeys/auth.queryKeys";
-import { AuthUser } from "@/services/auth/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import React from "react";
 
 /**
  * Hook for fetching employee data by auth ID
