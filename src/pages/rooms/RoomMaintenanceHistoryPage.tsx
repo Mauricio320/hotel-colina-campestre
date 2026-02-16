@@ -26,18 +26,18 @@ const RoomMaintenanceHistoryPage: React.FC = () => {
     navigate(`/rooms?tab=${tabParam || CATEGORIES[0]}`);
   };
 
-  const getCategoryColor = (categoryName: string) => {
+  const getCategoryStyle = (categoryName: string) => {
     switch (categoryName?.toLowerCase()) {
       case "general":
-        return "bg-blue-100 text-blue-700";
+        return { backgroundColor: "#E8F4FD", color: "#4A6FA5" };
       case "electricidad":
-        return "bg-yellow-100 text-yellow-700";
+        return { backgroundColor: "#FFF8E1", color: "#B8860B" };
       case "agua":
-        return "bg-cyan-100 text-cyan-700";
+        return { backgroundColor: "#E0F7FA", color: "#00838F" };
       case "aire acondicionado":
-        return "bg-purple-100 text-purple-700";
+        return { backgroundColor: "#F3E5F5", color: "#7B1FA2" };
       default:
-        return "bg-gray-100 text-gray-700";
+        return { backgroundColor: "#F5F5F5", color: "#616161" };
     }
   };
 
@@ -109,8 +109,12 @@ const RoomMaintenanceHistoryPage: React.FC = () => {
               row.category ? (
                 <Tag
                   value={row.category.name}
-                  className={`text-[10px] font-bold uppercase ${getCategoryColor(row.category.name)}`}
-                  style={{ backgroundColor: row.category.color || undefined }}
+                  className="text-[10px] font-bold uppercase border-0"
+                  style={
+                    row.category.color
+                      ? { backgroundColor: row.category.color }
+                      : getCategoryStyle(row.category.name)
+                  }
                 />
               ) : (
                 <span className="text-gray-400">-</span>

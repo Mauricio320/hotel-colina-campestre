@@ -123,7 +123,7 @@ const MaintenanceTaskPage: React.FC = () => {
         room_id: room.id,
         stay_id: stayIdFromUrl || undefined,
         previous_status_id: maintenanceStatus?.id,
-        new_status_id: stay?.room_status_id,
+        new_status_id: stay?.room_status_id || room?.status_id,
         employee_id: selectedEmployeeId,
         action_type: "Mantenimiento",
         observation: observation || "Sin novedad",
