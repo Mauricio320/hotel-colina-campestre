@@ -212,7 +212,7 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                             className="text-xs"
                             title="Pendiente por limpieza"
                           >
-                            🧹⚠️
+                            🧹{isRoomWithActivityToday && "⚠️"}
                           </span>
                         )}
                       </div>
