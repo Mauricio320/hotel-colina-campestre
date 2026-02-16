@@ -198,13 +198,10 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                           ( MAX: {room.beds_double * 2 + room.beds_single})
                         </span>
                       </span>
-                      <span className="text-[9px] text-gray-500 text-center leading-tight">
-                        MAX: {room.beds_double * 2 + room.beds_single}
-                      </span>
                       <span className="text-[9px] text-gray-400">
                         {room.beds_double}D | {room.beds_single}S
                       </span>
-                      <div className="mt-1">
+                      <div className="mt-[-10px]">
                         {room.cleaning_log && room.cleaning_log.length > 0 ? (
                           <i
                             className="pi pi-check-circle text-green-500 text-sm"
@@ -222,8 +219,8 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                     </div>
 
                     {/* Timeline de ocupación */}
-                    <div className="p-3 flex-1">
-                      <div className="relative h-14">
+                    <div className="flex-1">
+                      <div className="relative h-[60px]">
                         {/* Línea base de los días */}
                         <div className="absolute inset-0 flex">
                           {days.map((d) => {
