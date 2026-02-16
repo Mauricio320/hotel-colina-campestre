@@ -119,18 +119,9 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
     const url = `/check-in-payment/${activeStay?.id}?${params.join("&")}`;
     navigate(url);
   };
-  
-  
 
   return (
     <section>
-      <CalendarTable
-        data={data ?? []}
-        days={days}
-        getActiveStay={getActiveStay}
-        handleRoomClick={handleRoomClick}
-      />
-
       {/* Vista mobile del calendario */}
       <CalendarMobile
         data={data ?? []}
@@ -178,11 +169,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
 
       {/* Modal para reservas (Abonar / Check-in) */}
       <Dialog
-        header={
-          paymentStatus?.canCheckIn
-            ? "Reserva"
-            : "Abonar reserva"
-        }
+        header={paymentStatus?.canCheckIn ? "Reserva" : "Abonar reserva"}
         visible={showAbonoCheckOutModal}
         onHide={() => setShowAbonoCheckOutModal(false)}
         className="w-full max-w-[500px]"
@@ -191,7 +178,11 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
       >
         <div className="flex flex-col gap-5 py-2">
           <RoomActionModalHeaderInfo
-            accommodationTypeEnum={room ? AccommodationTypeEnum.HABITACION : AccommodationTypeEnum.APARTAMENTO}
+            accommodationTypeEnum={
+              room
+                ? AccommodationTypeEnum.HABITACION
+                : AccommodationTypeEnum.APARTAMENTO
+            }
             date={selectedDate}
             room={room}
           />
