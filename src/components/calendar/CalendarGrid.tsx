@@ -1,3 +1,4 @@
+import { CalendarMobile } from "@/components/calendar/CalendarMobile";
 import { CalendarTable } from "@/components/calendar/CalendarTable";
 import { RoomActionModal } from "@/components/calendar/RoomActionModal";
 import { RoomOccupiedModal } from "@/components/calendar/RoomOccupiedModal";
@@ -117,6 +118,13 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
         days={days}
         getActiveStay={getActiveStay}
         handleRoomClick={handleRoomClick}
+      />
+
+      {/* Vista mobile del calendario */}
+      <CalendarMobile
+        data={data ?? []}
+        days={days}
+        getActiveStay={getActiveStay}
       />
 
       {/* Modal para habitaciones disponibles (Check-in / Reservar) */}
