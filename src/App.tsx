@@ -31,6 +31,7 @@ import RoomFormPage from "@/pages/rooms/RoomFormPage";
 import RoomHistoryPage from "@/pages/rooms/RoomHistoryPage";
 import RoomMaintenanceHistoryPage from "@/pages/rooms/RoomMaintenanceHistoryPage";
 import RoomManagement from "@/pages/rooms/RoomManagement";
+import RoomRateHistoryPage from "@/pages/rooms/RoomRateHistoryPage";
 import Settings from "@/pages/settings/Settings";
 import CancelReservationPage from "@/pages/stays/CancelReservationPage";
 import CheckInPage from "@/pages/stays/CheckInPage";
@@ -138,6 +139,7 @@ const AppContent: React.FC = () => {
           path="/rooms/maintenance-history/:roomId"
           element={<RoomMaintenanceHistoryPage />}
         />
+        <Route path="/rooms/rate-history" element={<RoomRateHistoryPage />} />
         <Route path="/check-in-payment/:stayId" element={<CheckInPayment />} />
         <Route path="/room-payments" element={<RoomPayments />} />
         <Route path="/payments-invoice" element={<PaymentsInvoice />} />

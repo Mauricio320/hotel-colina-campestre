@@ -1,3 +1,4 @@
+import BulkRateUpdateModal from "@/components/rooms/BulkRateUpdateModal";
 import { CATEGORIES } from "@/constants";
 import { useAuth } from "@/hooks/useAuth";
 import { useRooms } from "@/hooks/useRooms";
@@ -26,6 +27,7 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
     const idx = CATEGORIES.findIndex((c) => c === tabParam);
     return idx >= 0 ? idx : 0;
   });
+  const [showBulkRateModal, setShowBulkRateModal] = useState(false);
 
   useEffect(() => {
     const idx = CATEGORIES.findIndex((c) => c === tabParam);
@@ -98,12 +100,28 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
         </div>
         <div className="flex items-center gap-3">
           {isAdmin && (
-            <Button
-              label="Nueva Habitación"
-              icon="pi pi-plus"
-              className="bg-emerald-600 text-white border-none rounded-xl font-bold shadow-sm hover:bg-emerald-700 transition-all py-2 px-4"
-              onClick={openCreate}
-            />
+            <>
+              <Button
+                label="Actualizar Tarifas"
+                icon="pi pi-money-bill"
+                className="bg-amber-500 text-white border-none rounded-xl font-bold shadow-sm hover:bg-amber-600 transition-all py-2 px-4"
+                onClick={() => setShowBulkRateModal(true)}
+              />
+              <Button
+                label="Historial Tarifas"
+                icon="pi pi-history"
+                className="bg-blue-500 text-white border-none rounded-xl font-bold shadow-sm hover:bg-blue-600 transition-all py-2 px-4"
+                onClick={() =>
+                  navigate(`/rooms/rate-history?tab=${CATEGORIES[activeTab]}`)
+                }
+              />
+              <Button
+                label="Nueva Habitación"
+                icon="pi pi-plus"
+                className="bg-emerald-600 text-white border-none rounded-xl font-bold shadow-sm hover:bg-emerald-700 transition-all py-2 px-4"
+                onClick={openCreate}
+              />
+            </>
           )}
         </div>
       </div>
@@ -218,11 +236,13 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                     return (
                       <div className="flex justify-center">
                         <SplitButton
+                          label="Historial"
                           icon="pi pi-history"
-                          className="p-button-text p-button-sm text-blue-500"
-                          buttonClassName="text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                          menuButtonClassName="text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                          tooltip="Ver Historial"
+                          className="p-button-sm"
+                          buttonClassName="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-l-lg px-3 py-1.5 font-semibold transition-all"
+                          menuButtonClassName="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 border-l-0 rounded-r-lg px-2 transition-all"
+                          tooltip="Ver historial de la habitación"
+                          tooltipOptions={{ position: "top" }}
                           onClick={() => openHistory(rowData)}
                           model={historyItems}
                         />
@@ -235,6 +255,11 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
           </TabPanel>
         ))}
       </TabView>
+
+      <BulkRateUpdateModal
+        visible={showBulkRateModal}
+        onHide={() => setShowBulkRateModal(false)}
+      />
     </div>
   );
 };

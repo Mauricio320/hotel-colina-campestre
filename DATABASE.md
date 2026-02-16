@@ -25,6 +25,7 @@
    - [stay_guests](#stay_guests)
    - [room_history](#room_history)
    - [room_rates](#room_rates)
+   - [room_rate_history](#room_rate_history)
    - [cleaning_logs](#cleaning_logs)
    - [maintenance_logs](#maintenance_logs)
    - [price_overrides](#price_overrides)
@@ -306,6 +307,22 @@ Dynamic pricing based on person count per room.
 
 ---
 
+### room_rate_history
+
+Audit log for room rate changes.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | uuid | PK | Unique identifier |
+| room_id | uuid | NOT NULL, FK → rooms | Room affected |
+| person_count | int | NOT NULL | Number of persons for this rate |
+| old_rate | numeric | NOT NULL | Previous rate value |
+| new_rate | numeric | NOT NULL | New rate value |
+| employee_id | uuid | NOT NULL, FK → employees | Employee who made the change |
+| created_at | timestamptz | DEFAULT now() | When the change was made |
+
+---
+
 ### cleaning_logs
 
 Cleaning records for rooms (separate from room_history).
@@ -396,6 +413,8 @@ room_history (previous_status_id, new_status_id) → room_statuses
 room_history (employee_id) → employees
 room_history (accommodation_type_id) → accommodation_types
 room_rates (room_id) → rooms
+room_rate_history (room_id) → rooms
+room_rate_history (employee_id) → employees
 cleaning_logs (room_id) → rooms
 cleaning_logs (stay_id) → stays
 cleaning_logs (employee_id) → employees

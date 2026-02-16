@@ -43,6 +43,26 @@ export interface RoomRate {
   rate: number;
 }
 
+export interface RoomRateHistory {
+  id: string;
+  room_id: string;
+  person_count: number;
+  old_rate: number;
+  new_rate: number;
+  employee_id: string;
+  created_at: string;
+  room?: Room;
+  employee?: Employee;
+}
+
+export interface BulkRateUpdate {
+  room_id: string;
+  person_count: number;
+  old_rate: number;
+  new_rate: number;
+  rate_id: string;
+}
+
 export interface Guest {
   id: string;
   doc_type: string;
