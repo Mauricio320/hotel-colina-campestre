@@ -239,7 +239,6 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                           {days.map((d) => {
                             const dateStr = dayjs(d).format("YYYY-MM-DD");
                             const isToday = dateStr === todayStr;
-                            const stay = getActiveStay(room, d);
 
                             return (
                               <div
@@ -295,7 +294,7 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                                 handleRoomClick?.(room, days[startIndex], stay)
                               }
                             >
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center gap-1 font-bold">
                                 <span className="text-xs">
                                   {/* {!stay.room_id ? "🏠" : "🛏️"} */}
                                 </span>
@@ -303,11 +302,11 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                                   #{stay.order_number}
                                 </span>
                               </div>
-                              <span className="text-[10px] text-white/90 truncate">
+                              <span className="text-[10px] text-white/90 truncate font-bold">
                                 {stay.guest?.first_name}{" "}
                                 {stay.guest?.last_name?.[0]}.
                               </span>
-                              <span className="text-[9px] text-white/70">
+                              <span className="text-[10px] text-white/70 font-bold">
                                 {dayjs(stay.check_in_date).format("D/M")} -{" "}
                                 {dayjs(stay.check_out_date).format("D/M")}
                               </span>

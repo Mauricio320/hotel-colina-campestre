@@ -201,6 +201,9 @@ export const RoomsQueryAndStayCategory = ({
             room.stays.push(stay as unknown as Stay);
           }
         });
+        room.stays.sort((a, b) =>
+          a.check_in_date.localeCompare(b.check_in_date),
+        );
         return room;
       });
     },

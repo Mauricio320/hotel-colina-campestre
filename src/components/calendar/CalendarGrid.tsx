@@ -44,6 +44,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
     startDate: startDateStr,
     endDate: endDateStr,
   });
+
   const { hideBlockUI, showBlockUI } = useBlockUI();
 
   const navigate = useNavigate();
