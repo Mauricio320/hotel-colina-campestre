@@ -388,16 +388,20 @@ const MyForm = () => {
 
 ## Date Handling
 
-**Always use Day.js** for date manipulation and formatting. Never use native JavaScript Date methods.
+**ALWAYS use Day.js** for ALL date manipulation and formatting. NEVER use native JavaScript Date methods.
 
 ```typescript
 import dayjs from "dayjs";
 
 // Format date for display
 const displayDate = dayjs(date).format("DD/MM/YYYY");
+const displayDateLong = dayjs(date).format("D [de] MMMM [de] YYYY"); // "15 de enero de 2025"
 
 // Format date for database (ISO format)
 const dbDate = dayjs().format("YYYY-MM-DD");
+
+// Format time
+const timeString = dayjs(date).format("HH:mm");
 
 // Date calculations
 const nights = dayjs(checkOut).diff(dayjs(checkIn), "day");
@@ -407,14 +411,26 @@ const isAfter = dayjs(date1).isAfter(dayjs(date2));
 
 // Get today
 const today = dayjs().format("YYYY-MM-DD");
+
+// Parse ISO strings
+const parsedDate = dayjs(isoString);
 ```
 
-**Never use:**
+**NEVER use native Date methods:**
 ```typescript
-// ❌ Bad - Don't use native Date
-new Date().toLocaleDateString("sv-SE");
+// ❌ BAD - Never use native Date
+new Date().toLocaleDateString("es-CO");
+new Date().toLocaleTimeString("es-CO");
 new Date().toISOString();
+new Date(dateString)
+
+// ❌ BAD - Don't use Date.parse or toLocaleString
+Date.parse(dateString)
+date.toLocaleDateString()
+date.toLocaleTimeString()
 ```
+
+**Day.js is already configured** with Spanish locale in `src/config/locale.ts`. All dates should be formatted using dayjs.
 
 ## Key Domain Concepts
 

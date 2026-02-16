@@ -5,8 +5,8 @@ import { Role, Room, RoomRate } from "@/types";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import { InputText } from "primereact/inputtext";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { SplitButton } from "primereact/splitbutton";
 import { TabPanel, TabView } from "primereact/tabview";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -44,6 +44,14 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
 
   const openHistory = (room: Room) => {
     navigate(`/rooms/history/${room.id}?tab=${CATEGORIES[activeTab]}`);
+  };
+
+  const openCleaningHistory = (room: Room) => {
+    navigate(`/rooms/cleaning-history/${room.id}?tab=${CATEGORIES[activeTab]}`);
+  };
+
+  const openMaintenanceHistory = (room: Room) => {
+    navigate(`/rooms/maintenance-history/${room.id}?tab=${CATEGORIES[activeTab]}`);
   };
 
   const formatRates = (rates: RoomRate[]): string => {
@@ -178,24 +186,48 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                 <Column
                   header="Acciones"
                   headerClassName="bg-gray-50/50 text-emerald-400 font-bold uppercase text-[10px] tracking-widest p-4 text-center"
-                  body={(rowData) => (
-                    <div className="flex gap-1 justify-center">
-                      <Button
-                        icon="pi pi-history"
-                        className="p-button-text p-button-sm text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-                        tooltip="Ver Historial"
-                        onClick={() => openHistory(rowData)}
-                      />
-                      {isAdmin && (
-                        <Button
-                          icon="pi pi-pencil"
-                          className="p-button-text p-button-sm text-amber-500 hover:bg-amber-50 rounded-lg transition-colors"
-                          tooltip="Editar Tarifas"
-                          onClick={() => openEdit(rowData)}
+                  body={(rowData) => {
+                    const historyItems: any[] = [
+                      {
+                        label: "Historial General",
+                        icon: "pi pi-history",
+                        command: () => openHistory(rowData),
+                      },
+                      {
+                        label: "Historial de Aseo",
+                        icon: "pi pi-sparkles",
+                        command: () => openCleaningHistory(rowData),
+                      },
+                      {
+                        label: "Historial de Mantenimiento",
+                        icon: "pi pi-wrench",
+                        command: () => openMaintenanceHistory(rowData),
+                      },
+                    ];
+
+                    if (isAdmin) {
+                      historyItems.push({ separator: true });
+                      historyItems.push({
+                        label: "Editar",
+                        icon: "pi pi-pencil",
+                        command: () => openEdit(rowData),
+                      });
+                    }
+
+                    return (
+                      <div className="flex justify-center">
+                        <SplitButton
+                          icon="pi pi-history"
+                          className="p-button-text p-button-sm text-blue-500"
+                          buttonClassName="text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                          menuButtonClassName="text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                          tooltip="Ver Historial"
+                          onClick={() => openHistory(rowData)}
+                          model={historyItems}
                         />
-                      )}
-                    </div>
-                  )}
+                      </div>
+                    );
+                  }}
                 />
               </DataTable>
             </div>

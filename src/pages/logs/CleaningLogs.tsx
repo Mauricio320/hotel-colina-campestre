@@ -45,6 +45,7 @@ const CleaningLogs: React.FC = () => {
         employee_id: selectedEmployeeId,
         cleaning_type: selectedCleaningType,
         observation: observation || undefined,
+        date: dayjs().format(),
       });
 
       setSelectedRoomId("");

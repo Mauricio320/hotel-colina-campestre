@@ -1,5 +1,6 @@
 import { CATEGORIES } from "@/constants";
-import { useRoomById, useRoomHistory } from "@/hooks/useRooms";
+import { useMaintenanceLogsByRoom } from "@/hooks/useMaintenanceLogs";
+import { useRoomById } from "@/hooks/useRooms";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
@@ -7,45 +8,36 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { Tag } from "primereact/tag";
 import dayjs from "dayjs";
 import React from "react";
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
-const RoomHistoryPage: React.FC = () => {
+const RoomMaintenanceHistoryPage: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
 
   const { data: room, isLoading: loadingRoom } = useRoomById(roomId || null);
-  const { data: history, isLoading: loadingHistory } = useRoomHistory(
-    roomId || null,
-  );
+  const { data: maintenanceLogs, isLoading: loadingLogs } =
+    useMaintenanceLogsByRoom(roomId || null);
 
-  const loading = loadingRoom || loadingHistory;
+  const loading = loadingRoom || loadingLogs;
 
   const handleBack = () => {
     navigate(`/rooms?tab=${tabParam || CATEGORIES[0]}`);
   };
 
-  const getStatusSeverity = (name: string) => {
-    switch (name) {
-      case "Disponible":
-        return "success";
-      case "Ocupado":
-        return "danger";
-      case "Reservado":
-        return "warning";
-      case "Limpieza":
-        return "info";
-      case "Mantenimiento":
-        return null;
+  const getCategoryColor = (categoryName: string) => {
+    switch (categoryName?.toLowerCase()) {
+      case "general":
+        return "bg-blue-100 text-blue-700";
+      case "electricidad":
+        return "bg-yellow-100 text-yellow-700";
+      case "agua":
+        return "bg-cyan-100 text-cyan-700";
+      case "aire acondicionado":
+        return "bg-purple-100 text-purple-700";
       default:
-        return "danger";
+        return "bg-gray-100 text-gray-700";
     }
   };
 
@@ -69,10 +61,10 @@ const RoomHistoryPage: React.FC = () => {
           />
           <div>
             <h1 className="text-3xl font-black text-gray-800 tracking-tight">
-              Historial de Habitación {room?.room_number}
+              Historial de Mantenimiento - Habitación {room?.room_number}
             </h1>
             <p className="text-gray-500 font-medium">
-              Registro completo de cambios de estado y eventos.
+              Registro completo de mantenimientos realizados.
             </p>
           </div>
         </div>
@@ -80,13 +72,13 @@ const RoomHistoryPage: React.FC = () => {
 
       <div className="bg-white rounded-3xl p-1 shadow-xl border border-gray-100 overflow-hidden">
         <DataTable
-          value={history || []}
+          value={maintenanceLogs || []}
           responsiveLayout="stack"
           breakpoint="960px"
           className="text-sm"
           scrollable
           scrollHeight="75vh"
-          emptyMessage="No hay historial registrado para esta habitación."
+          emptyMessage="No hay registros de mantenimiento para esta habitación."
           rowHover
           stripedRows
         >
@@ -95,49 +87,43 @@ const RoomHistoryPage: React.FC = () => {
             headerClassName="bg-gray-50/50 text-emerald-400 font-bold uppercase text-[10px] tracking-widest p-4"
             body={(row) => (
               <span className="font-bold text-gray-700">
-                {dayjs(row.timestamp).format("D [de] MMMM [de] YYYY, HH:mm")}
+                {dayjs(row.date).format("D [de] MMMM [de] YYYY")}
               </span>
             )}
             sortable
-            field="timestamp"
+            field="date"
           />
           <Column
-            header="Orden"
+            header="Hora"
             headerClassName="bg-gray-50/50 text-emerald-400 font-bold uppercase text-[10px] tracking-widest p-4"
             body={(row) => (
-              <span
-                className={`font-bold ${row.stay?.order_number ? "text-emerald-600 cursor-pointer hover:text-emerald-800 hover:underline" : "text-gray-700"}`}
-                onClick={() => {
-                  if (row.stay?.id) {
-                    navigate(`/invoice/${row.stay.id}`, {
-                      state: { from: location.pathname + location.search },
-                    });
-                  }
-                }}
-              >
-                {row.stay?.order_number ? `# ${row.stay.order_number}` : "-"}
+              <span className="font-medium text-gray-600">
+                {dayjs(row.created_at).format("HH:mm")}
               </span>
             )}
-            sortable
-            field="timestamp"
           />
           <Column
-            header="Transición"
+            header="Categoría"
+            headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+            body={(row) =>
+              row.category ? (
+                <Tag
+                  value={row.category.name}
+                  className={`text-[10px] font-bold uppercase ${getCategoryColor(row.category.name)}`}
+                  style={{ backgroundColor: row.category.color || undefined }}
+                />
+              ) : (
+                <span className="text-gray-400">-</span>
+              )
+            }
+          />
+          <Column
+            header="Subcategoría"
             headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
             body={(row) => (
-              <div className="flex items-center gap-2">
-                <Tag
-                  value={row.prev_status?.name || "N/A"}
-                  severity={getStatusSeverity(row.prev_status?.name)}
-                  className={`text-[10px] font-bold uppercase ${row.prev_status?.name === "Mantenimiento" ? "!bg-gray-500 !text-white" : ""}`}
-                />
-                <i className="pi pi-arrow-right text-xs text-gray-400"></i>
-                <Tag
-                  value={row.new_status?.name}
-                  severity={getStatusSeverity(row.new_status?.name)}
-                  className={`text-[10px] font-bold uppercase ${row.new_status?.name === "Mantenimiento" ? "!bg-gray-500 !text-white" : ""}`}
-                />
-              </div>
+              <span className="font-medium text-gray-700">
+                {row.subcategory?.name || "-"}
+              </span>
             )}
           />
           <Column
@@ -157,12 +143,23 @@ const RoomHistoryPage: React.FC = () => {
             )}
           />
           <Column
+            header="Orden"
+            headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+            body={(row) => (
+              <span
+                className={`font-bold ${row.stay?.order_number ? "text-emerald-600" : "text-gray-400"}`}
+              >
+                {row.stay?.order_number ? `# ${row.stay.order_number}` : "-"}
+              </span>
+            )}
+          />
+          <Column
             field="observation"
-            header="Notas"
+            header="Observaciones"
             headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
             body={(row) => (
               <span className="text-gray-600 italic text-xs">
-                {row.observation}
+                {row.observation || "-"}
               </span>
             )}
           />
@@ -172,4 +169,4 @@ const RoomHistoryPage: React.FC = () => {
   );
 };
 
-export default RoomHistoryPage;
+export default RoomMaintenanceHistoryPage;

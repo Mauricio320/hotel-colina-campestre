@@ -26,8 +26,10 @@ import PaymentsInvoice from "@/pages/payments/PaymentsInvoice";
 import RoomPayments from "@/pages/payments/RoomPayments";
 import MyProfile from "@/pages/profile/MyProfile";
 import Reports from "@/pages/reports/Reports";
+import RoomCleaningHistoryPage from "@/pages/rooms/RoomCleaningHistoryPage";
 import RoomFormPage from "@/pages/rooms/RoomFormPage";
 import RoomHistoryPage from "@/pages/rooms/RoomHistoryPage";
+import RoomMaintenanceHistoryPage from "@/pages/rooms/RoomMaintenanceHistoryPage";
 import RoomManagement from "@/pages/rooms/RoomManagement";
 import Settings from "@/pages/settings/Settings";
 import CancelReservationPage from "@/pages/stays/CancelReservationPage";
@@ -128,6 +130,14 @@ const AppContent: React.FC = () => {
         <Route path="/rooms/new" element={<RoomFormPage />} />
         <Route path="/rooms/edit/:roomId" element={<RoomFormPage />} />
         <Route path="/rooms/history/:roomId" element={<RoomHistoryPage />} />
+        <Route
+          path="/rooms/cleaning-history/:roomId"
+          element={<RoomCleaningHistoryPage />}
+        />
+        <Route
+          path="/rooms/maintenance-history/:roomId"
+          element={<RoomMaintenanceHistoryPage />}
+        />
         <Route path="/check-in-payment/:stayId" element={<CheckInPayment />} />
         <Route path="/room-payments" element={<RoomPayments />} />
         <Route path="/payments-invoice" element={<PaymentsInvoice />} />
