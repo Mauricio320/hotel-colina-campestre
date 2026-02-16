@@ -54,7 +54,9 @@ const CalendarView: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <CalendarHeader startDate={startDate} onStartDateChange={setStartDate} />
+      <h2 className="text-2xl font-bold text-gray-800">
+        Calendario de Ocupación
+      </h2>
 
       <TabView
         activeIndex={activeTab}
@@ -67,6 +69,8 @@ const CalendarView: React.FC = () => {
               accommodationType={type}
               activeTab={activeTab}
               days={days}
+              startDate={startDate}
+              onStartDateChange={setStartDate}
             />
           </TabPanel>
         ))}

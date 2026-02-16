@@ -20,6 +20,8 @@ interface CalendarGridProps {
   roomStatuses: RoomStatus[];
   activeTab: number;
   days: Date[];
+  startDate: Date;
+  onStartDateChange: (date: Date) => void;
 }
 
 export const CalendarGrid: React.FC<CalendarGridProps> = ({
@@ -27,6 +29,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   roomStatuses,
   activeTab,
   days,
+  startDate,
+  onStartDateChange,
 }) => {
   const {
     data,
@@ -126,6 +130,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
         days={days}
         getActiveStay={getActiveStay}
         handleRoomClick={handleRoomClick}
+        startDate={startDate}
+        onStartDateChange={onStartDateChange}
       />
 
       {/* Modal para habitaciones disponibles (Check-in / Reservar) */}

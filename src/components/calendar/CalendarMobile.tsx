@@ -1,3 +1,4 @@
+import { CalendarHeader } from "@/components/calendar/CalendarHeader";
 import { STATUS_MAP } from "@/constants";
 import { Room, Stay } from "@/types";
 import { RoomStatusEnum } from "@/util/enums/status-rooms.enum";
@@ -9,6 +10,8 @@ interface CalendarMobileProps {
   days: Date[];
   getActiveStay: (room: Room, date: Date) => Stay | undefined;
   handleRoomClick?: (room: Room, date: Date, stay: Stay | null) => void;
+  startDate: Date;
+  onStartDateChange: (date: Date) => void;
 }
 
 export const CalendarMobile: React.FC<CalendarMobileProps> = ({
@@ -16,6 +19,8 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
   days,
   getActiveStay,
   handleRoomClick,
+  startDate,
+  onStartDateChange,
 }) => {
   const todayStr = dayjs().format("YYYY-MM-DD");
 
@@ -93,6 +98,12 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Header de navegación de semanas */}
+      <CalendarHeader
+        startDate={startDate}
+        onStartDateChange={onStartDateChange}
+      />
 
       {/* Contenedor principal */}
       <div className="bg-white rounded-xl border shadow-sm overflow-hidden">

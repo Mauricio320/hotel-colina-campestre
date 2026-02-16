@@ -25,9 +25,6 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
 
   return (
     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-      <h2 className="text-2xl font-bold text-gray-800">
-        Calendario de Ocupación
-      </h2>
       <div className="flex items-center gap-2 bg-white p-2 rounded-xl border shadow-sm">
         <Button
           icon="pi pi-chevron-left"
