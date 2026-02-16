@@ -1,7 +1,6 @@
 import { CATEGORIES } from "@/constants";
 import { useCleaningLogsByRoom } from "@/hooks/useCleaningLogs";
 import { useRoomById } from "@/hooks/useRooms";
-import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { ProgressSpinner } from "primereact/progressspinner";
@@ -9,6 +8,7 @@ import { Tag } from "primereact/tag";
 import dayjs from "dayjs";
 import React from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import PageHeader from "@/components/ui/PageHeader";
 
 const RoomCleaningHistoryPage: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -47,25 +47,14 @@ const RoomCleaningHistoryPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto flex flex-col gap-8 animate-fade-in pb-12">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            icon="pi pi-arrow-left"
-            className="p-button-text p-button-rounded p-button-secondary bg-white shadow-sm"
-            onClick={handleBack}
-            tooltip="Volver"
-          />
-          <div>
-            <h1 className="text-3xl font-black text-gray-800 tracking-tight">
-              Historial de Aseo - Habitación {room?.room_number}
-            </h1>
-            <p className="text-gray-500 font-medium">
-              Registro completo de limpiezas realizadas.
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="max-w-6xl mx-auto flex flex-col gap-2 animate-fade-in pb-12">
+      <PageHeader
+        title={`Historial de Aseo - Habitación ${room?.room_number || ""}`}
+        subtitle="Registro completo de limpiezas realizadas"
+        icon="pi-sparkles"
+        color="emerald"
+        onBack={handleBack}
+      />
 
       <div className="bg-white rounded-3xl p-1 shadow-xl border border-gray-100 overflow-hidden">
         <DataTable

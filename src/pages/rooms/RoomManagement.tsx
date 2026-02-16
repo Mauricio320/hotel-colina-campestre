@@ -51,7 +51,9 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
   };
 
   const openMaintenanceHistory = (room: Room) => {
-    navigate(`/rooms/maintenance-history/${room.id}?tab=${CATEGORIES[activeTab]}`);
+    navigate(
+      `/rooms/maintenance-history/${room.id}?tab=${CATEGORIES[activeTab]}`,
+    );
   };
 
   const formatRates = (rates: RoomRate[]): string => {
@@ -113,7 +115,6 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
               <DataTable
                 value={
                   roomsQuery.data?.sort((a, b) => {
-                    // Orden lógico: primero numéricas, luego casas
                     const aNum = parseInt(a.room_number);
                     const bNum = parseInt(b.room_number);
 

@@ -1,59 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Button } from "primereact/button";
-import { TabView, TabPanel } from "primereact/tabview";
-import { ProgressSpinner } from "primereact/progressspinner";
-import { InputText } from "primereact/inputtext";
-import { Tag } from "primereact/tag";
-import { Divider } from "primereact/divider";
-import { supabase } from "@/config/supabase";
 import { CATEGORIES } from "@/constants";
-import { Payment } from "@/types";
+import { usePaymentsByCategory } from "@/hooks/usePaymentsByCategory";
+import { Button } from "primereact/button";
+import { Column } from "primereact/column";
+import { DataTable } from "primereact/datatable";
+import { InputText } from "primereact/inputtext";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { TabPanel, TabView } from "primereact/tabview";
+import { Tag } from "primereact/tag";
+import dayjs from "dayjs";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const PaymentsInvoice: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
-  const [allPayments, setAllPayments] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [globalFilter, setGlobalFilter] = useState("");
 
-  // Fetch payments for the selected category
-  const fetchPayments = async (category: string) => {
-    const { data, error } = await supabase
-      .from("payments")
-      .select(
-        `
-        *,
-        stay:stays(
-          order_number,
-          guest:guests(first_name, last_name),
-          room:rooms!inner(room_number, category)
-        ),
-        payment_method:payment_methods(name),
-        employee:employees(first_name, last_name)`,
-      )
-      .eq("stay.room.category", category)
-      .order("payment_date", { ascending: false });
-    if (error) {
-      console.error("Error fetching payments:", error);
-      return [];
-    }
-    return data || [];
-  };
-
-  // Effect to fetch payments whenever active tab changes
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      const category = CATEGORIES[activeTab];
-      const paymentsData = await fetchPayments(category);
-      setAllPayments(paymentsData);
-      setLoading(false);
-    };
-    load();
-  }, [activeTab]);
+  const category = CATEGORIES[activeTab];
+  const { data: payments, isLoading } = usePaymentsByCategory(category);
 
   const getPaymentTypeDisplay = (type: string) => {
     switch (type) {
@@ -104,13 +68,13 @@ const PaymentsInvoice: React.FC = () => {
       >
         {CATEGORIES.map((cat) => (
           <TabPanel key={cat} header={cat}>
-            {loading ? (
+            {isLoading ? (
               <div className="flex justify-center items-center py-10">
                 <ProgressSpinner className="w-8 h-8" strokeWidth="4" />
               </div>
             ) : (
               <DataTable
-                value={allPayments}
+                value={payments || []}
                 header={header}
                 globalFilter={globalFilter}
                 responsiveLayout="stack"
@@ -152,11 +116,7 @@ const PaymentsInvoice: React.FC = () => {
                   header="Fecha"
                   body={(row) => (
                     <span className="text-sm text-gray-600">
-                      {new Date(row.payment_date).toLocaleDateString("es-CO", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      {dayjs(row.payment_date).format("DD MMM YYYY")}
                     </span>
                   )}
                 />
