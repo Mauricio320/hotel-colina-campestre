@@ -113,18 +113,19 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
 
   return (
     <section>
-      <CalendarTable
+      {/* <CalendarTable
         data={data ?? []}
         days={days}
         getActiveStay={getActiveStay}
         handleRoomClick={handleRoomClick}
-      />
+      /> */}
 
       {/* Vista mobile del calendario */}
       <CalendarMobile
         data={data ?? []}
         days={days}
         getActiveStay={getActiveStay}
+        handleRoomClick={handleRoomClick}
       />
 
       {/* Modal para habitaciones disponibles (Check-in / Reservar) */}

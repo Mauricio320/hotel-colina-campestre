@@ -8,12 +8,14 @@ interface CalendarMobileProps {
   data: Room[];
   days: Date[];
   getActiveStay: (room: Room, date: Date) => Stay | undefined;
+  handleRoomClick?: (room: Room, date: Date, stay: Stay | null) => void;
 }
 
 export const CalendarMobile: React.FC<CalendarMobileProps> = ({
   data,
   days,
   getActiveStay,
+  handleRoomClick,
 }) => {
   const todayStr = dayjs().format("YYYY-MM-DD");
 
@@ -93,8 +95,8 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
       </div>
 
       {/* Contenedor principal */}
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden max-h-[70vh] overflow-y-auto">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
+        <div className="overflow-auto max-h-[70vh]">
           <div className="min-w-[600px]">
             {/* Header de días - Fijo en top */}
             <div className="flex border-b bg-[#eeebe4] sticky top-0 z-20">
@@ -237,9 +239,10 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                             return (
                               <div
                                 key={d.getTime()}
-                                className={`flex-1 min-w-[70px] border-r last:border-r-0 flex flex-col items-center justify-end pb-1 ${
+                                className={`flex-1 min-w-[70px] border-r last:border-r-0 flex flex-col items-center justify-end pb-1 cursor-pointer ${
                                   isToday ? "bg-emerald-50/30" : ""
                                 }`}
+                                onClick={() => handleRoomClick?.(room, d, stay || null)}
                               >
                                 {/* Indicador de día actual */}
                                 {isToday && (
@@ -289,13 +292,14 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                           return (
                             <div
                               key={stay.id}
-                              className={`absolute h-10 rounded-lg ${colorClass} shadow-md flex flex-col justify-center px-2 overflow-hidden`}
+                              className={`absolute h-10 rounded-lg ${colorClass} shadow-md flex flex-col justify-center px-2 overflow-hidden cursor-pointer`}
                               style={{
                                 left: `${leftPercent}%`,
                                 width: `${Math.max(widthPercent, 5)}%`, // Mínimo 5% para que se vea algo
                                 top: "50%",
                                 transform: "translateY(-50%)",
                               }}
+                              onClick={() => handleRoomClick?.(room, days[startIndex], stay)}
                             >
                               <div className="flex items-center gap-1">
                                 <span className="text-xs">
