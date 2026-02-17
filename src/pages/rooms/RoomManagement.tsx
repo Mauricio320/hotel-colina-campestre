@@ -242,7 +242,6 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                           className="p-button-sm"
                           buttonClassName="bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-l-lg px-3 py-1.5 font-semibold transition-all"
                           menuButtonClassName="bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 border-l-0 rounded-r-lg px-2 transition-all"
-                          tooltip="Ver historial de la habitación"
                           tooltipOptions={{ position: "top" }}
                           onClick={() => openHistory(rowData)}
                           model={historyItems}
