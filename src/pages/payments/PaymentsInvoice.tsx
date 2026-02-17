@@ -1,13 +1,24 @@
 import PaymentsInvoiceTable from "@/components/payments/PaymentsInvoiceTable";
 import { useAccommodationTypes } from "@/hooks/useAccommodationTypes";
 import { TabPanel, TabView } from "primereact/tabview";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 const PaymentsInvoice: React.FC = () => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState(0);
   const [globalFilter, setGlobalFilter] = useState("");
 
   const { fetchAll: accommodationTypesQuery } = useAccommodationTypes();
+
+  // Restaurar el tab activo al volver desde la factura
+  useEffect(() => {
+    if (location.state?.activeTab !== undefined) {
+      setActiveTab(location.state.activeTab);
+      // Limpiar el state para evitar bucles
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   return (
     <div className="p-4 animate-fade-in">
@@ -22,6 +33,7 @@ const PaymentsInvoice: React.FC = () => {
               globalFilter={globalFilter}
               setGlobalFilter={setGlobalFilter}
               categoryId={dt.id}
+              activeTab={activeTab}
             />
           </TabPanel>
         ))}

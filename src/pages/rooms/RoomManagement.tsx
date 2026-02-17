@@ -110,7 +110,7 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
               <Button
                 label="Historial Tarifas"
                 icon="pi pi-history"
-                className="bg-blue-500 text-white border-none rounded-xl font-bold shadow-sm hover:bg-blue-600 transition-all py-2 px-4"
+                className="bg-gray-500 text-white border-none rounded-xl font-bold shadow-sm hover:bg-gray-600 transition-all py-2 px-4"
                 onClick={() =>
                   navigate(`/rooms/rate-history?tab=${CATEGORIES[activeTab]}`)
                 }
@@ -204,7 +204,8 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                 />
                 <Column
                   header="Acciones"
-                  headerClassName="bg-gray-50/50 text-emerald-400 font-bold uppercase text-[10px] tracking-widest p-4 text-center"
+                  align="center"
+                  headerClassName="font-bold uppercase text-[10px] tracking-widest p-4 text-center"
                   body={(rowData) => {
                     const historyItems: any[] = [
                       {
@@ -239,8 +240,8 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                           label="Historial"
                           icon="pi pi-history"
                           className="p-button-sm"
-                          buttonClassName="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-l-lg px-3 py-1.5 font-semibold transition-all"
-                          menuButtonClassName="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 border-l-0 rounded-r-lg px-2 transition-all"
+                          buttonClassName="bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-l-lg px-3 py-1.5 font-semibold transition-all"
+                          menuButtonClassName="bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 border-l-0 rounded-r-lg px-2 transition-all"
                           tooltip="Ver historial de la habitación"
                           tooltipOptions={{ position: "top" }}
                           onClick={() => openHistory(rowData)}

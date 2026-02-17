@@ -1,73 +1,16 @@
 import PaymentHistoryTable from "@/components/payments/PaymentHistoryTable";
-import { supabase } from "@/config/supabase";
-import { usePayments } from "@/hooks/usePayments";
-import { Payment } from "@/types";
+import PageHeader from "@/components/ui/PageHeader";
+import { useStayInvoice } from "@/hooks/useStayInvoice";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 const InvoiceDetailPage: React.FC = () => {
   const { stayId } = useParams<{ stayId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const [loading, setLoading] = useState(true);
-  const [stay, setStay] = useState<any | null>(null);
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchInvoiceData = async () => {
-      if (!stayId) return;
-      setLoading(true);
-
-      try {
-        // Cargar datos de la estancia con todas las relaciones
-        const { data: stayData, error: stayError } = await supabase
-          .from("stays")
-          .select(
-            `
-            *,
-            guest:guests!stays_guest_id_fkey(*),
-            room:rooms(*),
-            payment_method:payment_methods(name),
-            price_override:price_overrides(*,employee:employees(first_name, last_name))
-          `,
-          )
-          .eq("id", stayId)
-          .single();
-
-        if (stayError) throw stayError;
-
-        // Cargar todos los pagos reales de la estancia desde la tabla payments
-        const { data: paymentsData, error: paymentsError } = await supabase
-          .from("payments")
-          .select(
-            `
-            *,
-            payment_method:payment_methods(name),
-            employee:employees(first_name, last_name)
-          `,
-          )
-          .eq("stay_id", stayId)
-          .order("payment_date", { ascending: true });
-
-        if (paymentsError) throw paymentsError;
-
-        setStay(stayData);
-        setPayments(paymentsData || []);
-      } catch (error) {
-        console.error("Error fetching invoice data:", error);
-        setError(
-          "No se pudo cargar la información de la factura. Es posible que la reserva no exista.",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInvoiceData();
-  }, [stayId]);
+  const { stay, payments, isLoading: loading, error } = useStayInvoice(stayId);
 
   // Cálculos y formateo de fechas
   const nights = useMemo(() => {
@@ -78,24 +21,6 @@ const InvoiceDetailPage: React.FC = () => {
     return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   }, [stay]);
 
-  const checkInDateFormatted = stay?.check_in_date
-    ? new Date(stay.check_in_date + "T12:00:00").toLocaleDateString("es-ES", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "";
-
-  const checkOutDateFormatted = stay?.check_out_date
-    ? new Date(stay.check_out_date + "T12:00:00").toLocaleDateString("es-ES", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "";
-
   // Función para calcular precio por noche
   const calculatePricePerNight = () => {
     if (!stay || nights <= 0) return 0;
@@ -104,20 +29,6 @@ const InvoiceDetailPage: React.FC = () => {
       (stay.iva_amount || 0) -
       (stay.extra_mattress_price || 0);
     return Math.round(basePrice / nights);
-  };
-
-  // Funciones para el estado y tipo de pago
-  const getStatusSeverity = (status: string) => {
-    switch (status) {
-      case "Completed":
-        return "success";
-      case "Active":
-        return "danger";
-      case "Reserved":
-        return "warning";
-      default:
-        return "info";
-    }
   };
 
   // Calcular totales de pagos
@@ -170,28 +81,20 @@ const InvoiceDetailPage: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto pb-12 animate-fade-in print:p-4">
-      {/* Header de Navegación */}
-      <div className="flex items-center justify-between mb-8 no-print">
-        <div className="flex items-center gap-4">
-          <Button
-            icon="pi pi-arrow-left"
-            onClick={handleBack}
-            className="p-button-text p-button-plain p-button-rounded text-gray-400"
-          />
-          <div>
-            <h1 className="text-2xl font-black text-gray-800 tracking-tight">
-              Factura #{stay?.order_number || "N/A"}
-            </h1>
-            <p className="text-sm text-gray-500 font-medium">
-              {stay?.status === "Reserved"
-                ? "Reserva"
-                : stay?.status === "Active"
-                  ? "En Curso"
-                  : "Completada"}
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title={`Factura #${stay?.order_number || "N/A"}`}
+        subtitle={
+          stay?.status === "Reserved"
+            ? "Reserva"
+            : stay?.status === "Active"
+              ? "En Curso"
+              : "Completada"
+        }
+        icon="pi-file-text"
+        color="emerald"
+        onBack={handleBack}
+        backTooltip="Volver a pagos"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Columna Izquierda - Info Cliente y Reserva */}

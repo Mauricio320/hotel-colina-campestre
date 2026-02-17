@@ -6,7 +6,7 @@ import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import dayjs from "dayjs";
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { usePaymentsByCategory } from "@/hooks/usePaymentsByCategory";
 
@@ -15,6 +15,7 @@ interface PaymentsInvoiceTableProps {
   setGlobalFilter: (value: string) => void;
   emptyMessage: string;
   categoryId: string;
+  activeTab: number;
 }
 
 const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
@@ -22,8 +23,10 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
   setGlobalFilter,
   emptyMessage,
   categoryId,
+  activeTab,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { data: payments, isLoading } = usePaymentsByCategory(categoryId);
   const getPaymentTypeDisplay = (type: string) => {
     switch (type) {
@@ -164,7 +167,10 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
             className="p-button-sm bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg px-3 py-1.5 font-semibold transition-all shadow-sm hover:shadow"
             onClick={() =>
               navigate(`/invoice/${row.stay_id}`, {
-                state: { from: location.pathname + location.search },
+                state: {
+                  from: location.pathname + location.search,
+                  activeTab: activeTab,
+                },
               })
             }
             tooltip="Ver factura en PDF"
