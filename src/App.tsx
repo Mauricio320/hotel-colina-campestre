@@ -19,7 +19,9 @@ import CalendarView from "@/pages/calendar/CalendarView";
 import Dashboard from "@/pages/dashboard/Dashboard";
 import EmployeeManagement from "@/pages/employees/EmployeeManagement";
 import GuestManagement from "@/pages/guests/GuestManagement";
+import CleaningLogsPage from "@/pages/logs/CleaningLogsPage";
 import CleaningTaskPage from "@/pages/logs/CleaningTaskPage";
+import MaintenanceLogsPage from "@/pages/logs/MaintenanceLogsPage";
 import MaintenanceTaskPage from "@/pages/logs/MaintenanceTaskPage";
 import InvoiceDetailPage from "@/pages/payments/InvoiceDetailPage";
 import PaymentsInvoice from "@/pages/payments/PaymentsInvoice";
@@ -152,6 +154,8 @@ const AppContent: React.FC = () => {
           path="/employees"
           element={<EmployeeManagement userRole={roleName} />}
         />
+        <Route path="/logs/cleaning" element={<CleaningLogsPage />} />
+        <Route path="/logs/maintenance" element={<MaintenanceLogsPage />} />
         <Route path="/limpieza/:room_id" element={<CleaningTaskPage />} />
         <Route
           path="/mantenimiento/:room_id"

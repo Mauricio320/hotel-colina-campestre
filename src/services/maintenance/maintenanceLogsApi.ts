@@ -60,3 +60,20 @@ export const fetchMaintenanceLogsByDate = async (
   if (error) throw error;
   return data || [];
 };
+
+export const fetchAllMaintenanceLogs = async (): Promise<MaintenanceLog[]> => {
+  const { data, error } = await supabase
+    .from("maintenance_logs")
+    .select(`
+      *,
+      category:maintenance_categories(*),
+      subcategory:maintenance_subcategories(*),
+      employee:employees(*),
+      room:rooms(*),
+      stay:stays(*, guest:guests!stays_guest_id_fkey(*))
+    `)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+};

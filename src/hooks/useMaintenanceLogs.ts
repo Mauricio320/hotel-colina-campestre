@@ -3,8 +3,19 @@ import {
   createMaintenanceLog,
   fetchMaintenanceLogsByRoom,
   fetchMaintenanceLogsByDate,
+  fetchAllMaintenanceLogs,
 } from "@/services/maintenance/maintenanceLogsApi";
 import { CreateMaintenanceLogDto } from "@/types";
+
+export const useMaintenanceLogs = () => {
+  return useQuery({
+    queryKey: ["maintenance-logs"],
+    queryFn: fetchAllMaintenanceLogs,
+    refetchOnWindowFocus: false,
+    staleTime: 0,
+    retry: 1,
+  });
+};
 
 export const useMaintenanceLogsByRoom = (roomId: string | null) => {
   return useQuery({
@@ -34,6 +45,9 @@ export const useCreateMaintenanceLog = () => {
   return useMutation({
     mutationFn: (dto: CreateMaintenanceLogDto) => createMaintenanceLog(dto),
     onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["maintenance-logs"],
+      });
       queryClient.invalidateQueries({
         queryKey: ["maintenance-logs", "room", variables.room_id],
       });
