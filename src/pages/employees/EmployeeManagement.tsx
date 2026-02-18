@@ -1,8 +1,9 @@
 import { BlockUIProvider, useBlockUI } from "@/context/BlockUIContext";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useRoles } from "@/hooks/useRoles";
-import { Role } from "@/types";
+import { Employee, Role } from "@/types";
 import { DocsTypesConst } from "@/util/const/types-docs.const";
+import { supabase } from "@/config/supabase";
 import { createClient } from "@supabase/supabase-js";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
@@ -13,6 +14,7 @@ import { InputText } from "primereact/inputtext";
 import { ProgressSpinner } from "primereact/progressspinner";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface EmployeeManagementProps {
   userRole: string | null;
@@ -24,8 +26,14 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
   const { showBlockUI, hideBlockUI } = useBlockUI();
   const { employeesQuery, createEmployee } = useEmployees();
   const { data: roles = [] } = useRoles();
-  const { register, handleSubmit, control, reset, formState } = useForm();
+  const { register, handleSubmit, control, reset, formState } = useForm({
+    mode: "onChange",
+  });
+  const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+  const [selectedEmployeeForReset, setSelectedEmployeeForReset] = useState<Employee | null>(null);
 
   if (userRole !== Role.Admin) {
     return (
@@ -36,6 +44,42 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
   }
 
   const onSubmit = async (data: any) => {
+    // Si estamos editando
+    if (editingEmployee) {
+      showBlockUI("Actualizando información del empleado...");
+      try {
+        const { error } = await supabase
+          .from("employees")
+          .update({
+            doc_type: data.doc_type,
+            doc_number: data.doc_number,
+            first_name: data.first_name,
+            last_name: data.last_name,
+            phone: data.phone,
+            city: data.city,
+            address: data.address,
+            role_id: data.role_id,
+          })
+          .eq("id", editingEmployee.id);
+
+        if (error) throw error;
+
+        // Invalidar la caché para refrescar la tabla
+        queryClient.invalidateQueries({ queryKey: ["employees"] });
+
+        setShowModal(false);
+        reset();
+        setEditingEmployee(null);
+        showBlockUI("Empleado actualizado exitosamente.");
+      } catch (error: any) {
+        alert("Error: " + (error.message || "No se pudo actualizar el empleado"));
+      } finally {
+        hideBlockUI();
+      }
+      return;
+    }
+
+    // Crear nuevo empleado
     showBlockUI(
       "Procesando registro del empleado en el sistema y en autenticación.",
     );
@@ -102,6 +146,57 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
 
   if (employeesQuery.isLoading) return <ProgressSpinner />;
 
+  const handleNewEmployee = () => {
+    setEditingEmployee(null);
+    reset({});
+    setShowModal(true);
+  };
+
+  const handleEdit = (employee: Employee) => {
+    setEditingEmployee(employee);
+    reset({
+      doc_type: employee.doc_type,
+      doc_number: employee.doc_number,
+      first_name: employee.first_name,
+      last_name: employee.last_name,
+      phone: employee.phone,
+      city: employee.city,
+      address: employee.address,
+      email: employee.email,
+      role_id: employee.role_id,
+    });
+    setShowModal(true);
+  };
+
+  const handleOpenResetPassword = (employee: Employee) => {
+    setSelectedEmployeeForReset(employee);
+    setShowResetPasswordModal(true);
+  };
+
+  const handleResetPassword = async () => {
+    if (!selectedEmployeeForReset?.email) return;
+
+    showBlockUI("Enviando email de recuperación...");
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        selectedEmployeeForReset.email,
+        {
+          redirectTo: `${window.location.origin}/reset-password`,
+        }
+      );
+
+      if (error) throw error;
+
+      alert(`Se ha enviado un email de recuperación a ${selectedEmployeeForReset.email}`);
+      setShowResetPasswordModal(false);
+      setSelectedEmployeeForReset(null);
+    } catch (error: any) {
+      alert("Error: " + (error.message || "No se pudo enviar el email"));
+    } finally {
+      hideBlockUI();
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -111,8 +206,8 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
         <Button
           label="Registrar Empleado"
           icon="pi pi-user-plus"
-          className="bg-emerald-600 shadow-md"
-          onClick={() => setShowModal(true)}
+          className="bg-emerald-600 shadow-md text-white px-4 py-2"
+          onClick={handleNewEmployee}
         />
       </div>
 
@@ -143,8 +238,15 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
             sortable
           />
           <Column
+            field="doc_type"
+            header="Tipo"
+            sortable
+            headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+          />
+          <Column
             field="doc_number"
             header="Documento"
+            sortable
             headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
           />
           <Column
@@ -159,28 +261,31 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
             )}
           />
           <Column
-            field="password"
-            header="Contraseña"
+            field="phone"
+            header="Teléfono"
             headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
-            body={(row) => (
-              <span className="font-mono text-gray-400">
-                {row.password || "********"}
-              </span>
-            )}
+          />
+          <Column
+            field="city"
+            header="Ciudad"
+            sortable
+            headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
           />
           <Column
             header="Acciones"
             headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4 text-center"
-            body={() => (
+            body={(rowData: Employee) => (
               <div className="flex justify-center gap-1">
                 <Button
                   icon="pi pi-pencil"
                   className="p-button-text p-button-warning p-button-sm"
+                  onClick={() => handleEdit(rowData)}
                 />
                 <Button
                   icon="pi pi-key"
                   className="p-button-text p-button-info p-button-sm"
                   tooltip="Reset Password"
+                  onClick={() => handleOpenResetPassword(rowData)}
                 />
               </div>
             )}
@@ -192,20 +297,20 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
         header={
           <div className="flex items-center gap-3">
             <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600">
-              <i className="pi pi-user-plus text-xl"></i>
+              <i className={`pi ${editingEmployee ? 'pi-user-edit' : 'pi-user-plus'} text-xl`}></i>
             </div>
             <div>
               <h3 className="text-xl font-black text-gray-800 tracking-tight">
-                Nuevo Perfil de Empleado
+                {editingEmployee ? "Editar Perfil de Empleado" : "Nuevo Perfil de Empleado"}
               </h3>
               <p className="text-xs text-gray-400 font-medium">
-                Complete la información para registrar un nuevo colaborador
+                {editingEmployee ? "Modifique la información del colaborador" : "Complete la información para registrar un nuevo colaborador"}
               </p>
             </div>
           </div>
         }
         visible={showModal}
-        onHide={() => setShowModal(false)}
+        onHide={() => { setShowModal(false); setEditingEmployee(null); reset({}); }}
         className="w-full max-w-2xl"
         contentClassName="p-0"
       >
@@ -216,7 +321,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
             <div className="md:col-span-4 flex flex-col gap-1">
               <label className="text-xs font-bold text-gray-700">
-                Tipo Documento
+                Tipo Documento <span className="text-amber-500">*</span>
               </label>
               <Controller
                 name="doc_type"
@@ -233,14 +338,14 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
                 )}
               />
               {formState.errors.doc_type && (
-                <small className="p-error">
+                <small className="p-error text-xs">
                   {formState.errors.doc_type.message as string}
                 </small>
               )}
             </div>
             <div className="md:col-span-8 flex flex-col gap-1">
               <label className="text-xs font-bold text-gray-700">
-                Número de Documento
+                Número de Documento <span className="text-amber-500">*</span>
               </label>
               <InputText
                 {...register("doc_number", {
@@ -251,6 +356,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
                       "El número de documento debe tener al menos 4 caracteres.",
                   },
                 })}
+                disabled={!!editingEmployee}
                 className={`w-full bg-gray-50/50 border-gray-100 ${
                   formState.errors.doc_number ? "p-invalid" : ""
                 }`}
@@ -258,14 +364,14 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
                 autoComplete="off"
               />
               {formState.errors.doc_number && (
-                <small className="p-error">
+                <small className="p-error text-xs">
                   {formState.errors.doc_number.message as string}
                 </small>
               )}
             </div>
 
             <div className="md:col-span-6 flex flex-col gap-1">
-              <label className="text-xs font-bold text-gray-700">Nombres</label>
+              <label className="text-xs font-bold text-gray-700">Nombres <span className="text-amber-500">*</span></label>
               <InputText
                 {...register("first_name", { required: "Campo requerido" })}
                 className={`w-full bg-gray-50/50 border-gray-100 ${
@@ -273,14 +379,14 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
                 }`}
               />
               {formState.errors.first_name && (
-                <small className="p-error">
+                <small className="p-error text-xs">
                   {formState.errors.first_name.message as string}
                 </small>
               )}
             </div>
             <div className="md:col-span-6 flex flex-col gap-1">
               <label className="text-xs font-bold text-gray-700">
-                Apellidos
+                Apellidos <span className="text-amber-500">*</span>
               </label>
               <InputText
                 {...register("last_name", { required: "Campo requerido" })}
@@ -289,7 +395,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
                 }`}
               />
               {formState.errors.last_name && (
-                <small className="p-error">
+                <small className="p-error text-xs">
                   {formState.errors.last_name.message as string}
                 </small>
               )}
@@ -297,7 +403,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
 
             <div className="md:col-span-12 flex flex-col gap-1">
               <label className="text-xs font-bold text-gray-700">
-                Rol en el Sistema
+                Rol en el Sistema <span className="text-amber-500">*</span>
               </label>
               <Controller
                 name="role_id"
@@ -317,73 +423,105 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
                 )}
               />
               {formState.errors.role_id && (
-                <small className="p-error">
+                <small className="p-error text-xs">
                   {formState.errors.role_id.message as string}
                 </small>
               )}
             </div>
 
-            <div className="md:col-span-6 flex flex-col gap-1">
+            {!editingEmployee && (
+              <div className="md:col-span-6 flex flex-col gap-1">
+                <label className="text-xs font-bold text-gray-700">
+                  Correo Institucional <span className="text-amber-500">*</span>
+                </label>
+                <InputText
+                  {...register("email", { required: "Campo requerido" })}
+                  className={`w-full bg-gray-50/50 border-gray-100 ${
+                    formState.errors.email ? "p-invalid" : ""
+                  }`}
+                  placeholder="empleado@hotel.com"
+                />
+                {formState.errors.email && (
+                  <small className="p-error text-xs">
+                    {formState.errors.email.message as string}
+                  </small>
+                )}
+              </div>
+            )}
+            <div className={editingEmployee ? "md:col-span-12 flex flex-col gap-1" : "md:col-span-6 flex flex-col gap-1"}>
               <label className="text-xs font-bold text-gray-700">
-                Correo Institucional
+                Teléfono <span className="text-amber-500">*</span>
               </label>
               <InputText
-                {...register("email", { required: "Campo requerido" })}
+                {...register("phone", { required: "Campo requerido" })}
                 className={`w-full bg-gray-50/50 border-gray-100 ${
-                  formState.errors.email ? "p-invalid" : ""
+                  formState.errors.phone ? "p-invalid" : ""
                 }`}
-                placeholder="empleado@hotel.com"
+                placeholder="300 123 4567"
               />
-              {formState.errors.email && (
-                <small className="p-error">
-                  {formState.errors.email.message as string}
+              {formState.errors.phone && (
+                <small className="p-error text-xs">
+                  {formState.errors.phone.message as string}
                 </small>
               )}
             </div>
+
             <div className="md:col-span-6 flex flex-col gap-1">
               <label className="text-xs font-bold text-gray-700">
-                Teléfono
+                Ciudad
               </label>
               <InputText
-                {...register("phone")}
+                {...register("city")}
                 className="w-full bg-gray-50/50 border-gray-100"
-                placeholder="300 123 4567"
+                placeholder="Ciudad de residencia"
+              />
+            </div>
+            <div className="md:col-span-6 flex flex-col gap-1">
+              <label className="text-xs font-bold text-gray-700">
+                Dirección
+              </label>
+              <InputText
+                {...register("address")}
+                className="w-full bg-gray-50/50 border-gray-100"
+                placeholder="Dirección de residencia"
               />
             </div>
 
-            <div className="md:col-span-12 flex flex-col gap-1">
-              <label className="text-xs font-bold text-gray-700">
-                Contraseña de Acceso
-              </label>
-              <Controller
-                name="password"
-                control={control}
-                rules={{
-                  required: "Campo requerido",
-                  minLength: { value: 6, message: "Mínimo 6 caracteres" },
-                }}
-                render={({ field, fieldState }) => (
-                  <InputText
-                    {...field}
-                    type="text"
-                    className={`w-full bg-gray-50/50 border-gray-100 font-mono ${
-                      fieldState.invalid ? "p-invalid" : ""
-                    }`}
-                    placeholder="Mínimo 6 caracteres"
-                  />
+            {!editingEmployee && (
+              <div className="md:col-span-12 flex flex-col gap-1">
+                <label className="text-xs font-bold text-gray-700">
+                  Contraseña de Acceso <span className="text-amber-500">*</span>
+                </label>
+                <Controller
+                  name="password"
+                  control={control}
+                  rules={{
+                    required: "Campo requerido",
+                    minLength: { value: 6, message: "Mínimo 6 caracteres" },
+                  }}
+                  render={({ field, fieldState }) => (
+                    <InputText
+                      {...field}
+                      type="text"
+                      className={`w-full bg-gray-50/50 border-gray-100 font-mono ${
+                        fieldState.invalid ? "p-invalid" : ""
+                      }`}
+                      placeholder="Mínimo 6 caracteres"
+                    />
+                  )}
+                />
+                {formState.errors.password && (
+                  <small className="p-error text-xs">
+                    {formState.errors.password.message as string}
+                  </small>
                 )}
-              />
-              {formState.errors.password && (
-                <small className="p-error">
-                  {formState.errors.password.message as string}
-                </small>
-              )}
-            </div>
+              </div>
+            )}
 
             <div className="md:col-span-12 mt-4 pt-4 border-t border-gray-50">
               <Button
                 type="submit"
-                label="Registrar Colaborador"
+                label={editingEmployee ? "Actualizar Colaborador" : "Registrar Colaborador"}
                 icon="pi pi-check"
                 className="bg-emerald-600 text-white w-full p-4 font-black rounded-2xl shadow-lg hover:bg-emerald-700 transition-all border-none"
                 loading={createEmployee.isPending}
@@ -391,6 +529,47 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
             </div>
           </div>
         </form>
+      </Dialog>
+
+      {/* Modal de Reset Password */}
+      <Dialog
+        header="Restablecer Contraseña"
+        visible={showResetPasswordModal}
+        onHide={() => { setShowResetPasswordModal(false); setSelectedEmployeeForReset(null); }}
+        className="w-full max-w-md"
+      >
+        <div className="p-4">
+          {selectedEmployeeForReset && (
+            <>
+              <p className="text-gray-600 mb-4">
+                ¿Desea enviar un email de recuperación de contraseña a:
+              </p>
+              <div className="bg-gray-50 p-3 rounded-lg mb-4">
+                <p className="font-bold text-gray-800">
+                  {selectedEmployeeForReset.first_name} {selectedEmployeeForReset.last_name}
+                </p>
+                <p className="text-sm text-gray-500">{selectedEmployeeForReset.email}</p>
+              </div>
+              <p className="text-xs text-gray-400 mb-4">
+                El empleado recibirá un email con un enlace para establecer una nueva contraseña.
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  label="Cancelar"
+                  icon="pi pi-times"
+                  className="p-button-secondary flex-1"
+                  onClick={() => { setShowResetPasswordModal(false); setSelectedEmployeeForReset(null); }}
+                />
+                <Button
+                  label="Enviar Email"
+                  icon="pi pi-send"
+                  className="bg-emerald-600 text-white flex-1"
+                  onClick={handleResetPassword}
+                />
+              </div>
+            </>
+          )}
+        </div>
       </Dialog>
     </div>
   );
