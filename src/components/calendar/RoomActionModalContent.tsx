@@ -27,10 +27,10 @@ interface RoomActionModalContentProps {
 }
 
 export const RoomActionModalContent = ({
+  activeStay,
   accommodationTypeEnum,
   accommodationType,
   roomStatuses,
-  activeStay,
   activeTab,
   onHide,
   room,
@@ -53,11 +53,20 @@ export const RoomActionModalContent = ({
   ];
 
   const handleGoToCheckIn = () => {
-    const url = `/check-in/${id}?${params.join("&")}`;
+    const queryParams = [...params];
+    if (activeStay?.id) {
+      queryParams.push(`stay_id=${activeStay.id}`);
+    }
+    const url = `/check-in/${id}?${queryParams.join("&")}`;
     navigate(url);
   };
+
   const handleGoToBooking = () => {
-    const url = `/booking/${id}?${params.join("&")}`;
+    const queryParams = [...params];
+    if (activeStay?.id) {
+      queryParams.push(`stay_id=${activeStay.id}`);
+    }
+    const url = `/booking/${id}?${queryParams.join("&")}`;
     navigate(url);
   };
 
@@ -135,17 +144,27 @@ export const RoomActionModalContent = ({
         handleRoomStatusChange={handleRoomStatusChange}
         onGoToCheckIn={handleGoToCheckIn}
         onGoToBooking={handleGoToBooking}
+        activeStay={activeStay}
+        room={room}
+        accommodationType={accommodationType}
+        activeTab={activeTab}
+        date={date}
       />
     );
   }
   return <div></div>;
 };
 
-interface ActionsButtons {
+interface ActionsButtonsProps {
   handleRoomStatusChange: (action: string) => Promise<void>;
   accommodationTypeEnum: AccommodationTypeEnum;
   onGoToCheckIn: () => void;
   onGoToBooking: () => void;
+  activeStay?: Stay | null;
+  room?: Room;
+  accommodationType?: AccommodationType;
+  activeTab: number;
+  date: Date | null;
 }
 
 const ActionsButtons = ({
@@ -153,31 +172,82 @@ const ActionsButtons = ({
   accommodationTypeEnum,
   onGoToCheckIn,
   onGoToBooking,
-}: ActionsButtons) => {
+  activeStay,
+  room,
+  accommodationType,
+  activeTab,
+  date,
+}: ActionsButtonsProps) => {
+  const navigate = useNavigate();
+
+  // Verificar si es el día actual
+  const isToday = date && dayjs(date).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD");
+
+  // Verificar si ya tiene limpieza realizada
+  const hasCleaning = room?.cleaning_log && room.cleaning_log.length > 0;
+
+  const handleLimpieza = () => {
+    const roomId =
+      accommodationTypeEnum === AccommodationTypeEnum.HABITACION
+        ? room?.id
+        : accommodationType?.id;
+
+    if (!roomId) return;
+
+    const queryParams = activeStay?.id
+      ? `?stay_id=${activeStay.id}&tab=${activeTab}`
+      : "";
+    navigate(`/limpieza/${roomId}${queryParams}`);
+  };
+
+  const handleMantenimiento = () => {
+    const roomId =
+      accommodationTypeEnum === AccommodationTypeEnum.HABITACION
+        ? room?.id
+        : accommodationType?.id;
+
+    if (!roomId) return;
+
+    const queryParams = activeStay?.id
+      ? `?stay_id=${activeStay.id}&tab=${activeTab}`
+      : "";
+    navigate(`/mantenimiento/${roomId}${queryParams}`);
+  };
+
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 gap-3">
       <Button
+        icon="pi pi-sign-in"
         label="Check-in"
-        className="bg-[#ff3d47] border-none text-white font-black py-4 rounded-2xl shadow-sm"
+        className="p-3 bg-[#ff3d47] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
         onClick={onGoToCheckIn}
       />
       <Button
+        icon="pi pi-calendar"
         label="Reservar"
-        className="bg-[#f9b000] border-none text-white font-black py-4 rounded-2xl shadow-sm"
+        className="p-3 bg-[#f9b000] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
         onClick={onGoToBooking}
       />
-      <Button
-        label="Limpieza"
-        className="bg-[#2d79ff] border-none text-white font-black py-4 rounded-2xl shadow-sm"
-        hidden={accommodationTypeEnum === AccommodationTypeEnum.APARTAMENTO}
-        onClick={() => handleRoomStatusChange(RoomActionEnum.LIMPIEZA)}
-      />
-      <Button
-        label="Mant."
-        className="bg-[#6e7687] border-none text-white font-black py-4 rounded-2xl shadow-sm"
-        hidden={accommodationTypeEnum === AccommodationTypeEnum.APARTAMENTO}
-        onClick={() => handleRoomStatusChange(RoomActionEnum.MANTENIMIENTO)}
-      />
+      {/* Botones de Limpieza y Mantenimiento - solo visibles el día actual */}
+      {isToday && (
+        <>
+          <Button
+            icon="pi pi-sparkles"
+            label={hasCleaning ? "Limpieza realizada" : "Limpieza"}
+            className="p-3 bg-[#2d79ff] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
+            hidden={accommodationTypeEnum === AccommodationTypeEnum.APARTAMENTO}
+            disabled={hasCleaning}
+            onClick={handleLimpieza}
+          />
+          <Button
+            icon="pi pi-wrench"
+            label="Mantenimiento"
+            className="p-3 bg-[#6e7687] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
+            hidden={accommodationTypeEnum === AccommodationTypeEnum.APARTAMENTO}
+            onClick={handleMantenimiento}
+          />
+        </>
+      )}
     </div>
   );
 };

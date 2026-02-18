@@ -5,17 +5,39 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Stay } from "@/types";
 
+type ConflictContext = "check-in" | "move" | "reservation";
+
 interface AvailabilityConflictModalProps {
   visible: boolean;
   onHide: () => void;
   conflicts: any[];
+  context?: ConflictContext;
 }
 
 const AvailabilityConflictModal: React.FC<AvailabilityConflictModalProps> = ({
   visible,
   onHide,
   conflicts,
+  context = "check-in",
 }) => {
+  // Mensajes según el contexto
+  const messages = {
+    "check-in": {
+      title: "No se puede proceder con el Check-in total.",
+      description: "Se encontraron los siguientes registros ocupando el espacio físico solicitado:",
+    },
+    move: {
+      title: "No se puede mover la reserva.",
+      description: "La habitación seleccionada no está disponible para las fechas indicadas:",
+    },
+    reservation: {
+      title: "No se puede crear la reserva.",
+      description: "El alojamiento seleccionado no está disponible para las fechas indicadas:",
+    },
+  };
+
+  const currentMessage = messages[context];
+
   const header = (
     <div className="flex items-center gap-3">
       <i className="pi pi-exclamation-triangle text-red-500 text-2xl"></i>
@@ -49,11 +71,10 @@ const AvailabilityConflictModal: React.FC<AvailabilityConflictModalProps> = ({
         <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-700">
           <p className="font-bold flex items-center gap-2">
             <i className="pi pi-info-circle"></i>
-            No se puede proceder con el Check-in total.
+            {currentMessage.title}
           </p>
           <p className="text-sm mt-1">
-            Se encontraron los siguientes registros ocupando el espacio físico
-            solicitado:
+            {currentMessage.description}
           </p>
         </div>
 
@@ -72,11 +93,27 @@ const AvailabilityConflictModal: React.FC<AvailabilityConflictModalProps> = ({
             header="Alojamiento"
             body={(row) => (
               <span className="font-bold text-gray-700">
-                {row.rooms
-                  ? `HAB ${row.rooms.room_number}`
-                  : row.accommodation_types?.name || "Alojamiento Completo"}
+                {row.room
+                  ? `HAB ${row.room.room_number}`
+                  : row.rooms
+                    ? `HAB ${row.rooms.room_number}`
+                    : row.accommodation_types?.name || "Alojamiento Completo"}
               </span>
             )}
+          />
+
+          <Column
+            header="Huésped"
+            body={(row) => {
+              const firstName = row.guest?.first_name || row.guests?.first_name;
+              const lastName = row.guest?.last_name || row.guests?.last_name;
+              const fullName = [firstName, lastName].filter(Boolean).join(" ");
+              return (
+                <span className="text-gray-700">
+                  {fullName || "Sin huésped"}
+                </span>
+              );
+            }}
           />
 
           <Column

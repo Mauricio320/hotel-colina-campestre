@@ -12,6 +12,7 @@ export interface StayPricingParams {
     iva: number;
     mat: number;
   };
+  roomRates?: any[];
 }
 
 export interface StayPricingReturn {
@@ -36,6 +37,7 @@ export const useStayPricing = (
     extraMattressCount,
     invoiceRequested,
     settings,
+    roomRates,
   } = params;
 
   const nights = useMemo(() => {
@@ -53,9 +55,9 @@ export const useStayPricing = (
     let dailyRate: number;
 
     if ("room_number" in room) {
-      const roomRates = room.rates || [];
-      const applicableRate = roomRates
-        .filter((rate) => rate.person_count <= personCount)
+      const rates = roomRates || room.rates || [];
+      const applicableRate = rates
+        .filter((rate) => rate.person_count === personCount)
         .sort((a, b) => b.person_count - a.person_count)[0];
 
       const defaultBaseRate = room.category === "Hotel" ? 80000 : 90000;

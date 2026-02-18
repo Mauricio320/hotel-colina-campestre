@@ -3,6 +3,7 @@ import { CATEGORIES } from "@/constants";
 import { useRoomStatuses } from "@/hooks/useRoomStatuses";
 import { useRooms } from "@/hooks/useRooms";
 import { Room } from "@/types";
+import PageHeader from "@/components/ui/PageHeader";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
@@ -125,30 +126,27 @@ const RoomFormPage: React.FC = () => {
     );
   }
 
+  const getPageTitle = () => {
+    return isEditMode
+      ? `Editar Habitación ${selectedRoom?.room_number || ""}`
+      : "Nueva Habitación";
+  };
+
+  const getPageSubtitle = () => {
+    return isEditMode
+      ? "Modifique los detalles de la habitación"
+      : "Ingrese los datos para crear una nueva habitación";
+  };
+
   return (
-    <div className="max-w-4xl mx-auto flex flex-col gap-8 animate-fade-in pb-12">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            icon="pi pi-arrow-left"
-            className="p-button-text p-button-rounded p-button-secondary bg-white "
-            onClick={handleBack}
-            tooltip="Volver"
-          />
-          <div>
-            <h1 className="text-3xl font-black text-gray-800 tracking-tight">
-              {isEditMode
-                ? `Editar Habitación ${selectedRoom?.room_number || ""}`
-                : "Nueva Habitación"}
-            </h1>
-            <p className="text-gray-500 font-medium">
-              {isEditMode
-                ? "Modifique los detalles de la habitación"
-                : "Ingrese los datos para crear una nueva habitación"}
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="max-w-4xl mx-auto flex flex-col gap-2 animate-fade-in pb-12">
+      <PageHeader
+        title={getPageTitle()}
+        subtitle={getPageSubtitle()}
+        icon="pi-building"
+        color="emerald"
+        onBack={handleBack}
+      />
 
       <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
         <form onSubmit={handleSubmit(onSave)} className="flex flex-col gap-8">

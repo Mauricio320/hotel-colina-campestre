@@ -3,14 +3,13 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
+  useMatch,
   useNavigate,
   useParams,
   useSearchParams,
-  useLocation,
-  useMatch,
 } from "react-router-dom";
 
-import GuestDataForm from "@/components/stays/GuestDataForm";
+import AllGuestsForm from "@/components/stays/AllGuestsForm";
 import PaymentSection from "@/components/stays/PaymentSection";
 import StayDetailsForm from "@/components/stays/StayDetailsForm";
 import { useUniversalRoomQuery } from "@/hooks/useUniversalRoomQuery";
@@ -23,6 +22,7 @@ import { useBlockUI } from "@/context/BlockUIContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useColombiaGeography } from "@/hooks/useColombiaGeography";
 import { useGuests } from "@/hooks/useGuests";
+import { useRoomRates } from "@/hooks/useRoomRates";
 import { useRoomStatuses } from "@/hooks/useRoomStatuses";
 import { usePaymentMethods, useSettings } from "@/hooks/useSettings";
 import { useStayPricing } from "@/hooks/useStayPricing";
@@ -30,19 +30,21 @@ import {
   CheckAvailability,
   useCreateOnStayWithPayment,
 } from "@/hooks/useStays";
-import { generateStayObservation } from "@/util/helper/stayHelpers";
-import { Employee, PaymentType } from "@/types";
+import { Employee, PaymentType, Stay } from "@/types";
 import {
   AccommodationTypeEnum,
   RoomStatusEnum,
 } from "@/util/enums/status-rooms.enum";
+import { generateStayObservation } from "@/util/helper/stayHelpers";
+import dayjs from "dayjs";
+import { useCheckRoomAvailability } from "@/hooks/useMoveStay";
+import { FormattedConflicts } from "@/util/helper/formattedConflicts";
 
 const CheckInPage: React.FC = () => {
   const { colombiaData, loadingGeo } = useColombiaGeography();
 
   const { findGuestByDoc, upsertGuest } = useGuests();
   const { data: roomStatuses } = useRoomStatuses();
-  const location = useLocation();
   const isCheckInMode = !!useMatch("/check-in/:roomId");
 
   const getStatusId = (name: RoomStatusEnum) =>
@@ -51,7 +53,7 @@ const CheckInPage: React.FC = () => {
   const { showBlockUI, hideBlockUI } = useBlockUI();
   const { settings } = useSettings();
   const { paymentMethods } = usePaymentMethods();
-
+  const checkAvailability = useCheckRoomAvailability();
   const { employee } = useAuth();
 
   const { roomId } = useParams<{ roomId: string }>();
@@ -60,6 +62,7 @@ const CheckInPage: React.FC = () => {
   const tabParam = searchParams.get("tab");
   const action = searchParams.get("action") as AccommodationTypeEnum;
 
+  const { data: roomRates } = useRoomRates(roomId);
   const { data: universalData, isLoading } = useUniversalRoomQuery(
     roomId,
     action,
@@ -79,31 +82,33 @@ const CheckInPage: React.FC = () => {
   const [isConflictModalVisible, setIsConflictModalVisible] = useState(false);
   const [conflicts, setConflicts] = useState<any[]>([]);
 
-  const { control, register, handleSubmit, setValue, watch } = useForm({
-    defaultValues: {
-      doc_type: "CC",
-      doc_number: "",
-      first_name: "",
-      last_name: "",
-      phone: "",
-      email: "",
-      department: "",
-      city: "",
-      address: "",
-      check_in_date: searchParams.get("date")
-        ? new Date(searchParams.get("date")! + "T12:00:00")
-        : new Date(),
-      check_out_date: null as Date | null,
-      person_count: 1,
-      extra_mattress_count: 0,
-      is_invoice_requested: false,
-      observation: "",
-      payment_method_id: "",
-      paid_amount: 0,
-      room_status_current_id: null,
-      new_status_id: null,
-    },
-  });
+  const { control, register, handleSubmit, setValue, watch, setError } =
+    useForm({
+      defaultValues: {
+        doc_type: "CC",
+        doc_number: "",
+        first_name: "",
+        last_name: "",
+        phone: "",
+        email: "",
+        department: "",
+        city: "",
+        address: "",
+        check_in_date: searchParams.get("date")
+          ? new Date(searchParams.get("date")! + "T12:00:00")
+          : new Date(),
+        check_out_date: null as Date | null,
+        person_count: 1,
+        extra_mattress_count: 0,
+        is_invoice_requested: false,
+        observation: "",
+        payment_method_id: "",
+        paid_amount: 0,
+        room_status_current_id: null,
+        new_status_id: null,
+        additional_guests: [],
+      },
+    });
 
   const personCount = watch("person_count");
   const checkInDate = watch("check_in_date");
@@ -112,6 +117,42 @@ const CheckInPage: React.FC = () => {
   const invoiceRequested = watch("is_invoice_requested");
   const watchDocNumber = watch("doc_number");
   const selectedDepartment = watch("department");
+
+  // Actualizar array de huéspedes adicionales cuando cambia personCount
+  useEffect(() => {
+    const currentCount = watch("additional_guests")?.length || 0;
+    const newCount = Math.max(0, personCount - 1);
+
+    if (newCount !== currentCount) {
+      if (newCount > currentCount) {
+        // Agregar nuevos huéspedes al array
+        const newGuests = Array.from(
+          { length: newCount - currentCount },
+          () => ({
+            doc_type: "CC",
+            doc_number: "",
+            first_name: "",
+            last_name: "",
+            phone: "",
+            email: "",
+            city: "",
+            address: "",
+            department: "",
+          }),
+        );
+        setValue("additional_guests", [
+          ...(watch("additional_guests") || []),
+          ...newGuests,
+        ]);
+      } else {
+        // Recortar array
+        setValue(
+          "additional_guests",
+          watch("additional_guests")?.slice(0, newCount) || [],
+        );
+      }
+    }
+  }, [personCount, setValue, watch]);
 
   useEffect(() => {
     if (paymentMethods?.length > 0)
@@ -198,6 +239,7 @@ const CheckInPage: React.FC = () => {
     extraMattressCount,
     invoiceRequested,
     settings,
+    roomRates,
   });
 
   const finalPriceInfo = useMemo(() => {
@@ -215,23 +257,7 @@ const CheckInPage: React.FC = () => {
   const onSubmit = async (data: any) => {
     if (!data.check_out_date) return alert("Seleccione una fecha de salida");
     showBlockUI("Procesando check-in...");
-    const isApartmentAction = action === AccommodationTypeEnum.APARTAMENTO;
-
-    if (isApartmentAction) {
-      showBlockUI("Verificando disponibilidad...");
-      const { data: currentConflicts } = await CheckAvailability(
-        roomId,
-        data.check_in_date.toLocaleDateString("sv-SE"),
-        data.check_out_date.toLocaleDateString("sv-SE"),
-      );
-      hideBlockUI();
-
-      if (currentConflicts && currentConflicts.length > 0) {
-        setConflicts(currentConflicts);
-        setIsConflictModalVisible(true);
-        return;
-      }
-    }
+    if (!(await verifyStay(data))) return;
 
     try {
       const guest = await upsertGuest.mutateAsync({
@@ -244,6 +270,26 @@ const CheckInPage: React.FC = () => {
         city: data.city,
         address: data.address,
       });
+
+      const additionalGuests = data.additional_guests || [];
+      const additionalGuestIds: string[] = [];
+
+      for (const additionalGuest of additionalGuests) {
+        if (additionalGuest.doc_number && additionalGuest.first_name) {
+          const savedGuest = await upsertGuest.mutateAsync({
+            doc_type: additionalGuest.doc_type || "CC",
+            doc_number: additionalGuest.doc_number,
+            first_name: additionalGuest.first_name,
+            last_name: additionalGuest.last_name,
+            phone: additionalGuest.phone,
+            email: additionalGuest.email,
+            city: additionalGuest.city,
+            address: additionalGuest.address,
+          });
+          additionalGuestIds.push(savedGuest.id);
+        }
+      }
+
       const isApartmentAction = action === AccommodationTypeEnum.APARTAMENTO;
 
       const room_status_current_id = getStatusId(RoomStatusEnum.DISPONIBLE);
@@ -307,7 +353,9 @@ const CheckInPage: React.FC = () => {
           final_price: finalPriceInfo.total,
           authorized_by: authorizedBy?.id,
         },
+        additionalGuestIds,
       });
+
       navigate(tabParam ? `/calendar?tab=${tabParam}` : "/calendar");
     } catch (e: any) {
       alert("Error: " + e.message);
@@ -316,6 +364,45 @@ const CheckInPage: React.FC = () => {
       setTimeout(() => {
         hideBlockUI();
       }, 1000);
+    }
+
+    hideBlockUI();
+  };
+
+  const verifyStay = async (data: any) => {
+    const isApartmentAction = action === AccommodationTypeEnum.APARTAMENTO;
+    if (isApartmentAction) {
+      showBlockUI("Verificando disponibilidad...");
+      const { data: currentConflicts } = await CheckAvailability(
+        roomId,
+        data.check_in_date.toLocaleDateString("sv-SE"),
+        data.check_out_date.toLocaleDateString("sv-SE"),
+      );
+      hideBlockUI();
+
+      if (currentConflicts && currentConflicts.length > 0) {
+        setConflicts(currentConflicts);
+        setIsConflictModalVisible(true);
+        return false;
+      }
+    } else {
+      const result = await checkAvailability.mutateAsync({
+        roomId: roomId,
+        checkInDate: data.check_in_date.toLocaleDateString("sv-SE"),
+        checkOutDate: data.check_out_date.toLocaleDateString("sv-SE"),
+      });
+
+      if (!result.available && result.conflictingStays) {
+        const formattedConflicts: Stay[] = FormattedConflicts(
+          result.conflictingStays,
+        );
+        setConflicts(formattedConflicts);
+        setIsConflictModalVisible(true);
+        hideBlockUI();
+        return false;
+      }
+
+      return true;
     }
   };
 
@@ -356,31 +443,36 @@ const CheckInPage: React.FC = () => {
         }
       />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
-        <GuestDataForm
+      <div className="pb-5">
+        <StayDetailsForm
+          title="Detalles de la Estadía"
+          checkInDate={checkInDate}
+          roomRates={roomRates}
           register={register}
+          settings={settings}
           control={control}
           setValue={setValue}
+          watch={watch}
+          maxCapacity={10}
+        />
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+        <AllGuestsForm
           searching={searching}
           searchGuest={searchGuest}
-          cityOptions={cityOptions}
-          selectedDepartment={selectedDepartment}
-          colombiaData={colombiaData}
           guestNotFound={guestNotFound}
           guestFound={guestFound}
           searchMessage={searchMessage}
           watchDocNumber={watchDocNumber}
-        />
-
-        <StayDetailsForm
-          title="Detalles de la Estadía"
-          checkInDate={checkInDate}
+          personCount={personCount}
+          selectedDepartment={selectedDepartment}
+          colombiaData={colombiaData}
+          cityOptions={cityOptions}
           register={register}
-          setValue={setValue}
           control={control}
-          settings={settings}
-          maxCapacity={2}
+          setValue={setValue}
           watch={watch}
+          findGuestByDoc={findGuestByDoc}
         />
 
         <CorporateClientSelector

@@ -17,17 +17,17 @@ const Layout: React.FC<LayoutProps> = ({ employee, onLogout }) => {
   const location = useLocation();
 
   const menuItems = [
-    {
-      label: "Dashboard",
-      icon: "pi pi-home",
-      path: "/",
-      roles: [
-        Role.Admin,
-        Role.Recepcionista,
-        Role.Limpieza,
-        Role.Mantenimiento,
-      ],
-    },
+    // {
+    //   label: "Dashboard",
+    //   icon: "pi pi-home",
+    //   path: "/",
+    //   roles: [
+    //     Role.Admin,
+    //     Role.Recepcionista,
+    //     Role.Limpieza,
+    //     Role.Mantenimiento,
+    //   ],
+    // },
     {
       label: "Calendario",
       icon: "pi pi-calendar",
@@ -182,7 +182,7 @@ const Layout: React.FC<LayoutProps> = ({ employee, onLogout }) => {
         </Sidebar>
 
         <div className="w-full h-screen flex flex-col">
-          <header className="bg-white border-b h-16 flex items-center justify-between px-4 sticky top-0 z-50 shadow-sm flex-shrink-0">
+          <header className="bg-white border-b h-16 flex items-center justify-between px-4 sticky top-0 z-50 shadow-sm shrink-0">
             <div className="flex items-center gap-4">
               <Button
                 icon="pi pi-bars"

@@ -32,7 +32,7 @@ const Login: React.FC = () => {
     setErrorMsg(null);
     try {
       await login(data.email, data.password);
-      navigate("/");
+      navigate("/calendar");
     } catch (err: any) {
       console.error("Login error detail:", err);
 
@@ -76,7 +76,7 @@ const Login: React.FC = () => {
 
             <div className="space-y-4">
               <h1 className="text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
-                <span className="bg-gradient-to-r from-emerald-300 to-emerald-400 bg-clip-text text-transparent">
+                <span className="bg-linear-to-r from-emerald-300 to-emerald-400 bg-clip-text text-transparent">
                   Bienvenido
                 </span>
                 <br />
@@ -192,7 +192,7 @@ const Login: React.FC = () => {
                   type="submit"
                   label="Iniciar Sesión"
                   icon="pi pi-arrow-right"
-                  className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-xl border-0 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 text-lg"
+                  className="w-full py-4 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-xl border-0 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 text-lg"
                   loading={loading}
                 />
               </form>

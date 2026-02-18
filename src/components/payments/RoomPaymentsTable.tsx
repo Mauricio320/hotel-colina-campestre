@@ -205,12 +205,13 @@ const RoomPaymentsTable: React.FC<RoomPaymentsTableProps> = ({
           <Column
             header="Acciones"
             align="center"
-            headerClassName="bg-gray-50/50 text-emerald-400 font-bold uppercase text-[10px] tracking-widest p-4 text-center"
+            headerClassName="font-bold uppercase text-[10px] tracking-widest p-4 text-center"
             body={(row) => (
               <div className="flex justify-center">
                 <Button
-                  icon="pi pi-search"
-                  className="p-button-rounded p-button-text text-emerald-600 hover:bg-emerald-50"
+                  label="Ver factura"
+                  icon="pi pi-file-pdf"
+                  className="p-button-sm bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg px-3 py-1.5 font-semibold transition-all shadow-sm hover:shadow"
                   onClick={() =>
                     navigate(`/invoice/${row.id}`, {
                       state: {
@@ -219,6 +220,7 @@ const RoomPaymentsTable: React.FC<RoomPaymentsTableProps> = ({
                       },
                     })
                   }
+                  tooltipOptions={{ position: "left" }}
                 />
               </div>
             )}

@@ -13,27 +13,33 @@ import {
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 
 // Components
-import Layout from "./components/layout/Layout";
 import Login from "@/pages/auth/Login";
 import RegisterAdmin from "@/pages/auth/RegisterAdmin";
-import BookingMovements from "@/pages/bookings/BookingMovements";
 import CalendarView from "@/pages/calendar/CalendarView";
 import Dashboard from "@/pages/dashboard/Dashboard";
 import EmployeeManagement from "@/pages/employees/EmployeeManagement";
 import GuestManagement from "@/pages/guests/GuestManagement";
-import CleaningLogs from "@/pages/logs/CleaningLogs.tsx";
-import MaintenanceLogs from "@/pages/logs/MaintenanceLogs.tsx";
+import CleaningLogsPage from "@/pages/logs/CleaningLogsPage";
+import CleaningTaskPage from "@/pages/logs/CleaningTaskPage";
+import MaintenanceLogsPage from "@/pages/logs/MaintenanceLogsPage";
+import MaintenanceTaskPage from "@/pages/logs/MaintenanceTaskPage";
 import InvoiceDetailPage from "@/pages/payments/InvoiceDetailPage";
 import PaymentsInvoice from "@/pages/payments/PaymentsInvoice";
 import RoomPayments from "@/pages/payments/RoomPayments";
 import MyProfile from "@/pages/profile/MyProfile";
 import Reports from "@/pages/reports/Reports";
+import RoomCleaningHistoryPage from "@/pages/rooms/RoomCleaningHistoryPage";
 import RoomFormPage from "@/pages/rooms/RoomFormPage";
 import RoomHistoryPage from "@/pages/rooms/RoomHistoryPage";
+import RoomMaintenanceHistoryPage from "@/pages/rooms/RoomMaintenanceHistoryPage";
 import RoomManagement from "@/pages/rooms/RoomManagement";
+import RoomRateHistoryPage from "@/pages/rooms/RoomRateHistoryPage";
 import Settings from "@/pages/settings/Settings";
+import CancelReservationPage from "@/pages/stays/CancelReservationPage";
 import CheckInPage from "@/pages/stays/CheckInPage";
 import CheckOutPage from "@/pages/stays/CheckOutPage";
+import MoveReservationPage from "@/pages/stays/MoveReservationPage";
+import Layout from "./components/layout/Layout";
 
 const queryClient = new QueryClient();
 
@@ -127,8 +133,16 @@ const AppContent: React.FC = () => {
         <Route path="/rooms/new" element={<RoomFormPage />} />
         <Route path="/rooms/edit/:roomId" element={<RoomFormPage />} />
         <Route path="/rooms/history/:roomId" element={<RoomHistoryPage />} />
+        <Route
+          path="/rooms/cleaning-history/:roomId"
+          element={<RoomCleaningHistoryPage />}
+        />
+        <Route
+          path="/rooms/maintenance-history/:roomId"
+          element={<RoomMaintenanceHistoryPage />}
+        />
+        <Route path="/rooms/rate-history" element={<RoomRateHistoryPage />} />
         <Route path="/check-in-payment/:stayId" element={<CheckInPayment />} />
-        <Route path="/booking-movements" element={<BookingMovements />} />
         <Route path="/room-payments" element={<RoomPayments />} />
         <Route path="/payments-invoice" element={<PaymentsInvoice />} />
         <Route path="/invoice/:stayId" element={<InvoiceDetailPage />} />
@@ -140,8 +154,21 @@ const AppContent: React.FC = () => {
           path="/employees"
           element={<EmployeeManagement userRole={roleName} />}
         />
-        {/* <Route path="/logs/cleaning" element={<CleaningLogs />} />
-        <Route path="/logs/maintenance" element={<MaintenanceLogs />} /> */}
+        <Route path="/logs/cleaning" element={<CleaningLogsPage />} />
+        <Route path="/logs/maintenance" element={<MaintenanceLogsPage />} />
+        <Route path="/limpieza/:room_id" element={<CleaningTaskPage />} />
+        <Route
+          path="/mantenimiento/:room_id"
+          element={<MaintenanceTaskPage />}
+        />
+        <Route
+          path="/cancelar-reserva/:stayId"
+          element={<CancelReservationPage />}
+        />
+        <Route
+          path="/mover-reserva/:stayId"
+          element={<MoveReservationPage />}
+        />
         <Route path="/settings" element={<Settings userRole={roleName} />} />
         <Route path="/profile" element={<MyProfile />} />
         <Route path="/reports" element={<Reports userRole={roleName} />} />
@@ -152,8 +179,8 @@ const AppContent: React.FC = () => {
   );
 };
 
-import { BlockUIProvider } from "./context/BlockUIContext";
 import { CheckInPayment } from "@/pages/stays/CheckInPayment";
+import { BlockUIProvider } from "./context/BlockUIContext";
 
 const App: React.FC = () => {
   return (

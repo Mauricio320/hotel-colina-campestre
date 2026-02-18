@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/config/supabase";
-import { Room, RoomRate } from "@/types";
+import { Room, RoomRate, Stay } from "@/types";
+import dayjs from "dayjs";
 
 export const useRooms = (category?: string) => {
   const queryClient = useQueryClient();
@@ -95,7 +96,7 @@ export const useRooms = (category?: string) => {
         .select("status_id, status_date")
         .eq("id", roomId)
         .single();
-      const targetDate = statusDate || new Date().toLocaleDateString("sv-SE");
+      const targetDate = statusDate || dayjs().format("YYYY-MM-DD");
 
       const { error: roomError } = await supabase
         .from("rooms")
@@ -130,45 +131,102 @@ export const useRooms = (category?: string) => {
   return { roomsQuery, updateStatus, upsertRoom };
 };
 
-export const RoomsQueryCtegory = (id: string) => {
+interface RoomsQueryCategoryParams {
+  id: string;
+  startDate: string;
+  endDate: string;
+}
+
+export const RoomsQueryAndStayCategory = ({
+  id,
+  startDate,
+  endDate,
+}: RoomsQueryCategoryParams) => {
   return useQuery({
-    queryKey: ["rooms", id],
+    queryKey: ["rooms", id, startDate, endDate],
     queryFn: async ({ signal }) => {
+      const todayStr = dayjs().format("YYYY-MM-DD");
+
       const { data: accommodationType } = await supabase
         .from("stays")
         .select(
-          `*, 
-          room:rooms(*),  
-          guest:guests(*),
+          `id, status, order_number, room_id, cancelled, guest_id, employee_id, check_in_date, check_out_date, total_price, paid_amount, payment_method_id, has_extra_mattress, extra_mattress_price, is_invoice_requested, iva_amount, observation, origin_was_reservation, iva_percentage, person_count, extra_mattress_count, extra_mattress_unit_price, accommodation_type_id, room_status_id, active,
+          room:rooms(*),
+          guest:guests!stays_guest_id_fkey(*),
           room_statuses(*)`,
         )
         .eq("accommodation_type_id", id)
-        .eq("active", true)
+        .eq("cancelled", false)
+        // Solo cargar estadías que intersecten con el rango de fechas
+        .lte("check_in_date", endDate)
+        .gte("check_out_date", startDate)
         .abortSignal(signal);
 
       const { data } = await supabase
         .from("rooms")
         .select(
-          `*, 
-          status:room_statuses(*), 
-          rates:room_rates(*), 
-          stays(*, 
-            room:rooms(*),  
-            guest:guests(*),
-            room_statuses(*)
-          ),
-          accommodation_types(*)`,
+          `
+    *,
+    status:room_statuses(*),
+    rates:room_rates(*),
+    stays!stays_room_id_fkey(
+      id, status, order_number, room_id, guest_id, employee_id, check_in_date, check_out_date, total_price, paid_amount, payment_method_id, has_extra_mattress, extra_mattress_price, is_invoice_requested, iva_amount, observation, origin_was_reservation, iva_percentage, person_count, extra_mattress_count, extra_mattress_unit_price, accommodation_type_id, room_status_id, active,
+      room:rooms(*),
+      guest:guests!stays_guest_id_fkey(*),
+      room_statuses(*)
+    ),
+    cleaning_log: cleaning_logs(id),
+    accommodation_types(*)
+  `,
         )
         .eq("is_active", true)
         .eq("accommodation_type_id", id)
-        .eq("stays.active", true)
+        .eq("stays.cancelled", false)
+        // Filtrar stays que intersecten con el rango de fechas
+        .lte("stays.check_in_date", endDate)
+        .gte("stays.check_out_date", startDate)
+        .eq("cleaning_log.date", todayStr)
         .abortSignal(signal)
         .order("room_number");
 
       return (data as unknown as Room[]).map((room) => {
+        // Si no hay cleaning_log, inicializar como array vacío
+        if (!room.cleaning_log) {
+          room.cleaning_log = [];
+        }
+        // Filtrar stays del accommodationType para evitar duplicados
+        const roomStayIds = new Set(room.stays.map((s) => s.id));
         accommodationType.forEach((stay) => {
-          room.stays.push(stay);
+          if (!roomStayIds.has(stay.id)) {
+            room.stays.push(stay as unknown as Stay);
+          }
         });
+        room.stays.sort((a, b) =>
+          a.check_in_date.localeCompare(b.check_in_date),
+        );
+        return room;
+      });
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 0,
+    gcTime: 0,
+    retry: 1,
+  });
+};
+
+export const RoomsQueryCategory = (id: string) => {
+  return useQuery({
+    queryKey: ["rooms", id],
+    queryFn: async ({ signal }) => {
+      const { data } = await supabase
+        .from("rooms")
+        .select(`*, accommodation_types(*)`)
+        .eq("is_active", true)
+        .eq("accommodation_type_id", id)
+        .abortSignal(signal)
+        .order("room_number");
+
+      return (data as unknown as Room[]).map((room) => {
         return room;
       });
     },
@@ -186,7 +244,7 @@ export const useRoomById = (roomId: string | null) => {
       if (!roomId) return null;
       const { data, error } = await supabase
         .from("rooms")
-        .select("*, rates:room_rates(*)")
+        .select("*, rates:room_rates(*), accommodation_types(name)")
         .eq("id", roomId)
         .single();
 

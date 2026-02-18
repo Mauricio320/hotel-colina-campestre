@@ -48,7 +48,7 @@ export const useStayConflict = ({
         .select(
           `
           *,
-          guest:guests(*),
+          guest:guests!stays_guest_id_fkey(*),
           room:rooms(*)
         `,
         )

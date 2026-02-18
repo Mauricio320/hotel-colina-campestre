@@ -6,7 +6,8 @@ import {
 } from "@/services/payment/paymentApi";
 import { CreatePriceOverrides } from "@/services/price-overrides/priceOverridesApi";
 import { CreateRoomHistory } from "@/services/room-history/roomHistoryApi";
-import { StayCreateService } from "@/services/stays/staysApi";
+import { StayCreateService, cancelStay } from "@/services/stays/staysApi";
+import { stayGuestsApi } from "@/services/stay-guests/stayGuestsApi";
 import {
   CreatePaymentDto,
   Payment,
@@ -25,7 +26,7 @@ export const useStays = () => {
       try {
         const { data, error } = await supabase
           .from("stays")
-          .select("*, room:rooms(*), guest:guests(*)")
+          .select("*, room:rooms(*), guest:guests!stays_guest_id_fkey(*)")
           .abortSignal(signal) // Vinculamos la señal de aborto de React Query
           .order("created_at", { ascending: false });
 
@@ -420,12 +421,22 @@ export const useStays = () => {
     },
   });
 
+  const cancelStayMutation = useMutation({
+    mutationFn: cancelStay,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stays"] });
+      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      queryClient.invalidateQueries({ queryKey: ["room_history"] });
+    },
+  });
+
   return {
     staysQuery,
     createStay,
     createStayWithPayment,
     registerPayment,
     registerCheckInReserva,
+    cancelStay: cancelStayMutation,
   };
 };
 
@@ -455,6 +466,7 @@ export interface CreateOnStayWithPaymentParams {
         room_id: string;
         accommodation_type_id?: undefined;
       };
+  additionalGuestIds?: string[];
 }
 
 export const useCreateOnStayWithPayment = async ({
@@ -464,6 +476,7 @@ export const useCreateOnStayWithPayment = async ({
   payment,
   keyId,
   stay,
+  additionalGuestIds = [],
 }: CreateOnStayWithPaymentParams) => {
   const { data: stayData } = await createStay({
     staySet: { ...stay, ...keyId },
@@ -492,6 +505,14 @@ export const useCreateOnStayWithPayment = async ({
       ...price_overrides,
       stay_id: stayData?.id,
     });
+  }
+
+  if (additionalGuestIds.length > 0 && stayData?.id) {
+    const stayGuests = additionalGuestIds.map((guestId) => ({
+      guest_id: guestId,
+      is_primary_guest: false,
+    }));
+    await stayGuestsApi.addMultipleGuests(stayData.id, stayGuests);
   }
 
   return stayData;

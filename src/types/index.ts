@@ -33,6 +33,7 @@ export interface Room {
   rates?: RoomRate[];
   status?: RoomStatus;
   stays?: Stay[];
+  cleaning_log?: CleaningLog[];
 }
 
 export interface RoomRate {
@@ -40,6 +41,26 @@ export interface RoomRate {
   room_id: string;
   person_count: number;
   rate: number;
+}
+
+export interface RoomRateHistory {
+  id: string;
+  room_id: string;
+  person_count: number;
+  old_rate: number;
+  new_rate: number;
+  employee_id: string;
+  created_at: string;
+  room?: Room;
+  employee?: Employee;
+}
+
+export interface BulkRateUpdate {
+  room_id: string;
+  person_count: number;
+  old_rate: number;
+  new_rate: number;
+  rate_id: string;
 }
 
 export interface Guest {
@@ -98,6 +119,8 @@ export interface Stay {
   room_status_id?: string;
   active?: boolean;
   room_statuses?: RoomStatus;
+  additional_guests?: StayGuest[];
+  cancelled?: boolean;
 }
 
 export interface PaymentMethod {
@@ -151,6 +174,14 @@ export interface AccommodationType {
   created_at: string;
 }
 
+export interface StayGuest {
+  stay_id: string;
+  guest_id: string;
+  is_primary_guest: boolean;
+  created_at: string;
+  guest?: Guest;
+}
+
 export interface RoomHistory {
   id: string;
   room_id?: string;
@@ -186,4 +217,65 @@ export interface PriceOverride {
   final_price: number;
   authorized_by: string;
   created_at?: string;
+}
+
+export interface CleaningLog {
+  id: string;
+  room_id: string;
+  stay_id?: string;
+  employee_id: string;
+  cleaning_type: 'Aseo parcial' | 'Aseo general';
+  date: string;
+  observation?: string;
+  created_at: string;
+  room?: Room;
+  stay?: Stay;
+  employee?: Employee;
+}
+
+export type CleaningType = 'Aseo parcial' | 'Aseo general';
+
+export interface MaintenanceCategory {
+  id: string;
+  name: 'General' | 'Electricidad' | 'Agua' | 'Aire acondicionado';
+  icon?: string;
+  color?: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface MaintenanceSubcategory {
+  id: string;
+  category_id: string;
+  name: string;
+  is_active: boolean;
+  created_at: string;
+  category?: MaintenanceCategory;
+}
+
+export interface MaintenanceLog {
+  id: string;
+  room_id: string;
+  stay_id?: string;
+  employee_id: string;
+  category_id: string;
+  subcategory_id: string;
+  observation?: string;
+  date: string;
+  created_at: string;
+  room?: Room;
+  stay?: Stay;
+  employee?: Employee;
+  category?: MaintenanceCategory;
+  subcategory?: MaintenanceSubcategory;
+}
+
+export interface CreateMaintenanceLogDto {
+  room_id: string;
+  stay_id?: string;
+  employee_id: string;
+  category_id: string;
+  subcategory_id: string;
+  observation?: string;
+  date: string;
 }
