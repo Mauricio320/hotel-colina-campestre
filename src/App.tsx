@@ -108,13 +108,11 @@ const AppContent: React.FC = () => {
 
   return (
     <Routes>
-      <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
       <Route
-        path="/register-admin"
-        element={!user ? <RegisterAdmin /> : <Navigate to="/" />}
+        path="/login"
+        element={!user ? <Login /> : <Navigate to="/calendar" />}
       />
 
-      {/* Protected Routes */}
       <Route
         element={
           user ? (
