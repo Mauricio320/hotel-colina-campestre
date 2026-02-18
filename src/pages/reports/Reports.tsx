@@ -17,6 +17,8 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
+  const [invoiceStartDate, setInvoiceStartDate] = useState<Date | null>(null);
+  const [invoiceEndDate, setInvoiceEndDate] = useState<Date | null>(null);
   const { fetchAll: accommodationTypesQuery } = useAccommodationTypes();
 
   if (userRole !== Role.Admin) {
@@ -291,6 +293,136 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
     setLoading(false);
   };
 
+  const handlePaymentsInvoiceReport = async () => {
+    setLoading(true);
+    try {
+      const accommodationTypes = accommodationTypesQuery.data || [];
+
+      if (accommodationTypes.length === 0) {
+        alert("No se encontraron tipos de acomodación");
+        setLoading(false);
+        return;
+      }
+
+      // Validar fechas
+      if (!invoiceStartDate || !invoiceEndDate) {
+        alert("Por favor seleccione fecha de inicio y fecha de fin");
+        setLoading(false);
+        return;
+      }
+
+      const formattedStartDate = dayjs(invoiceStartDate).format("YYYY-MM-DD");
+      const formattedEndDate = dayjs(invoiceEndDate).format("YYYY-MM-DD");
+
+      // Obtener todos los pagos con información relacionada filtrados por rango de fechas
+      const { data: paymentsData, error: paymentsError } = await supabase
+        .from("payments")
+        .select(
+          `
+          id,
+          payment_date,
+          amount,
+          payment_type,
+          observation,
+          stay_id,
+          payment_method:payment_methods(name),
+          employee:employees(first_name, last_name),
+          stay:stays!inner(order_number, check_in_date, check_out_date, room:rooms(room_number, accommodation_type_id), guest:guests!stays_guest_id_fkey(first_name, last_name, doc_number))
+        `
+        )
+        .gte("payment_date", formattedStartDate)
+        .lte("payment_date", formattedEndDate)
+        .order("payment_date", { ascending: false });
+
+      if (paymentsError) throw paymentsError;
+
+      if (!paymentsData || paymentsData.length === 0) {
+        alert("No hay datos de pagos para exportar en el rango de fechas seleccionado");
+        setLoading(false);
+        return;
+      }
+
+      // Crear workbook
+      const workbook = XLSX.utils.book_new();
+
+      // Crear una hoja por cada tipo de acomodación
+      for (const accType of accommodationTypes) {
+        // Filtrar pagos por tipo de acomodación (a través de la habitación de la estadía)
+        const typePayments = paymentsData.filter((payment: any) => {
+          const roomAccTypeId = (payment.stay as any)?.room?.accommodation_type_id;
+          return roomAccTypeId === accType.id;
+        });
+
+        // Formatear datos para la hoja (incluso si está vacía)
+        const formattedData = typePayments.length > 0 ? typePayments.map((payment: any) => {
+          const getPaymentTypeDisplay = (type: string) => {
+            switch (type) {
+              case "ABONO_RESERVA": return "Abono";
+              case "PAGO_COMPLETO_RESERVA": return "Pago Completo";
+              case "PAGO_CHECKIN_DIRECTO": return "Check-in Directo";
+              case "ANTICIPADO_COMPLETO": return "Anticipado";
+              default: return type;
+            }
+          };
+
+          return {
+            "N° Orden": (payment.stay as any)?.order_number,
+            Habitación: (payment.stay as any)?.room?.room_number || "N/A",
+            Huésped: (payment.stay as any)?.guest
+              ? `${(payment.stay as any).guest.first_name} ${(payment.stay as any).guest.last_name}`
+              : "N/A",
+            Documento: (payment.stay as any)?.guest?.doc_number || "N/A",
+            "Fecha Pago": dayjs(payment.payment_date).format("DD/MM/YYYY"),
+            "Método": (payment.payment_method as any)?.name || "N/A",
+            "Monto": Number(payment.amount),
+            "Tipo Pago": getPaymentTypeDisplay(payment.payment_type),
+            "Registrado por": payment.employee
+              ? `${(payment.employee as any).first_name} ${(payment.employee as any).last_name}`
+              : "Sistema",
+            Observación: payment.observation || "",
+          };
+        }) : [];
+
+        // Crear worksheet para este tipo de acomodación
+        const worksheet = XLSX.utils.json_to_sheet(formattedData);
+
+        // Ajustar anchos de columna
+        const colWidths = [
+          { wch: 12 }, // N° Orden
+          { wch: 12 }, // Habitación
+          { wch: 25 }, // Huésped
+          { wch: 15 }, // Documento
+          { wch: 12 }, // Fecha Pago
+          { wch: 15 }, // Método
+          { wch: 15 }, // Monto
+          { wch: 18 }, // Tipo Pago
+          { wch: 20 }, // Registrado por
+          { wch: 25 }, // Observación
+        ];
+        worksheet["!cols"] = colWidths;
+
+        // Agregar hoja al workbook (nombre limitado a 31 caracteres)
+        const sheetName = accType.name.substring(0, 31);
+        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+      }
+
+      // Verificar si se agregaron hojas
+      if (workbook.SheetNames.length === 0) {
+        alert("No hay datos de pagos para exportar");
+        setLoading(false);
+        return;
+      }
+
+      // Descargar archivo con fechas en el nombre
+      const fileName = `reporte_facturas_pagos_${formattedStartDate}_a_${formattedEndDate}`;
+      XLSX.writeFile(workbook, `${fileName}.xlsx`);
+    } catch (error) {
+      console.error("Error generating payments invoice report:", error);
+      alert("Error al generar el reporte de facturas");
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -350,18 +482,42 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
         </Card>
 
         <Card
-          title="Reporte Detallado de Pagos"
+          title="Reporte de Facturas por Categoría"
           className="shadow-sm border-t-4 border-green-500"
         >
-          <p className="text-gray-600 mb-6">
-            Historial completo de pagos y abonos del mes actual con método,
-            tipo y empleado que registró.
+          <p className="text-gray-600 mb-4">
+            Genera un archivo Excel con una hoja por cada tipo de acomodación.
+            Muestra los pagos registrados con método, tipo y empleado.
           </p>
+          <div className="flex flex-col gap-3 mb-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-bold text-gray-600">Fecha Inicio</label>
+              <Calendar
+                value={invoiceStartDate}
+                onChange={(e) => setInvoiceStartDate(e.value as Date)}
+                dateFormat="dd/mm/yy"
+                placeholder="Seleccionar fecha inicio"
+                className="w-full"
+                showIcon
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-bold text-gray-600">Fecha Fin</label>
+              <Calendar
+                value={invoiceEndDate}
+                onChange={(e) => setInvoiceEndDate(e.value as Date)}
+                dateFormat="dd/mm/yy"
+                placeholder="Seleccionar fecha fin"
+                className="w-full"
+                showIcon
+              />
+            </div>
+          </div>
           <Button
-            label="Descargar Pagos Detallados"
-            icon="pi pi-money-bill"
+            label="Descargar Excel de Facturas"
+            icon="pi pi-file-pdf"
             className="p-button-warning w-full font-bold p-3"
-            onClick={handlePaymentsDetailReport}
+            onClick={handlePaymentsInvoiceReport}
             disabled={loading}
           />
         </Card>
