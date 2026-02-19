@@ -76,24 +76,47 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
           <h3 className="text-sm font-bold text-gray-700">
             Resumen del día {dayjs().format("D/M/YYYY")}
           </h3>
-          <div className="flex gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">
-              <i className="pi pi-users text-blue-600 text-xs"></i>
-              <span className="text-xs font-semibold text-blue-700">
-                Estadías: {totalStaysToday}
-              </span>
+          <div className="flex justify-between">
+            <div className=" flex justify-end gap-2">
+              <div className="flex items-center gap-1.5 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">
+                <i className="pi pi-users text-blue-600 text-xs"></i>
+                <span className="text-xs font-semibold text-blue-700">
+                  Estadías: {totalStaysToday}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-green-50 px-2.5 py-1 rounded-lg border border-green-100">
+                <i className="pi pi-check-circle text-green-600 text-xs"></i>
+                <span className="text-xs font-semibold text-green-700">
+                  Limpias: {cleanedRooms}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-100">
+                <span className="text-xs">🧹⚠️</span>
+                <span className="text-xs font-semibold text-amber-700">
+                  Pendientes: {pendingCleaning}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 bg-green-50 px-2.5 py-1 rounded-lg border border-green-100">
-              <i className="pi pi-check-circle text-green-600 text-xs"></i>
-              <span className="text-xs font-semibold text-green-700">
-                Limpias: {cleanedRooms}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-100">
-              <span className="text-xs">🧹⚠️</span>
-              <span className="text-xs font-semibold text-amber-700">
-                Pendientes: {pendingCleaning}
-              </span>
+
+            <div className="flex justify-end gap-2">
+              <div className="flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span className="text-xs font-semibold text-emerald-700">
+                  Ocupadas
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-yellow-50 px-2.5 py-1 rounded-lg border border-yellow-100">
+                <span className="w-2.5 h-2.5 rounded-full bg-yellow-500"></span>
+                <span className="text-xs font-semibold text-yellow-700">
+                  Reservadas
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#a8b6cd]"></span>
+                <span className="text-xs font-semibold text-slate-700">
+                  Check-out
+                </span>
+              </div>
             </div>
           </div>
         </div>
