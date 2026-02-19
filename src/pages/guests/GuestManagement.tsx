@@ -11,6 +11,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { useGuests } from '@/hooks/useGuests';
 import { useColombiaGeography } from '@/hooks/useColombiaGeography';
 import { DocsTypesConst } from '@/util/const/types-docs.const';
+import PageHeader from '@/components/ui/PageHeader';
 import type { Guest } from '@/types';
 
 interface GuestManagementProps {
@@ -98,12 +99,24 @@ const GuestManagement: React.FC<GuestManagementProps> = ({ userRole }) => {
     </div>
   );
 
+  const headerRightContent = (
+    <Button
+      label="Nuevo Huésped"
+      icon="pi pi-plus"
+      className="bg-emerald-600 border-emerald-600 text-white px-4 py-2"
+      onClick={handleNewGuest}
+    />
+  );
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-800">Gestión de Huéspedes</h2>
-        <Button label="Nuevo Huésped" icon="pi pi-plus" className="bg-emerald-600 border-emerald-600 text-white px-4 py-2" onClick={handleNewGuest} />
-      </div>
+      <PageHeader
+        title="Gestión de Huéspedes"
+        icon="pi-users"
+        color="emerald"
+        variant="simple"
+        rightContent={headerRightContent}
+      />
 
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
         <DataTable

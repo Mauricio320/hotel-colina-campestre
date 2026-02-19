@@ -1,6 +1,7 @@
 import { BlockUIProvider, useBlockUI } from "@/context/BlockUIContext";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useRoles } from "@/hooks/useRoles";
+import PageHeader from "@/components/ui/PageHeader";
 import { Employee, Role } from "@/types";
 import { DocsTypesConst } from "@/util/const/types-docs.const";
 import { supabase } from "@/config/supabase";
@@ -202,17 +203,23 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
     }
   };
 
+  const headerRightContent = (
+    <Button
+      label="Registrar Personal"
+      icon="pi pi-user-plus"
+      className="bg-emerald-600 shadow-md text-white px-4 py-2"
+      onClick={handleNewEmployee}
+    />
+  );
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-800">Personal</h2>
-        <Button
-          label="Registrar Personal"
-          icon="pi pi-user-plus"
-          className="bg-emerald-600 shadow-md text-white px-4 py-2"
-          onClick={handleNewEmployee}
-        />
-      </div>
+      <PageHeader
+        title="Personal"
+        icon="pi-users"
+        variant="simple"
+        rightContent={headerRightContent}
+      />
 
       <div className="bg-white rounded-3xl border border-emerald-50 shadow-xl shadow-emerald-100/20 overflow-hidden">
         <DataTable
@@ -306,9 +313,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
             </div>
             <div>
               <h3 className="text-xl font-black text-gray-800 tracking-tight">
-                {editingEmployee
-                  ? "Editar Personal"
-                  : "Agregar Personal"}
+                {editingEmployee ? "Editar Personal" : "Agregar Personal"}
               </h3>
               <p className="text-xs text-gray-400 font-medium">
                 {editingEmployee

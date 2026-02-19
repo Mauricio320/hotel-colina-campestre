@@ -4,6 +4,7 @@ import { Card } from "primereact/card";
 import { InputNumber } from "primereact/inputnumber";
 import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
+import PageHeader from "@/components/ui/PageHeader";
 import { Role } from "@/types";
 import { supabase } from "@/config/supabase";
 
@@ -59,9 +60,12 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-2xl font-bold text-gray-800">
-        Parámetros Globales (Módulo Otros)
-      </h2>
+      <PageHeader
+        title="Parámetros Globales"
+        icon="pi-cog"
+        color="gray"
+        variant="simple"
+      />
 
       <Card className="shadow-sm max-w-xl border-t-4 border-emerald-600">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">

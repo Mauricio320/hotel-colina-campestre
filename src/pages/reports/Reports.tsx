@@ -648,7 +648,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
 
         <Card
           title="Reporte de Facturas por Categoría"
-          className="shadow-sm border-t-4 border-green-500"
+          className="shadow-sm border-t-4 border-yellow-500"
         >
           <p className="text-gray-600 mb-4">
             Genera un archivo Excel con una hoja por cada tipo de acomodación.

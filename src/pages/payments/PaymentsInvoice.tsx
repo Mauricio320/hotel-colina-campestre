@@ -1,5 +1,6 @@
 import PaymentsInvoiceTable from "@/components/payments/PaymentsInvoiceTable";
 import { useAccommodationTypes } from "@/hooks/useAccommodationTypes";
+import PageHeader from "@/components/ui/PageHeader";
 import { TabPanel, TabView } from "primereact/tabview";
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -22,6 +23,12 @@ const PaymentsInvoice: React.FC = () => {
 
   return (
     <div className="p-4 animate-fade-in">
+      <PageHeader
+        title="Facturas de Pagos"
+        icon="pi-file-pdf"
+        color="red"
+        variant="simple"
+      />
       <TabView
         activeIndex={activeTab}
         onTabChange={(e) => setActiveTab(e.index)}
