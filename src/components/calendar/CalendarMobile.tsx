@@ -76,8 +76,8 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
           <h3 className="text-sm font-bold text-gray-700">
             Resumen del día {dayjs().format("D/M/YYYY")}
           </h3>
-          <div className="flex justify-between">
-            <div className=" flex justify-end gap-2">
+          <div className="flex justify-between flex-wrap">
+            <div className=" flex justify-end gap-2 mb-2">
               <div className="flex items-center gap-1.5 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">
                 <i className="pi pi-users text-blue-600 text-xs"></i>
                 <span className="text-xs font-semibold text-blue-700">
@@ -98,7 +98,7 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
               </div>
             </div>
 
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2 mb-2">
               <div className="flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                 <span className="text-xs font-semibold text-emerald-700">

@@ -64,7 +64,7 @@ const Layout: React.FC<LayoutProps> = ({ employee, onLogout }) => {
       roles: [Role.Admin, Role.Recepcionista],
     },
     {
-      label: "Empleados",
+      label: "Personal",
       icon: "pi pi-user-plus",
       path: "/employees",
       roles: [Role.Admin],
