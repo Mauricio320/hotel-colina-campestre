@@ -1,5 +1,6 @@
 import { useMaintenanceLogs } from "@/hooks/useMaintenanceLogs";
 import { useAccommodationTypes } from "@/hooks/useAccommodationTypes";
+import PageHeader from "@/components/ui/PageHeader";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { TabPanel, TabView } from "primereact/tabview";
@@ -86,13 +87,22 @@ const MaintenanceLogsPage: React.FC = () => {
       maintenanceLogs?.filter(
         (log) =>
           log.room?.accommodation_type_id === accommodationTypeId ||
-          log.room?.accommodation_types?.id === accommodationTypeId
+          log.room?.accommodation_types?.id === accommodationTypeId,
       ) || []
     );
   };
 
   return (
     <div className="p-4 animate-fade-in">
+      <div className="mb-6">
+        <PageHeader
+          title="Historial de Mantenimiento"
+          icon="pi-wrench"
+          color="amber"
+          variant="simple"
+        />
+      </div>
+
       <TabView
         activeIndex={activeTab}
         onTabChange={(e) => setActiveTab(e.index)}

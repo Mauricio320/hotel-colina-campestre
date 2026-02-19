@@ -1,6 +1,7 @@
 import { BlockUIProvider, useBlockUI } from "@/context/BlockUIContext";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useRoles } from "@/hooks/useRoles";
+import PageHeader from "@/components/ui/PageHeader";
 import { Employee, Role } from "@/types";
 import { DocsTypesConst } from "@/util/const/types-docs.const";
 import { supabase } from "@/config/supabase";
@@ -33,7 +34,8 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
   const [showModal, setShowModal] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
-  const [selectedEmployeeForReset, setSelectedEmployeeForReset] = useState<Employee | null>(null);
+  const [selectedEmployeeForReset, setSelectedEmployeeForReset] =
+    useState<Employee | null>(null);
 
   if (userRole !== Role.Admin) {
     return (
@@ -46,7 +48,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
   const onSubmit = async (data: any) => {
     // Si estamos editando
     if (editingEmployee) {
-      showBlockUI("Actualizando información del empleado...");
+      showBlockUI("Actualizando información del Personal...");
       try {
         const { error } = await supabase
           .from("employees")
@@ -70,18 +72,20 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
         setShowModal(false);
         reset();
         setEditingEmployee(null);
-        showBlockUI("Empleado actualizado exitosamente.");
+        showBlockUI("Personal actualizado exitosamente.");
       } catch (error: any) {
-        alert("Error: " + (error.message || "No se pudo actualizar el empleado"));
+        alert(
+          "Error: " + (error.message || "No se pudo actualizar el Personal"),
+        );
       } finally {
         hideBlockUI();
       }
       return;
     }
 
-    // Crear nuevo empleado
+    // Crear nuevo Personal
     showBlockUI(
-      "Procesando registro del empleado en el sistema y en autenticación.",
+      "Procesando registro del Personal en el sistema y en autenticación.",
     );
     try {
       const tempClient = createClient(
@@ -123,7 +127,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
       setShowModal(false);
       reset();
       showBlockUI(
-        "Empleado registrado exitosamente en el sistema y en autenticación.",
+        "Personal registrado exitosamente en el sistema y en autenticación.",
       );
     } catch (error: any) {
       let errorMessage = "Ocurrió un error inesperado.";
@@ -133,7 +137,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
           "El correo electrónico ya se encuentra registrado en el sistema.";
       } else if (error.code === "23505") {
         errorMessage =
-          "El número de documento ya está asignado a otro empleado.";
+          "El número de documento ya está asignado a otro Personal.";
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -182,12 +186,14 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
         selectedEmployeeForReset.email,
         {
           redirectTo: `${window.location.origin}/reset-password`,
-        }
+        },
       );
 
       if (error) throw error;
 
-      alert(`Se ha enviado un email de recuperación a ${selectedEmployeeForReset.email}`);
+      alert(
+        `Se ha enviado un email de recuperación a ${selectedEmployeeForReset.email}`,
+      );
       setShowResetPasswordModal(false);
       setSelectedEmployeeForReset(null);
     } catch (error: any) {
@@ -197,19 +203,23 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
     }
   };
 
+  const headerRightContent = (
+    <Button
+      label="Registrar Personal"
+      icon="pi pi-user-plus"
+      className="bg-emerald-600 shadow-md text-white px-4 py-2"
+      onClick={handleNewEmployee}
+    />
+  );
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-800">
-          Gestión de Talento Humano
-        </h2>
-        <Button
-          label="Registrar Empleado"
-          icon="pi pi-user-plus"
-          className="bg-emerald-600 shadow-md text-white px-4 py-2"
-          onClick={handleNewEmployee}
-        />
-      </div>
+      <PageHeader
+        title="Personal"
+        icon="pi-users"
+        variant="simple"
+        rightContent={headerRightContent}
+      />
 
       <div className="bg-white rounded-3xl border border-emerald-50 shadow-xl shadow-emerald-100/20 overflow-hidden">
         <DataTable
@@ -223,7 +233,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
           stripedRows
         >
           <Column
-            header="Empleado"
+            header="Personal"
             headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
             body={(row) => (
               <div className="flex flex-col">
@@ -297,20 +307,28 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
         header={
           <div className="flex items-center gap-3">
             <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600">
-              <i className={`pi ${editingEmployee ? 'pi-user-edit' : 'pi-user-plus'} text-xl`}></i>
+              <i
+                className={`pi ${editingEmployee ? "pi-user-edit" : "pi-user-plus"} text-xl`}
+              ></i>
             </div>
             <div>
               <h3 className="text-xl font-black text-gray-800 tracking-tight">
-                {editingEmployee ? "Editar Perfil de Empleado" : "Nuevo Perfil de Empleado"}
+                {editingEmployee ? "Editar Personal" : "Agregar Personal"}
               </h3>
               <p className="text-xs text-gray-400 font-medium">
-                {editingEmployee ? "Modifique la información del colaborador" : "Complete la información para registrar un nuevo colaborador"}
+                {editingEmployee
+                  ? "Modifique la información del colaborador"
+                  : "Complete la información para registrar un nuevo colaborador"}
               </p>
             </div>
           </div>
         }
         visible={showModal}
-        onHide={() => { setShowModal(false); setEditingEmployee(null); reset({}); }}
+        onHide={() => {
+          setShowModal(false);
+          setEditingEmployee(null);
+          reset({});
+        }}
         className="w-full max-w-2xl"
         contentClassName="p-0"
       >
@@ -371,7 +389,9 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
             </div>
 
             <div className="md:col-span-6 flex flex-col gap-1">
-              <label className="text-xs font-bold text-gray-700">Nombres <span className="text-amber-500">*</span></label>
+              <label className="text-xs font-bold text-gray-700">
+                Nombres <span className="text-amber-500">*</span>
+              </label>
               <InputText
                 {...register("first_name", { required: "Campo requerido" })}
                 className={`w-full bg-gray-50/50 border-gray-100 ${
@@ -439,7 +459,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
                   className={`w-full bg-gray-50/50 border-gray-100 ${
                     formState.errors.email ? "p-invalid" : ""
                   }`}
-                  placeholder="empleado@hotel.com"
+                  placeholder="Personal@hotel.com"
                 />
                 {formState.errors.email && (
                   <small className="p-error text-xs">
@@ -448,7 +468,13 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
                 )}
               </div>
             )}
-            <div className={editingEmployee ? "md:col-span-12 flex flex-col gap-1" : "md:col-span-6 flex flex-col gap-1"}>
+            <div
+              className={
+                editingEmployee
+                  ? "md:col-span-12 flex flex-col gap-1"
+                  : "md:col-span-6 flex flex-col gap-1"
+              }
+            >
               <label className="text-xs font-bold text-gray-700">
                 Teléfono <span className="text-amber-500">*</span>
               </label>
@@ -467,9 +493,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
             </div>
 
             <div className="md:col-span-6 flex flex-col gap-1">
-              <label className="text-xs font-bold text-gray-700">
-                Ciudad
-              </label>
+              <label className="text-xs font-bold text-gray-700">Ciudad</label>
               <InputText
                 {...register("city")}
                 className="w-full bg-gray-50/50 border-gray-100"
@@ -521,7 +545,11 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
             <div className="md:col-span-12 mt-4 pt-4 border-t border-gray-50">
               <Button
                 type="submit"
-                label={editingEmployee ? "Actualizar Colaborador" : "Registrar Colaborador"}
+                label={
+                  editingEmployee
+                    ? "Actualizar Colaborador"
+                    : "Registrar Colaborador"
+                }
                 icon="pi pi-check"
                 className="bg-emerald-600 text-white w-full p-4 font-black rounded-2xl shadow-lg hover:bg-emerald-700 transition-all border-none"
                 loading={createEmployee.isPending}
@@ -535,7 +563,10 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
       <Dialog
         header="Restablecer Contraseña"
         visible={showResetPasswordModal}
-        onHide={() => { setShowResetPasswordModal(false); setSelectedEmployeeForReset(null); }}
+        onHide={() => {
+          setShowResetPasswordModal(false);
+          setSelectedEmployeeForReset(null);
+        }}
         className="w-full max-w-md"
       >
         <div className="p-4">
@@ -546,19 +577,26 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
               </p>
               <div className="bg-gray-50 p-3 rounded-lg mb-4">
                 <p className="font-bold text-gray-800">
-                  {selectedEmployeeForReset.first_name} {selectedEmployeeForReset.last_name}
+                  {selectedEmployeeForReset.first_name}{" "}
+                  {selectedEmployeeForReset.last_name}
                 </p>
-                <p className="text-sm text-gray-500">{selectedEmployeeForReset.email}</p>
+                <p className="text-sm text-gray-500">
+                  {selectedEmployeeForReset.email}
+                </p>
               </div>
               <p className="text-xs text-gray-400 mb-4">
-                El empleado recibirá un email con un enlace para establecer una nueva contraseña.
+                El Personal recibirá un email con un enlace para establecer una
+                nueva contraseña.
               </p>
               <div className="flex gap-2">
                 <Button
                   label="Cancelar"
                   icon="pi pi-times"
                   className="p-button-secondary flex-1"
-                  onClick={() => { setShowResetPasswordModal(false); setSelectedEmployeeForReset(null); }}
+                  onClick={() => {
+                    setShowResetPasswordModal(false);
+                    setSelectedEmployeeForReset(null);
+                  }}
                 />
                 <Button
                   label="Enviar Email"

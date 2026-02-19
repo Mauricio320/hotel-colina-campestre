@@ -1,6 +1,6 @@
 import { CalendarGrid } from "@/components/calendar/CalendarGrid";
-import { CalendarHeader } from "@/components/calendar/CalendarHeader";
 import { SkeletonUI } from "@/components/ui/SkeletonUI";
+import PageHeader from "@/components/ui/PageHeader";
 import { useBlockUI } from "@/context/BlockUIContext";
 import { useAccommodationTypes } from "@/hooks/useAccommodationTypes";
 import { useRooms } from "@/hooks/useRooms";
@@ -54,9 +54,12 @@ const CalendarView: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-2xl font-bold text-gray-800">
-        Calendario de Ocupación
-      </h2>
+      <PageHeader
+        title="Calendario de Ocupación"
+        icon="pi-calendar"
+        color="blue"
+        variant="simple"
+      />
 
       <TabView
         activeIndex={activeTab}

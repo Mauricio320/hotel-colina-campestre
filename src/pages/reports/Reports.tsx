@@ -19,6 +19,10 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [invoiceStartDate, setInvoiceStartDate] = useState<Date | null>(null);
   const [invoiceEndDate, setInvoiceEndDate] = useState<Date | null>(null);
+  const [occupancyStartDate, setOccupancyStartDate] = useState<Date | null>(
+    null,
+  );
+  const [occupancyEndDate, setOccupancyEndDate] = useState<Date | null>(null);
   const { fetchAll: accommodationTypesQuery } = useAccommodationTypes();
 
   if (userRole !== Role.Admin) {
@@ -100,7 +104,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
           accommodation_type_id,
           guest:guests!stays_guest_id_fkey(first_name, last_name, doc_number),
           room:rooms(room_number, accommodation_type_id)
-        `
+        `,
         )
         .gte("check_in_date", formattedStartDate)
         .lte("check_in_date", formattedEndDate)
@@ -131,27 +135,31 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
         });
 
         // Formatear datos para la hoja (incluso si está vacía)
-        const formattedData = typeStays.length > 0 ? typeStays.map((stay: any) => {
-          const paymentStatus = getPaymentStatus(stay);
-          const pending = (stay.total_price || 0) - (stay.paid_amount || 0);
+        const formattedData =
+          typeStays.length > 0
+            ? typeStays.map((stay: any) => {
+                const paymentStatus = getPaymentStatus(stay);
+                const pending =
+                  (stay.total_price || 0) - (stay.paid_amount || 0);
 
-          return {
-            "N° Orden": stay.order_number,
-            Huésped: stay.guest
-              ? `${stay.guest.first_name} ${stay.guest.last_name}`
-              : "N/A",
-            Documento: stay.guest?.doc_number || "N/A",
-            "Fecha Check-in": stay.check_in_date,
-            "Fecha Check-out": stay.check_out_date,
-            Habitación: (stay.room as any)?.room_number || "N/A",
-            Origen: stay.origin_was_reservation ? "Reserva" : "Directo",
-            "Valor Total": stay.total_price || 0,
-            Abonado: stay.paid_amount || 0,
-            Pendiente: pending > 0 ? pending : 0,
-            "Estado Pago": paymentStatus.status,
-            "Estado Estadía": stay.status,
-          };
-        }) : [];
+                return {
+                  "N° Orden": stay.order_number,
+                  Huésped: stay.guest
+                    ? `${stay.guest.first_name} ${stay.guest.last_name}`
+                    : "N/A",
+                  Documento: stay.guest?.doc_number || "N/A",
+                  "Fecha Check-in": stay.check_in_date,
+                  "Fecha Check-out": stay.check_out_date,
+                  Habitación: (stay.room as any)?.room_number || "N/A",
+                  Origen: stay.origin_was_reservation ? "Reserva" : "Directo",
+                  "Valor Total": stay.total_price || 0,
+                  Abonado: stay.paid_amount || 0,
+                  Pendiente: pending > 0 ? pending : 0,
+                  "Estado Pago": paymentStatus.status,
+                  "Estado Estadía": stay.status,
+                };
+              })
+            : [];
 
         // Crear worksheet para este tipo de acomodación
         const worksheet = XLSX.utils.json_to_sheet(formattedData);
@@ -201,7 +209,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
       const { data } = await supabase
         .from("room_history")
         .select(
-          "timestamp, action_type, observation, room:rooms(room_number), employee:employees(first_name, last_name)"
+          "timestamp, action_type, observation, room:rooms(room_number), employee:employees(first_name, last_name)",
         )
         .order("timestamp", { ascending: false });
 
@@ -215,7 +223,10 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
             : "Sistema",
           Observacion: h.observation || "",
         }));
-        exportToExcel(formatted, `historial_completo_${dayjs().format("YYYY-MM-DD")}`);
+        exportToExcel(
+          formatted,
+          `historial_completo_${dayjs().format("YYYY-MM-DD")}`,
+        );
       }
     } catch (error) {
       console.error("Error generating history report:", error);
@@ -243,7 +254,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
           employee:employees(first_name, last_name),
           stay:stays(order_number, check_in_date, check_out_date),
           guest:guests!payments_guest_id_fkey(first_name, last_name, doc_number)
-        `
+        `,
         )
         .gte("payment_date", startDate.toISOString())
         .lte("payment_date", endDate.toISOString())
@@ -282,7 +293,10 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
             : "Sistema",
           Observación: p.observation || "",
         }));
-        exportToExcel(formatted, `reporte_pagos_detallado_${today.format("YYYY-MM")}`);
+        exportToExcel(
+          formatted,
+          `reporte_pagos_detallado_${today.format("YYYY-MM")}`,
+        );
       } else {
         alert("No hay pagos registrados en el mes actual");
       }
@@ -328,7 +342,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
           payment_method:payment_methods(name),
           employee:employees(first_name, last_name),
           stay:stays!inner(order_number, check_in_date, check_out_date, room:rooms(room_number, accommodation_type_id), guest:guests!stays_guest_id_fkey(first_name, last_name, doc_number))
-        `
+        `,
         )
         .gte("payment_date", formattedStartDate)
         .lte("payment_date", formattedEndDate)
@@ -337,7 +351,9 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
       if (paymentsError) throw paymentsError;
 
       if (!paymentsData || paymentsData.length === 0) {
-        alert("No hay datos de pagos para exportar en el rango de fechas seleccionado");
+        alert(
+          "No hay datos de pagos para exportar en el rango de fechas seleccionado",
+        );
         setLoading(false);
         return;
       }
@@ -349,39 +365,50 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
       for (const accType of accommodationTypes) {
         // Filtrar pagos por tipo de acomodación (a través de la habitación de la estadía)
         const typePayments = paymentsData.filter((payment: any) => {
-          const roomAccTypeId = (payment.stay as any)?.room?.accommodation_type_id;
+          const roomAccTypeId = (payment.stay as any)?.room
+            ?.accommodation_type_id;
           return roomAccTypeId === accType.id;
         });
 
         // Formatear datos para la hoja (incluso si está vacía)
-        const formattedData = typePayments.length > 0 ? typePayments.map((payment: any) => {
-          const getPaymentTypeDisplay = (type: string) => {
-            switch (type) {
-              case "ABONO_RESERVA": return "Abono";
-              case "PAGO_COMPLETO_RESERVA": return "Pago Completo";
-              case "PAGO_CHECKIN_DIRECTO": return "Check-in Directo";
-              case "ANTICIPADO_COMPLETO": return "Anticipado";
-              default: return type;
-            }
-          };
+        const formattedData =
+          typePayments.length > 0
+            ? typePayments.map((payment: any) => {
+                const getPaymentTypeDisplay = (type: string) => {
+                  switch (type) {
+                    case "ABONO_RESERVA":
+                      return "Abono";
+                    case "PAGO_COMPLETO_RESERVA":
+                      return "Pago Completo";
+                    case "PAGO_CHECKIN_DIRECTO":
+                      return "Check-in Directo";
+                    case "ANTICIPADO_COMPLETO":
+                      return "Anticipado";
+                    default:
+                      return type;
+                  }
+                };
 
-          return {
-            "N° Orden": (payment.stay as any)?.order_number,
-            Habitación: (payment.stay as any)?.room?.room_number || "N/A",
-            Huésped: (payment.stay as any)?.guest
-              ? `${(payment.stay as any).guest.first_name} ${(payment.stay as any).guest.last_name}`
-              : "N/A",
-            Documento: (payment.stay as any)?.guest?.doc_number || "N/A",
-            "Fecha Pago": dayjs(payment.payment_date).format("DD/MM/YYYY"),
-            "Método": (payment.payment_method as any)?.name || "N/A",
-            "Monto": Number(payment.amount),
-            "Tipo Pago": getPaymentTypeDisplay(payment.payment_type),
-            "Registrado por": payment.employee
-              ? `${(payment.employee as any).first_name} ${(payment.employee as any).last_name}`
-              : "Sistema",
-            Observación: payment.observation || "",
-          };
-        }) : [];
+                return {
+                  "N° Orden": (payment.stay as any)?.order_number,
+                  Habitación: (payment.stay as any)?.room?.room_number || "N/A",
+                  Huésped: (payment.stay as any)?.guest
+                    ? `${(payment.stay as any).guest.first_name} ${(payment.stay as any).guest.last_name}`
+                    : "N/A",
+                  Documento: (payment.stay as any)?.guest?.doc_number || "N/A",
+                  "Fecha Pago": dayjs(payment.payment_date).format(
+                    "DD/MM/YYYY",
+                  ),
+                  Método: (payment.payment_method as any)?.name || "N/A",
+                  Monto: Number(payment.amount),
+                  "Tipo Pago": getPaymentTypeDisplay(payment.payment_type),
+                  "Registrado por": payment.employee
+                    ? `${(payment.employee as any).first_name} ${(payment.employee as any).last_name}`
+                    : "Sistema",
+                  Observación: payment.observation || "",
+                };
+              })
+            : [];
 
         // Crear worksheet para este tipo de acomodación
         const worksheet = XLSX.utils.json_to_sheet(formattedData);
@@ -423,6 +450,140 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
     setLoading(false);
   };
 
+  const handleOccupancyReport = async () => {
+    setLoading(true);
+    try {
+      const accommodationTypes = accommodationTypesQuery.data || [];
+
+      if (accommodationTypes.length === 0) {
+        alert("No se encontraron tipos de acomodación");
+        setLoading(false);
+        return;
+      }
+
+      // Validar fechas
+      if (!occupancyStartDate || !occupancyEndDate) {
+        alert("Por favor seleccione fecha de inicio y fecha de fin");
+        setLoading(false);
+        return;
+      }
+
+      const formattedStartDate = dayjs(occupancyStartDate).format("YYYY-MM-DD");
+      const formattedEndDate = dayjs(occupancyEndDate).format("YYYY-MM-DD");
+
+      // Obtener todas las estancias con información de habitación y huéspedes
+      const { data: staysData, error: staysError } = await supabase
+        .from("stays")
+        .select(
+          `
+          id,
+          check_in_date,
+          check_out_date,
+          room:rooms(room_number, accommodation_type_id),
+          stay_guests(guest_id)
+        `,
+        )
+        .gte("check_in_date", formattedStartDate)
+        .lte("check_in_date", formattedEndDate)
+        .order("check_in_date", { ascending: false });
+
+      if (staysError) throw staysError;
+
+      // Crear workbook
+      const workbook = XLSX.utils.book_new();
+
+      // Crear una hoja por cada tipo de acomodación
+      for (const accType of accommodationTypes) {
+        // Filtrar estancias por tipo de acomodación
+        const typeStays = (staysData || []).filter((stay: any) => {
+          const roomAccTypeId = (stay.room as any)?.accommodation_type_id;
+          return roomAccTypeId === accType.id;
+        });
+
+        // Agrupar por habitación
+        const roomStats = new Map<
+          string,
+          {
+            roomNumber: string;
+            totalNights: number;
+            totalGuests: number;
+            totalStays: number;
+          }
+        >();
+
+        for (const stay of typeStays) {
+          const roomNumber = (stay.room as any)?.room_number || "N/A";
+          const nights = dayjs(stay.check_out_date).diff(
+            dayjs(stay.check_in_date),
+            "day",
+          );
+          const guestCount = (stay.stay_guests as any[])?.length || 1;
+
+          if (roomStats.has(roomNumber)) {
+            const existing = roomStats.get(roomNumber)!;
+            existing.totalNights += nights;
+            existing.totalGuests += guestCount;
+            existing.totalStays += 1;
+          } else {
+            roomStats.set(roomNumber, {
+              roomNumber,
+              totalNights: nights,
+              totalGuests: guestCount,
+              totalStays: 1,
+            });
+          }
+        }
+
+        // Formatear datos para la hoja
+        const formattedData = Array.from(roomStats.values()).map((stat) => ({
+          Habitación: stat.roomNumber,
+          "Total Noches": stat.totalNights,
+          "Total Huéspedes": stat.totalGuests,
+          "N° Estancias": stat.totalStays,
+        }));
+
+        // Crear worksheet para este tipo de acomodación
+        const worksheet = XLSX.utils.json_to_sheet(formattedData);
+
+        // Ajustar anchos de columna
+        const colWidths = [
+          { wch: 15 }, // Habitación
+          { wch: 15 }, // Total Noches
+          { wch: 18 }, // Total Huéspedes
+          { wch: 15 }, // N° Estancias
+        ];
+        worksheet["!cols"] = colWidths;
+
+        // Agregar hoja al workbook (nombre limitado a 31 caracteres)
+        const sheetName = accType.name.substring(0, 31);
+        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+      }
+
+      // Verificar si se agregaron hojas con datos
+      const hasData = workbook.SheetNames.some((sheetName) => {
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        return jsonData.length > 0;
+      });
+
+      if (!hasData) {
+        alert(
+          "No hay datos de ocupación para exportar en el rango de fechas seleccionado",
+        );
+        setLoading(false);
+        return;
+      }
+
+      // Descargar archivo con fechas en el nombre
+      const fileName = `reporte_ocupacion_habitaciones_${formattedStartDate}_a_${formattedEndDate}`;
+      XLSX.writeFile(workbook, `${fileName}.xlsx`);
+    } catch (error) {
+      console.error("Error generating occupancy report:", error);
+      alert("Error al generar el reporte de ocupación");
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -439,9 +600,9 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card
-          title="Reporte de Pagos por Habitación"
+          title="Reporte Facturas Habitaciones"
           className="shadow-sm border-t-4 border-emerald-500"
         >
           <p className="text-gray-600 mb-4">
@@ -450,7 +611,9 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
           </p>
           <div className="flex flex-col gap-3 mb-4">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-gray-600">Fecha Inicio</label>
+              <label className="text-xs font-bold text-gray-600">
+                Fecha Inicio
+              </label>
               <Calendar
                 value={startDate}
                 onChange={(e) => setStartDate(e.value as Date)}
@@ -461,7 +624,9 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-gray-600">Fecha Fin</label>
+              <label className="text-xs font-bold text-gray-600">
+                Fecha Fin
+              </label>
               <Calendar
                 value={endDate}
                 onChange={(e) => setEndDate(e.value as Date)}
@@ -483,7 +648,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
 
         <Card
           title="Reporte de Facturas por Categoría"
-          className="shadow-sm border-t-4 border-green-500"
+          className="shadow-sm border-t-4 border-yellow-500"
         >
           <p className="text-gray-600 mb-4">
             Genera un archivo Excel con una hoja por cada tipo de acomodación.
@@ -491,7 +656,9 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
           </p>
           <div className="flex flex-col gap-3 mb-4">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-gray-600">Fecha Inicio</label>
+              <label className="text-xs font-bold text-gray-600">
+                Fecha Inicio
+              </label>
               <Calendar
                 value={invoiceStartDate}
                 onChange={(e) => setInvoiceStartDate(e.value as Date)}
@@ -502,7 +669,9 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-gray-600">Fecha Fin</label>
+              <label className="text-xs font-bold text-gray-600">
+                Fecha Fin
+              </label>
               <Calendar
                 value={invoiceEndDate}
                 onChange={(e) => setInvoiceEndDate(e.value as Date)}
@@ -523,18 +692,46 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
         </Card>
 
         <Card
-          title="Reporte Histórico Operativo"
-          className="shadow-sm border-t-4 border-blue-500"
+          title="Reporte de Ocupación por Habitación"
+          className="shadow-sm border-t-4 border-purple-500"
         >
-          <p className="text-gray-600 mb-6">
-            Registro detallado de cambios de estado, limpiezas y mantenimientos
-            realizados en todas las áreas.
+          <p className="text-gray-600 mb-4">
+            Genera un archivo Excel con una hoja por cada tipo de acomodación.
+            Muestra el total de noches ocupadas y huéspedes por habitación.
           </p>
+          <div className="flex flex-col gap-3 mb-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-bold text-gray-600">
+                Fecha Inicio
+              </label>
+              <Calendar
+                value={occupancyStartDate}
+                onChange={(e) => setOccupancyStartDate(e.value as Date)}
+                dateFormat="dd/mm/yy"
+                placeholder="Seleccionar fecha inicio"
+                className="w-full"
+                showIcon
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-bold text-gray-600">
+                Fecha Fin
+              </label>
+              <Calendar
+                value={occupancyEndDate}
+                onChange={(e) => setOccupancyEndDate(e.value as Date)}
+                dateFormat="dd/mm/yy"
+                placeholder="Seleccionar fecha fin"
+                className="w-full"
+                showIcon
+              />
+            </div>
+          </div>
           <Button
-            label="Descargar Histórico General"
-            icon="pi pi-clock"
-            className="p-button-info w-full font-bold p-3"
-            onClick={handleHistoryReport}
+            label="Descargar Excel de Ocupación"
+            icon="pi pi-file-excel"
+            className="p-button-help w-full font-bold p-3 bg-purple-500 text-white"
+            onClick={handleOccupancyReport}
             disabled={loading}
           />
         </Card>
