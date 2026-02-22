@@ -137,7 +137,7 @@ const RoomPaymentsTable: React.FC<RoomPaymentsTableProps> = ({
                         : "text-blue-600 bg-blue-50"
                     }`}
                   >
-                    {row.origin_was_reservation ? "Reserva" : "Directo"}
+                    {row.origin_was_reservation ? "Reserva" : "Check-in"}
                   </span>
                 </div>
               </div>

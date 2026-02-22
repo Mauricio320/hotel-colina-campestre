@@ -181,7 +181,8 @@ const ActionsButtons = ({
   const navigate = useNavigate();
 
   // Verificar si es el día actual
-  const isToday = date && dayjs(date).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD");
+  const isToday =
+    date && dayjs(date).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD");
 
   // Verificar si ya tiene limpieza realizada
   const hasCleaning = room?.cleaning_log && room.cleaning_log.length > 0;
@@ -215,13 +216,17 @@ const ActionsButtons = ({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-3">
-      <Button
-        icon="pi pi-sign-in"
-        label="Check-in"
-        className="p-3 bg-[#ff3d47] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
-        onClick={onGoToCheckIn}
-      />
+    <div
+      className={`grid ${isToday ? "grid-cols-2" : "grid-cols-1"} justify-center gap-3`}
+    >
+      {isToday && (
+        <Button
+          icon="pi pi-sign-in"
+          label="Check-in"
+          className="p-3 bg-[#ff3d47] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
+          onClick={onGoToCheckIn}
+        />
+      )}
       <Button
         icon="pi pi-calendar"
         label="Reservar"

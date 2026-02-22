@@ -22,30 +22,30 @@ export const StaySummaryHeader: React.FC<StaySummaryHeaderProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="p-4 bg-[#eeebe4] rounded-2xl">
-          <span className="text-xs text-gray-400 font-bold uppercase block mb-1">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
+        <div className="p-3 sm:p-4 bg-[#eeebe4] rounded-2xl">
+          <span className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase block mb-1">
             #Orden
           </span>
-          <span className="text-xl font-black text-gray-700">
+          <span className="text-base sm:text-xl font-black text-gray-700 break-words">
             {stay?.order_number}
           </span>
         </div>
-        <div className="p-4 bg-[#eeebe4] rounded-2xl">
-          <span className="text-xs text-gray-400 font-bold uppercase block mb-1">
+        <div className="p-3 sm:p-4 bg-[#eeebe4] rounded-2xl">
+          <span className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase block mb-1">
             Acomodación
           </span>
-          <span className="text-xl font-black text-gray-700">
+          <span className="text-base sm:text-xl font-black text-gray-700 break-words leading-tight">
             {stay?.accommodation_type_id
               ? stay["accommodation_type"]?.name
               : `HAB ${stay?.room?.room_number} | ${stay?.room?.category}`}
           </span>
         </div>
-        <div className="p-4 bg-[#eeebe4] rounded-2xl">
-          <span className="text-xs text-gray-400 font-bold uppercase block mb-1">
+        <div className="p-3 sm:p-4 bg-[#eeebe4] rounded-2xl col-span-2 sm:col-span-1">
+          <span className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase block mb-1">
             Fecha Salida
           </span>
-          <span className="text-xl font-black text-gray-700">
+          <span className="text-base sm:text-xl font-black text-gray-700 break-words">
             {stay?.check_out_date}
           </span>
         </div>

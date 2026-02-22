@@ -115,7 +115,7 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
             type="submit"
             label="Actualizar Parámetros"
             icon="pi pi-save"
-            className="bg-emerald-600 mt-2 p-3 font-bold"
+            className="bg-emerald-600 mt-2 p-3 font-bold text-white"
           />
         </form>
       </Card>

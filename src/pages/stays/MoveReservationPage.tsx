@@ -94,8 +94,12 @@ const MoveReservationPage: React.FC = () => {
     if (stay) {
       reset({
         selectedRoomId: stay.room_id || "",
-        checkInDate: stay.check_in_date ? new Date(stay.check_in_date + "T12:00:00") : null,
-        checkOutDate: stay.check_out_date ? new Date(stay.check_out_date + "T12:00:00") : null,
+        checkInDate: stay.check_in_date
+          ? new Date(stay.check_in_date + "T12:00:00")
+          : null,
+        checkOutDate: stay.check_out_date
+          ? new Date(stay.check_out_date + "T12:00:00")
+          : null,
         observation: "",
         personCount: stay.person_count || 1,
         extraMattressCount: stay.extra_mattress_count || 0,
@@ -192,7 +196,12 @@ const MoveReservationPage: React.FC = () => {
           acceptIcon: "pi pi-check",
           rejectIcon: "pi pi-times",
           acceptClassName: "p-button-success",
-          accept: () => navigate(tabParam ? `/check-in-payment/${stayId}?tab=${tabParam}` : `/check-in-payment/${stayId}`),
+          accept: () =>
+            navigate(
+              tabParam
+                ? `/check-in-payment/${stayId}?tab=${tabParam}`
+                : `/check-in-payment/${stayId}`,
+            ),
           reject: () => navigateToCalendar(),
         });
       } else {
@@ -237,7 +246,9 @@ const MoveReservationPage: React.FC = () => {
         );
       }
       if (isGuestsOrMattressChanged) {
-        changes.push(`huéspedes a ${data.personCount} y colchonetas a ${data.extraMattressCount}`);
+        changes.push(
+          `huéspedes a ${data.personCount} y colchonetas a ${data.extraMattressCount}`,
+        );
       }
 
       confirmDialog({
@@ -342,11 +353,15 @@ const MoveReservationPage: React.FC = () => {
               </div>
               <div>
                 <p className="text-xs text-gray-500">Personas</p>
-                <p className="font-bold text-gray-800">{stay.person_count || 1}</p>
+                <p className="font-bold text-gray-800">
+                  {stay.person_count || 1}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-gray-500">Colchonetas</p>
-                <p className="font-bold text-gray-800">{stay.extra_mattress_count || 0}</p>
+                <p className="font-bold text-gray-800">
+                  {stay.extra_mattress_count || 0}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-gray-500">Entrada actual</p>
@@ -505,7 +520,9 @@ const MoveReservationPage: React.FC = () => {
                   )}
                 />
                 {errors.personCount && (
-                  <p className="text-xs text-red-500">{errors.personCount.message}</p>
+                  <p className="text-xs text-red-500">
+                    {errors.personCount.message}
+                  </p>
                 )}
               </div>
 
@@ -542,8 +559,12 @@ const MoveReservationPage: React.FC = () => {
                   />
                 )}
               />
-              <label htmlFor="isInvoiceRequested" className="text-sm font-medium text-gray-700 cursor-pointer">
-                Requiere factura electrónica <span className="text-gray-500">(+{settings.iva}% IVA)</span>
+              <label
+                htmlFor="isInvoiceRequested"
+                className="text-sm font-medium text-gray-700 cursor-pointer"
+              >
+                Requiere factura electrónica{" "}
+                <span className="text-gray-500">(+{settings.iva}% IVA)</span>
               </label>
             </div>
 
@@ -573,17 +594,26 @@ const MoveReservationPage: React.FC = () => {
                   {extraMattressCount > 0 && (
                     <div className="flex justify-between items-center text-sm">
                       <span className="text-gray-600">
-                        Colchonetas ({extraMattressCount} x ${settings.mat.toLocaleString()} x {nights} noche{nights > 1 ? "s" : ""})
+                        Colchonetas ({extraMattressCount} x $
+                        {settings.mat.toLocaleString()} x {nights} noche
+                        {nights > 1 ? "s" : ""})
                       </span>
                       <span className="font-medium text-gray-800">
-                        ${(extraMattressCount * settings.mat * nights).toLocaleString()}
+                        $
+                        {(
+                          extraMattressCount *
+                          settings.mat *
+                          nights
+                        ).toLocaleString()}
                       </span>
                     </div>
                   )}
                   <div className="h-px bg-amber-200 my-2"></div>
                   {isInvoiceRequested && (
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600">IVA ({settings.iva}%)</span>
+                      <span className="text-gray-600">
+                        IVA ({settings.iva}%)
+                      </span>
                       <span className="font-medium text-gray-800">
                         ${priceInfo.iva.toLocaleString()}
                       </span>
