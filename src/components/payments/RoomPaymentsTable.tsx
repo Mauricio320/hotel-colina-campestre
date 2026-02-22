@@ -26,9 +26,6 @@ const RoomPaymentsTable: React.FC<RoomPaymentsTableProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(10);
-  const [page, setPage] = useState(0);
   const [orderNumberFilter, setOrderNumberFilter] = useState("");
   const [docNumberFilter, setDocNumberFilter] = useState("");
   const [isReservationFilter, setIsReservationFilter] = useState<
@@ -43,8 +40,8 @@ const RoomPaymentsTable: React.FC<RoomPaymentsTableProps> = ({
   const { data: staysResult, isLoading: loading } = useStaysByAccommodationType(
     {
       accommodation_type_id,
-      page,
-      pageSize: rows,
+      page: 0,
+      pageSize: 200,
       orderNumber: orderNumberFilter,
       docNumber: docNumberFilter,
       isReservation: isReservationFilter,
@@ -52,33 +49,26 @@ const RoomPaymentsTable: React.FC<RoomPaymentsTableProps> = ({
   );
 
   const stays = staysResult?.data || [];
-  const totalRecords = staysResult?.count || 0;
-
-  const onPage = (event: any) => {
-    setFirst(event.first);
-    setRows(event.rows);
-    setPage(event.page || 0);
-  };
 
   return (
     <div className="bg-white rounded-3xl border border-emerald-50 shadow-xl shadow-emerald-100/20 overflow-hidden mt-4">
-      <div className="flex flex-wrap gap-4 p-4 bg-gray-50 border-b border-gray-100 items-center">
-        <span className="p-input-icon-left">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-3 p-4 bg-gray-50 border-b border-gray-100">
+        <span className="p-input-icon-left flex-1 sm:flex-none">
           <i className="pi pi-hashtag text-gray-400" />
           <InputText
             placeholder="Buscar por N° Orden"
             value={orderNumberFilter}
             onChange={(e) => setOrderNumberFilter(e.target.value)}
-            className="p-inputtext-sm rounded-lg pl-10"
+            className="p-inputtext-sm rounded-lg pl-10 w-full"
           />
         </span>
-        <span className="p-input-icon-left">
+        <span className="p-input-icon-left flex-1 sm:flex-none">
           <i className="pi pi-id-card text-gray-400" />
           <InputText
             placeholder="Buscar por Documento"
             value={docNumberFilter}
             onChange={(e) => setDocNumberFilter(e.target.value)}
-            className="p-inputtext-sm rounded-lg pl-10"
+            className="p-inputtext-sm rounded-lg pl-10 w-full"
           />
         </span>
         <Dropdown
@@ -87,7 +77,7 @@ const RoomPaymentsTable: React.FC<RoomPaymentsTableProps> = ({
           onChange={(e) => setIsReservationFilter(e.value)}
           placeholder="Todos"
           showClear
-          className="p-inputtext-sm w-40 rounded-lg"
+          className="p-inputtext-sm w-full sm:w-40 rounded-lg"
         />
       </div>
       {loading ? (
@@ -101,18 +91,10 @@ const RoomPaymentsTable: React.FC<RoomPaymentsTableProps> = ({
         <DataTable
           value={stays}
           globalFilter={globalFilter}
-          responsiveLayout="stack"
-          breakpoint="960px"
+          breakpoint="640px"
           className="text-sm"
           scrollable
           scrollHeight="70vh"
-          lazy
-          paginator
-          first={first}
-          rows={rows}
-          totalRecords={totalRecords}
-          onPage={onPage}
-          rowsPerPageOptions={[10, 20, 50]}
           rowHover
           stripedRows
           emptyMessage={`No hay registros de facturas`}
@@ -155,7 +137,7 @@ const RoomPaymentsTable: React.FC<RoomPaymentsTableProps> = ({
                         : "text-blue-600 bg-blue-50"
                     }`}
                   >
-                    {row.origin_was_reservation ? "Reserva" : "Directo"}
+                    {row.origin_was_reservation ? "Reserva" : "Check-in"}
                   </span>
                 </div>
               </div>
@@ -182,7 +164,8 @@ const RoomPaymentsTable: React.FC<RoomPaymentsTableProps> = ({
             header="Valor Total"
             sortable
             field="total_price"
-            headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+            className="hidden sm:table-cell"
+            headerClassName="hidden sm:table-cell bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
             body={(row) => (
               <span className="font-black text-gray-800">
                 $ {(row.total_price || 0).toLocaleString()}
@@ -194,7 +177,8 @@ const RoomPaymentsTable: React.FC<RoomPaymentsTableProps> = ({
             header="Abonado"
             sortable
             field="paid_amount"
-            headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+            className="hidden sm:table-cell"
+            headerClassName="hidden sm:table-cell bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
             body={(row) => (
               <span className="font-black text-green-600">
                 $ {(row.paid_amount || 0).toLocaleString()}
@@ -211,7 +195,7 @@ const RoomPaymentsTable: React.FC<RoomPaymentsTableProps> = ({
                 <Button
                   label="Ver factura"
                   icon="pi pi-file-pdf"
-                  className="p-button-sm bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg px-3 py-1.5 font-semibold transition-all shadow-sm hover:shadow"
+                  className="p-button-sm w-full sm:w-auto bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg px-3 py-1.5 font-semibold transition-all shadow-sm hover:shadow justify-center"
                   onClick={() =>
                     navigate(`/invoice/${row.id}`, {
                       state: {

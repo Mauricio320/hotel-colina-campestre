@@ -89,41 +89,39 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="p-3 bg-emerald-100 rounded-2xl text-emerald-600 shadow-sm">
             <i className="pi pi-building text-xl"></i>
           </div>
-          <h2 className="text-3xl font-black text-gray-800 tracking-tighter">
+          <h2 className="text-xl sm:text-3xl font-black text-gray-800 tracking-tighter">
             Gestión de Habitaciones
           </h2>
         </div>
-        <div className="flex items-center gap-3">
-          {isAdmin && (
-            <>
-              <Button
-                label="Actualizar Tarifas"
-                icon="pi pi-money-bill"
-                className="bg-amber-500 text-white border-none rounded-xl font-bold shadow-sm hover:bg-amber-600 transition-all py-2 px-4"
-                onClick={() => setShowBulkRateModal(true)}
-              />
-              <Button
-                label="Historial Tarifas"
-                icon="pi pi-history"
-                className="bg-gray-500 text-white border-none rounded-xl font-bold shadow-sm hover:bg-gray-600 transition-all py-2 px-4"
-                onClick={() =>
-                  navigate(`/rooms/rate-history?tab=${CATEGORIES[activeTab]}`)
-                }
-              />
-              <Button
-                label="Nueva Habitación"
-                icon="pi pi-plus"
-                className="bg-emerald-600 text-white border-none rounded-xl font-bold shadow-sm hover:bg-emerald-700 transition-all py-2 px-4"
-                onClick={openCreate}
-              />
-            </>
-          )}
-        </div>
+        {isAdmin && (
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              label="Actualizar Tarifas"
+              icon="pi pi-money-bill"
+              className="bg-amber-500 text-white border-none rounded-xl font-bold shadow-sm hover:bg-amber-600 transition-all py-2 px-3 text-sm flex-1 sm:flex-none"
+              onClick={() => setShowBulkRateModal(true)}
+            />
+            <Button
+              label="Historial Tarifas"
+              icon="pi pi-history"
+              className="bg-gray-500 text-white border-none rounded-xl font-bold shadow-sm hover:bg-gray-600 transition-all py-2 px-3 text-sm flex-1 sm:flex-none"
+              onClick={() =>
+                navigate(`/rooms/rate-history?tab=${CATEGORIES[activeTab]}`)
+              }
+            />
+            <Button
+              label="Nueva Habitación"
+              icon="pi pi-plus"
+              className="bg-emerald-600 text-white border-none rounded-xl font-bold shadow-sm hover:bg-emerald-700 transition-all py-2 px-3 text-sm w-full sm:w-auto"
+              onClick={openCreate}
+            />
+          </div>
+        )}
       </div>
 
       <TabView activeIndex={activeTab} onTabChange={handleTabChange}>
@@ -143,10 +141,7 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                     return a.room_number.localeCompare(b.room_number);
                   }) || []
                 }
-                scrollable
-                scrollHeight="70vh"
-                responsiveLayout="stack"
-                breakpoint="960px"
+                breakpoint="640px"
                 className="text-sm"
                 rowHover
                 stripedRows
@@ -175,7 +170,8 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                 <Column
                   header="Descripción"
                   field="observation"
-                  headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+                  className="hidden sm:table-cell"
+                  headerClassName="hidden sm:table-cell bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
                   body={(rowData) => (
                     <div
                       className="text-xs text-gray-500 italic font-medium"
@@ -239,8 +235,8 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                         <SplitButton
                           label="Historial"
                           icon="pi pi-history"
-                          className="p-button-sm"
-                          buttonClassName="bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-l-lg px-3 py-1.5 font-semibold transition-all"
+                          className="p-button-sm w-full sm:w-auto"
+                          buttonClassName="bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-l-lg px-3 py-1.5 font-semibold transition-all flex-1 sm:flex-none justify-center"
                           menuButtonClassName="bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 border-l-0 rounded-r-lg px-2 transition-all"
                           tooltipOptions={{ position: "top" }}
                           onClick={() => openHistory(rowData)}

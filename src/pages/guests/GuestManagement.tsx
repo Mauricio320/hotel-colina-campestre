@@ -90,11 +90,16 @@ const GuestManagement: React.FC<GuestManagementProps> = ({ userRole }) => {
   };
 
   const header = (
-    <div className="flex flex-wrap gap-2 justify-between items-center">
+    <div className="flex flex-col sm:flex-row gap-2 justify-between items-start sm:items-center">
       <h3 className="m-0 text-xl font-bold text-emerald-700">Listado de Huéspedes</h3>
-      <span className="p-input-icon-left">
+      <span className="p-input-icon-left w-full sm:w-auto">
         <i className="pi pi-search" />
-        <InputText type="search" onInput={(e: any) => setGlobalFilter(e.target.value)} placeholder="Buscar documento o nombre..." />
+        <InputText
+          type="search"
+          onInput={(e: any) => setGlobalFilter(e.target.value)}
+          placeholder="Buscar documento o nombre..."
+          className="w-full sm:w-72"
+        />
       </span>
     </div>
   );
@@ -103,7 +108,7 @@ const GuestManagement: React.FC<GuestManagementProps> = ({ userRole }) => {
     <Button
       label="Nuevo Huésped"
       icon="pi pi-plus"
-      className="bg-emerald-600 border-emerald-600 text-white px-4 py-2"
+      className="bg-emerald-600 border-emerald-600 text-white px-4 py-2 w-full sm:w-auto"
       onClick={handleNewGuest}
     />
   );
@@ -124,23 +129,31 @@ const GuestManagement: React.FC<GuestManagementProps> = ({ userRole }) => {
           header={header}
           globalFilter={globalFilter}
           scrollable
-          scrollHeight="calc(100vh - 280px)"
+          scrollHeight="70vh"
           className="text-sm"
-          paginator
-          rows={10}
+          rowHover
+          stripedRows
+          breakpoint="640px"
+          emptyMessage="No hay huéspedes registrados."
         >
           <Column field="doc_type" header="Tipo" sortable style={{ width: '80px' }} />
           <Column field="doc_number" header="Documento" sortable />
           <Column field="first_name" header="Nombres" sortable />
-          <Column field="last_name" header="Apellidos" sortable />
-          <Column field="phone" header="Teléfono" />
-          <Column field="email" header="Email" />
-          <Column field="city" header="Municipio" />
+          <Column field="last_name" header="Apellidos" sortable className="hidden sm:table-cell" headerClassName="hidden sm:table-cell" />
+          <Column field="phone" header="Teléfono" className="hidden sm:table-cell" headerClassName="hidden sm:table-cell" />
+          <Column field="email" header="Email" className="hidden md:table-cell" headerClassName="hidden md:table-cell" />
+          <Column field="city" header="Municipio" className="hidden md:table-cell" headerClassName="hidden md:table-cell" />
           <Column
             header="Acciones"
             body={(rowData: Guest) => (
-              <div className="flex gap-2">
-                <Button icon="pi pi-pencil" className="p-button-text p-button-sm p-button-warning" onClick={() => handleEdit(rowData)} />
+              <div className="flex gap-2 justify-center">
+                <Button
+                  icon="pi pi-pencil"
+                  className="p-button-text p-button-sm p-button-warning"
+                  onClick={() => handleEdit(rowData)}
+                  tooltip="Editar"
+                  tooltipOptions={{ position: 'top' }}
+                />
               </div>
             )}
           />

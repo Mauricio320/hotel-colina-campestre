@@ -69,7 +69,7 @@ const RoomPayments: React.FC = () => {
           <div className="p-3 bg-green-100 rounded-2xl text-green-600 shadow-sm">
             <i className="pi pi-money-bill text-xl"></i>
           </div>
-          <h2 className="text-3xl font-black text-gray-800 tracking-tighter">
+          <h2 className="text-xl sm:text-3xl font-black text-gray-800 tracking-tighter">
             Pagos Habitaciones
           </h2>
         </div>

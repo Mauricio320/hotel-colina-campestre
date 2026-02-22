@@ -18,6 +18,8 @@ import { UpdateStay } from "@/hooks/useStays";
 import { RoomStatusEnum } from "@/util/enums/status-rooms.enum";
 import { useRoomStatuses } from "@/hooks/useRoomStatuses";
 import { InputTextarea } from "primereact/inputtextarea";
+import PageHeader from "@/components/ui/PageHeader";
+import dayjs from "dayjs";
 
 export const CheckInPayment = () => {
   const { showBlockUI, hideBlockUI } = useBlockUI();
@@ -155,16 +157,14 @@ export const CheckInPayment = () => {
 
   return (
     <div className="max-w-2xl mx-auto pb-12 animate-fade-in">
-      <div className="flex items-center gap-4 mb-8">
-        <Button
-          icon="pi pi-arrow-left"
-          onClick={navigateCalendar}
-          className="p-button-text p-button-plain p-button-rounded"
-        />
-        <h1 className="text-3xl font-black text-gray-800">
-          CheckIn/Abonos Reserva
-        </h1>
-      </div>
+      <PageHeader
+        title="CheckIn/Abonos Reserva"
+        subtitle={dayjs().format("DD/MM/YYYY")}
+        icon="pi-money-bill"
+        color="emerald"
+        onBack={navigateCalendar}
+        backTooltip="Volver al calendario"
+      />
 
       <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 flex flex-col gap-6">
         <StaySummaryHeader stay={stay} />

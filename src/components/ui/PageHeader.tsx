@@ -117,8 +117,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   // Simple variant - used for list/module pages (Reports, RoomManagement, etc.)
   if (variant === "simple") {
     return (
-      <div className={`flex flex-col gap-6 ${className}`}>
-        <div className="flex items-center justify-between">
+      <div className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${className}`}>
           <div className="flex items-center gap-3">
             {icon && (
               <div
@@ -127,7 +126,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                 <i className={`pi ${icon} text-xl`}></i>
               </div>
             )}
-            <h2 className="text-3xl font-black text-gray-800 tracking-tighter">
+            <h2 className="text-xl sm:text-3xl font-black text-gray-800 tracking-tighter">
               {title}
             </h2>
           </div>
@@ -135,7 +134,6 @@ const PageHeader: React.FC<PageHeaderProps> = ({
             {rightContent}
             {loading && <ProgressSpinner {...spinnerProps} />}
           </div>
-        </div>
       </div>
     );
   }
@@ -163,7 +161,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
             className={`w-1.5 ${colors.bg} rounded-full shadow-sm self-stretch`}
           ></div>
           <div className="flex flex-col justify-center gap-1">
-            <h1 className="text-3xl font-black text-gray-900 tracking-tighter leading-none">
+            <h1 className="text-xl sm:text-3xl font-black text-gray-900 tracking-tighter leading-none">
               {title}
             </h1>
 

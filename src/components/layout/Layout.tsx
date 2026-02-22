@@ -151,11 +151,22 @@ const Layout: React.FC<LayoutProps> = ({ employee, onLogout }) => {
           visible={visible}
           onHide={() => setVisible(false)}
           className="w-full sm:w-80 bg-white max-w-[80%]"
+          showCloseIcon={false}
+          pt={{
+            header: { className: "hidden" },
+            content: { className: "p-0" },
+          }}
         >
-          <div className="flex items-center gap-2 h-16 m-[-1rem] p-2 border-b border-emerald-800 bg-emerald-600 mb-1">
-            <img src={wccLogo.href} alt="Logo" className="max-w-full" />
+          <div className="relative flex items-center justify-center h-16 px-3 border-b border-emerald-800 bg-emerald-600 mb-1">
+            <img src={wccLogo.href} alt="Logo" className="max-h-full" />
+            <button
+              onClick={() => setVisible(false)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/40 hover:bg-white/50 text-white transition-colors"
+            >
+              <i className="pi pi-times text-sm font-bold"></i>
+            </button>
           </div>
-          <div className="flex flex-col gap-2 mt-4 ">
+          <div className="flex flex-col gap-2 mt-4 px-3">
             {filteredMenu.map((item) => (
               <Link
                 key={item.path}
@@ -172,12 +183,13 @@ const Layout: React.FC<LayoutProps> = ({ employee, onLogout }) => {
               </Link>
             ))}
             <Divider />
-            <Button
-              label="Cerrar Sesión"
-              icon="pi pi-sign-out"
-              className="p-button-text p-button-danger w-full justify-start p-4"
+            <button
               onClick={onLogout}
-            />
+              className="flex items-center gap-3 p-4 rounded-xl w-full text-left text-red-500 hover:bg-red-50 transition-colors"
+            >
+              <i className="pi pi-sign-out text-base"></i>
+              <span className="font-medium">Cerrar Sesión</span>
+            </button>
           </div>
         </Sidebar>
 

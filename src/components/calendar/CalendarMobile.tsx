@@ -227,14 +227,14 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                     className="flex border-b last:border-b-0 hover:bg-emerald-50/30 transition-colors"
                   >
                     {/* Lateral con número de habitación - sticky en left y top */}
-                    <div className="w-[85px] p-1 border-r bg-gray-50/50 flex flex-col items-center justify-center gap-1 sticky left-0 z-10">
+                    <div className="w-[85px] p-1 border-r bg-gray-50/70 flex flex-col items-center justify-center gap-1 sticky left-0 z-10">
                       <span className="text-[11px] font-black text-emerald-800">
                         #{room.room_number}
                         <span className="text-[9px] text-gray-600">
                           ( MAX: {room.beds_double * 2 + room.beds_single})
                         </span>
                       </span>
-                      <span className="text-[9px] text-gray-400">
+                      <span className="text-[9px] text-gray-700 font-bold">
                         {room.beds_double}D | {room.beds_single}S
                       </span>
                       <div className="mt-[-10px]">

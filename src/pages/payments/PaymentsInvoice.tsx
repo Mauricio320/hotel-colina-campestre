@@ -23,12 +23,14 @@ const PaymentsInvoice: React.FC = () => {
 
   return (
     <div className="p-4 animate-fade-in">
-      <PageHeader
-        title="Facturas de Pagos"
-        icon="pi-file-pdf"
-        color="red"
-        variant="simple"
-      />
+      <div className="mb-4">
+        <PageHeader
+          title="Pagos de facturas"
+          icon="pi-file-pdf"
+          color="red"
+          variant="simple"
+        />
+      </div>
       <TabView
         activeIndex={activeTab}
         onTabChange={(e) => setActiveTab(e.index)}

@@ -8,6 +8,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Card } from "primereact/card";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { Checkbox } from "primereact/checkbox";
 import { useStayById } from "@/hooks/useStayById";
 import { RoomsQueryCategory } from "@/hooks/useRooms";
 import { useMoveStay, useCheckRoomAvailability } from "@/hooks/useMoveStay";
@@ -18,6 +19,9 @@ import AvailabilityConflictModal from "@/components/stays/AvailabilityConflictMo
 import dayjs from "dayjs";
 import { Room, Stay } from "@/types";
 import { FormattedConflicts } from "@/util/helper/formattedConflicts";
+import { useRoomRates } from "@/hooks/useRoomRates";
+import { useSettings } from "@/hooks/useSettings";
+import { useStayPricing } from "@/hooks/useStayPricing";
 
 interface RoomOption {
   label: string;
@@ -30,6 +34,9 @@ interface MoveReservationFormData {
   checkInDate: Date | null;
   checkOutDate: Date | null;
   observation: string;
+  personCount: number;
+  extraMattressCount: number;
+  isInvoiceRequested: boolean;
 }
 
 const MoveReservationPage: React.FC = () => {
@@ -51,6 +58,7 @@ const MoveReservationPage: React.FC = () => {
   const { data: roomsQuery } = RoomsQueryCategory(accommodation_type_id);
   const moveStay = useMoveStay();
   const checkAvailability = useCheckRoomAvailability();
+  const { settings } = useSettings();
 
   // Estado para conflictos de disponibilidad
   const [conflicts, setConflicts] = useState<Stay[]>([]);
@@ -69,22 +77,33 @@ const MoveReservationPage: React.FC = () => {
       checkInDate: null,
       checkOutDate: null,
       observation: "",
+      personCount: 1,
+      extraMattressCount: 0,
+      isInvoiceRequested: false,
     },
   });
 
   const selectedRoomId = watch("selectedRoomId");
   const checkInDate = watch("checkInDate");
   const checkOutDate = watch("checkOutDate");
+  const personCount = watch("personCount");
+  const extraMattressCount = watch("extraMattressCount");
+  const isInvoiceRequested = watch("isInvoiceRequested");
 
   useEffect(() => {
     if (stay) {
       reset({
         selectedRoomId: stay.room_id || "",
-        checkInDate: stay.check_in_date ? new Date(stay.check_in_date) : null,
+        checkInDate: stay.check_in_date
+          ? new Date(stay.check_in_date + "T12:00:00")
+          : null,
         checkOutDate: stay.check_out_date
-          ? new Date(stay.check_out_date)
+          ? new Date(stay.check_out_date + "T12:00:00")
           : null,
         observation: "",
+        personCount: stay.person_count || 1,
+        extraMattressCount: stay.extra_mattress_count || 0,
+        isInvoiceRequested: stay.is_invoice_requested || false,
       });
     }
   }, [stay, reset]);
@@ -114,6 +133,31 @@ const MoveReservationPage: React.FC = () => {
       dayjs(checkOutDate).format("YYYY-MM-DD") !==
         dayjs(stay.check_out_date).format("YYYY-MM-DD"));
 
+  // Tarifas de la habitación seleccionada
+  const { data: roomRates } = useRoomRates(selectedRoomId || null);
+
+  // Cálculo dinámico del precio nuevo
+  const { nights, priceInfo } = useStayPricing({
+    room: selectedRoom as any,
+    checkInDate,
+    checkOutDate,
+    personCount,
+    extraMattressCount,
+    invoiceRequested: isInvoiceRequested,
+    settings,
+    roomRates,
+  });
+
+  const isGuestsOrMattressChanged =
+    stay &&
+    (personCount !== (stay.person_count || 1) ||
+      extraMattressCount !== (stay.extra_mattress_count || 0));
+
+  const mattressOptions = Array.from({ length: 7 }, (_, i) => ({
+    label: `${i}${i > 0 ? ` ($${(i * settings.mat).toLocaleString()})` : ""}`,
+    value: i,
+  }));
+
   const onSubmit = async (data: MoveReservationFormData) => {
     if (!stay || !stayId || !employee?.id) return;
     if (!data.checkInDate || !data.checkOutDate) return;
@@ -130,9 +174,39 @@ const MoveReservationPage: React.FC = () => {
         employeeId: employee.id,
         observation: data.observation.trim() || undefined,
         stayStatusId: stay.room_status_id || "",
+        personCount: data.personCount,
+        extraMattressCount: data.extraMattressCount,
+        newTotalPrice: priceInfo.total,
+        extraMattressPrice: data.extraMattressCount * settings.mat * nights,
+        isInvoiceRequested: data.isInvoiceRequested,
+        ivaAmount: priceInfo.iva,
+        ivaPercentage: settings.iva,
       });
 
-      navigateToCalendar();
+      const newTotalIsHigher = priceInfo.total > (stay.total_price || 0);
+
+      if (newTotalIsHigher) {
+        hideBlockUI();
+        confirmDialog({
+          message: `El nuevo total ($${priceInfo.total.toLocaleString()}) es mayor al anterior ($${(stay.total_price || 0).toLocaleString()}). ¿Desea registrar un pago ahora?`,
+          header: "Registrar pago",
+          icon: "pi pi-credit-card",
+          acceptLabel: "Sí, ir a pagos",
+          rejectLabel: "No, volver al calendario",
+          acceptIcon: "pi pi-check",
+          rejectIcon: "pi pi-times",
+          acceptClassName: "p-button-success",
+          accept: () =>
+            navigate(
+              tabParam
+                ? `/check-in-payment/${stayId}?tab=${tabParam}`
+                : `/check-in-payment/${stayId}`,
+            ),
+          reject: () => navigateToCalendar(),
+        });
+      } else {
+        navigateToCalendar();
+      }
     } catch (error: any) {
       console.error("Error al mover reserva:", error);
     } finally {
@@ -171,12 +245,17 @@ const MoveReservationPage: React.FC = () => {
           `fechas a ${dayjs(data.checkInDate).format("DD/MM/YYYY")} - ${dayjs(data.checkOutDate).format("DD/MM/YYYY")}`,
         );
       }
+      if (isGuestsOrMattressChanged) {
+        changes.push(
+          `huéspedes a ${data.personCount} y colchonetas a ${data.extraMattressCount}`,
+        );
+      }
 
       confirmDialog({
-        message: `¿Está seguro que desea mover esta reserva? Se cambiará ${changes.join(" y ")}.`,
-        header: "Confirmar movimiento",
+        message: `¿Está seguro que desea modificar esta reserva? Se cambiará ${changes.join(", ")}.`,
+        header: "Confirmar cambios",
         icon: "pi pi-exclamation-triangle",
-        acceptLabel: "Sí, mover",
+        acceptLabel: "Sí, guardar",
         rejectLabel: "No, volver",
         acceptIcon: "pi pi-check",
         rejectIcon: "pi pi-times",
@@ -258,11 +337,12 @@ const MoveReservationPage: React.FC = () => {
           onSubmit={handleSubmit(handleCheckAndConfirm)}
           className="flex flex-col gap-6"
         >
+          {/* Info actual */}
           <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
             <h3 className="text-sm font-black text-gray-500 uppercase tracking-wide mb-3">
               Información actual de la reserva
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div>
                 <p className="text-xs text-gray-500">Habitación</p>
                 <p className="font-bold text-gray-800">{roomNumber}</p>
@@ -272,6 +352,18 @@ const MoveReservationPage: React.FC = () => {
                 <p className="font-bold text-gray-800">{guestName}</p>
               </div>
               <div>
+                <p className="text-xs text-gray-500">Personas</p>
+                <p className="font-bold text-gray-800">
+                  {stay.person_count || 1}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Colchonetas</p>
+                <p className="font-bold text-gray-800">
+                  {stay.extra_mattress_count || 0}
+                </p>
+              </div>
+              <div>
                 <p className="text-xs text-gray-500">Entrada actual</p>
                 <p className="font-bold text-gray-800">{currentCheckInDate}</p>
               </div>
@@ -279,18 +371,20 @@ const MoveReservationPage: React.FC = () => {
                 <p className="text-xs text-gray-500">Salida actual</p>
                 <p className="font-bold text-gray-800">{currentCheckOutDate}</p>
               </div>
-              <div className="sm:col-span-2">
-                <p className="text-xs text-gray-500">Total</p>
+              <div className="sm:col-span-3">
+                <p className="text-xs text-gray-500">Total actual</p>
                 <p className="font-bold text-lg text-gray-800">{totalPrice}</p>
               </div>
             </div>
           </div>
 
+          {/* Nuevos datos */}
           <div className="flex flex-col gap-4">
             <h3 className="text-sm font-black text-gray-500 uppercase tracking-wide">
               Nuevos datos de la reserva
             </h3>
 
+            {/* Habitación */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-bold text-gray-700">
                 Habitación <span className="text-amber-500">*</span>
@@ -323,6 +417,7 @@ const MoveReservationPage: React.FC = () => {
               )}
             </div>
 
+            {/* Fechas */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-bold text-gray-700">
@@ -343,7 +438,6 @@ const MoveReservationPage: React.FC = () => {
                       className={`w-full ${errors.checkInDate ? "p-invalid" : ""}`}
                       showIcon
                       iconPos="right"
-                      minDate={new Date()}
                     />
                   )}
                 />
@@ -394,6 +488,148 @@ const MoveReservationPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Personas y colchonetas */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold text-gray-700">
+                  Cantidad de personas <span className="text-amber-500">*</span>
+                </label>
+                <Controller
+                  name="personCount"
+                  control={control}
+                  rules={{ required: "Campo requerido" }}
+                  render={({ field }) => (
+                    <Dropdown
+                      id={field.name}
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.value)}
+                      options={
+                        roomRates && roomRates.length > 0
+                          ? roomRates.map((rate) => ({
+                              label: `${rate.person_count} pers. - $${rate.rate.toLocaleString()}`,
+                              value: rate.person_count,
+                            }))
+                          : Array.from({ length: 10 }, (_, i) => ({
+                              label: `${i + 1} persona${i > 0 ? "s" : ""}`,
+                              value: i + 1,
+                            }))
+                      }
+                      placeholder="Seleccione"
+                      className={`w-full ${errors.personCount ? "p-invalid" : ""}`}
+                    />
+                  )}
+                />
+                {errors.personCount && (
+                  <p className="text-xs text-red-500">
+                    {errors.personCount.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold text-gray-700">
+                  Colchonetas adicionales
+                </label>
+                <Controller
+                  name="extraMattressCount"
+                  control={control}
+                  render={({ field }) => (
+                    <Dropdown
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.value)}
+                      options={mattressOptions}
+                      placeholder="0"
+                      className="w-full"
+                    />
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Factura electrónica */}
+            <div className="flex items-center gap-2 pt-1">
+              <Controller
+                name="isInvoiceRequested"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    inputId="isInvoiceRequested"
+                    checked={field.value}
+                    onChange={(e) => field.onChange(e.checked)}
+                  />
+                )}
+              />
+              <label
+                htmlFor="isInvoiceRequested"
+                className="text-sm font-medium text-gray-700 cursor-pointer"
+              >
+                Requiere factura electrónica{" "}
+                <span className="text-gray-500">(+{settings.iva}% IVA)</span>
+              </label>
+            </div>
+
+            {/* Resumen de precio nuevo */}
+            {selectedRoom && checkInDate && checkOutDate && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <h4 className="text-sm font-black text-amber-700 uppercase tracking-wide mb-3">
+                  Nuevo precio estimado
+                </h4>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">
+                      Tarifa/noche ({personCount} pers.)
+                    </span>
+                    <span className="font-medium text-gray-800">
+                      ${priceInfo.rate.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">
+                      Hospedaje ({nights} noche{nights > 1 ? "s" : ""})
+                    </span>
+                    <span className="font-medium text-gray-800">
+                      ${priceInfo.subtotalHospedaje.toLocaleString()}
+                    </span>
+                  </div>
+                  {extraMattressCount > 0 && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">
+                        Colchonetas ({extraMattressCount} x $
+                        {settings.mat.toLocaleString()} x {nights} noche
+                        {nights > 1 ? "s" : ""})
+                      </span>
+                      <span className="font-medium text-gray-800">
+                        $
+                        {(
+                          extraMattressCount *
+                          settings.mat *
+                          nights
+                        ).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                  <div className="h-px bg-amber-200 my-2"></div>
+                  {isInvoiceRequested && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">
+                        IVA ({settings.iva}%)
+                      </span>
+                      <span className="font-medium text-gray-800">
+                        ${priceInfo.iva.toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-gray-800">Nuevo total</span>
+                    <span className="text-xl font-black text-amber-700">
+                      ${priceInfo.total.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Observación */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-bold text-gray-700">
                 Observación <span className="text-amber-500">*</span>
@@ -421,10 +657,9 @@ const MoveReservationPage: React.FC = () => {
 
           <Button
             type="submit"
-            label="Mover Reserva"
+            label="Guardar cambios"
             icon="pi pi-calendar-plus"
             className="bg-amber-500 hover:bg-amber-600 border-none text-white w-full py-4 text-lg font-black rounded-2xl shadow-lg mt-2"
-            disabled={moveStay.isPending || checkAvailability.isPending}
             loading={moveStay.isPending || checkAvailability.isPending}
           />
 
