@@ -11,6 +11,13 @@ export interface MoveStayParams {
   employeeId: string;
   observation?: string;
   stayStatusId: string;
+  personCount?: number;
+  extraMattressCount?: number;
+  newTotalPrice?: number;
+  extraMattressPrice?: number;
+  isInvoiceRequested?: boolean;
+  ivaAmount?: number;
+  ivaPercentage?: number;
 }
 
 export interface ConflictingStay {
@@ -90,6 +97,13 @@ export const moveStay = async (params: MoveStayParams): Promise<void> => {
     moveDate,
     employeeId,
     observation,
+    personCount,
+    extraMattressCount,
+    newTotalPrice,
+    extraMattressPrice,
+    isInvoiceRequested,
+    ivaAmount,
+    ivaPercentage,
   } = params;
 
   const isRoomChange = currentRoomId !== newRoomId;
@@ -139,14 +153,27 @@ export const moveStay = async (params: MoveStayParams): Promise<void> => {
 
   const targetStatusId = isStayActive ? occupiedStatus?.id : reservedStatus?.id;
 
+  const stayUpdatePayload: Record<string, any> = {
+    room_id: newRoomId,
+    check_in_date: newCheckInDate,
+    check_out_date: newCheckOutDate,
+    room_status_id: targetStatusId,
+  };
+
+  if (personCount !== undefined) stayUpdatePayload.person_count = personCount;
+  if (extraMattressCount !== undefined) {
+    stayUpdatePayload.extra_mattress_count = extraMattressCount;
+    stayUpdatePayload.has_extra_mattress = extraMattressCount > 0;
+    stayUpdatePayload.extra_mattress_price = extraMattressPrice ?? 0;
+  }
+  if (newTotalPrice !== undefined) stayUpdatePayload.total_price = newTotalPrice;
+  if (isInvoiceRequested !== undefined) stayUpdatePayload.is_invoice_requested = isInvoiceRequested;
+  if (ivaAmount !== undefined) stayUpdatePayload.iva_amount = ivaAmount;
+  if (ivaPercentage !== undefined) stayUpdatePayload.iva_percentage = ivaPercentage;
+
   const { error: updateStayError } = await supabase
     .from("stays")
-    .update({
-      room_id: newRoomId,
-      check_in_date: newCheckInDate,
-      check_out_date: newCheckOutDate,
-      room_status_id: targetStatusId,
-    })
+    .update(stayUpdatePayload)
     .eq("id", stayId);
 
   if (updateStayError) throw updateStayError;

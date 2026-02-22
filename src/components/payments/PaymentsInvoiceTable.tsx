@@ -65,7 +65,7 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
         value={globalFilter}
         onChange={(e) => setGlobalFilter(e.target.value)}
         placeholder="Buscar por orden, huésped, habitación, método o empleado..."
-        className="p-inputtext-sm w-80"
+        className="p-inputtext-sm w-full sm:w-80"
       />
     </div>
   );
@@ -77,7 +77,7 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
       value={payments}
       header={header}
       globalFilter={globalFilter}
-      responsiveLayout="stack"
+      breakpoint="640px"
       scrollable
       scrollHeight="70vh"
       emptyMessage={emptyMessage}
@@ -92,6 +92,8 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
       />
       <Column
         header="Habitación"
+        className="hidden sm:table-cell"
+        headerClassName="hidden sm:table-cell"
         body={(row: PaymentWithRelations) => (
           <span className="font-bold text-emerald-600">
             {row.stay.room.room_number}
@@ -113,6 +115,8 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
       <Column
         field="payment_date"
         header="Fecha"
+        className="hidden sm:table-cell"
+        headerClassName="hidden sm:table-cell"
         body={(row: PaymentWithRelations) => (
           <span className="text-sm text-gray-600">
             {dayjs(row.payment_date).format("DD MMM YYYY")}
@@ -121,6 +125,8 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
       />
       <Column
         header="Método"
+        className="hidden sm:table-cell"
+        headerClassName="hidden sm:table-cell"
         body={(row: PaymentWithRelations) => (
           <Tag
             value={row.payment_method?.name || "N/A"}
@@ -141,6 +147,8 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
       <Column
         field="payment_type"
         header="Tipo de Pago"
+        className="hidden sm:table-cell"
+        headerClassName="hidden sm:table-cell"
         body={(row: PaymentWithRelations) => (
           <Tag
             value={getPaymentTypeDisplay(row.payment_type)}
@@ -150,6 +158,8 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
       />
       <Column
         header="Registrado por"
+        className="hidden sm:table-cell"
+        headerClassName="hidden sm:table-cell"
         body={(row: PaymentWithRelations) => (
           <span className="text-sm text-gray-600">
             {row.employee
@@ -164,7 +174,7 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
           <Button
             label="Ver Factura"
             icon="pi pi-file-pdf"
-            className="p-button-sm bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg px-3 py-1.5 font-semibold transition-all shadow-sm hover:shadow"
+            className="p-button-sm w-full sm:w-auto bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg px-3 py-1.5 font-semibold transition-all shadow-sm hover:shadow justify-center"
             onClick={() =>
               navigate(`/invoice/${row.stay_id}`, {
                 state: {

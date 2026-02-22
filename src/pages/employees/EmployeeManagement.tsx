@@ -207,7 +207,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
     <Button
       label="Registrar Personal"
       icon="pi pi-user-plus"
-      className="bg-emerald-600 shadow-md text-white px-4 py-2"
+      className="bg-emerald-600 shadow-md text-white px-4 py-2 w-full sm:w-auto"
       onClick={handleNewEmployee}
     />
   );
@@ -224,13 +224,13 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
       <div className="bg-white rounded-3xl border border-emerald-50 shadow-xl shadow-emerald-100/20 overflow-hidden">
         <DataTable
           value={employeesQuery.data || []}
-          responsiveLayout="stack"
-          breakpoint="960px"
+          breakpoint="640px"
           className="text-sm"
-          paginator
-          rows={10}
+          scrollable
+          scrollHeight="70vh"
           rowHover
           stripedRows
+          emptyMessage="No hay personal registrado."
         >
           <Column
             header="Personal"
@@ -251,13 +251,15 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
             field="doc_type"
             header="Tipo"
             sortable
-            headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+            className="hidden sm:table-cell"
+            headerClassName="hidden sm:table-cell bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
           />
           <Column
             field="doc_number"
             header="Documento"
             sortable
-            headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+            className="hidden sm:table-cell"
+            headerClassName="hidden sm:table-cell bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
           />
           <Column
             field="role.name"
@@ -273,13 +275,15 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
           <Column
             field="phone"
             header="Teléfono"
-            headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+            className="hidden md:table-cell"
+            headerClassName="hidden md:table-cell bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
           />
           <Column
             field="city"
             header="Ciudad"
             sortable
-            headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+            className="hidden md:table-cell"
+            headerClassName="hidden md:table-cell bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
           />
           <Column
             header="Acciones"
@@ -290,11 +294,14 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({
                   icon="pi pi-pencil"
                   className="p-button-text p-button-warning p-button-sm"
                   onClick={() => handleEdit(rowData)}
+                  tooltip="Editar"
+                  tooltipOptions={{ position: 'top' }}
                 />
                 <Button
                   icon="pi pi-key"
                   className="p-button-text p-button-info p-button-sm"
                   tooltip="Reset Password"
+                  tooltipOptions={{ position: 'top' }}
                   onClick={() => handleOpenResetPassword(rowData)}
                 />
               </div>

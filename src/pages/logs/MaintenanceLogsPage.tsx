@@ -93,15 +93,13 @@ const MaintenanceLogsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 animate-fade-in">
-      <div className="mb-6">
-        <PageHeader
-          title="Historial de Mantenimiento"
-          icon="pi-wrench"
-          color="amber"
-          variant="simple"
-        />
-      </div>
+    <div className="flex flex-col gap-6 animate-fade-in">
+      <PageHeader
+        title="Historial de Mantenimiento"
+        icon="pi-wrench"
+        color="amber"
+        variant="simple"
+      />
 
       <TabView
         activeIndex={activeTab}
@@ -109,62 +107,69 @@ const MaintenanceLogsPage: React.FC = () => {
       >
         {accommodationTypesQuery.data?.map((type) => (
           <TabPanel key={type.id} header={type.name}>
-            <DataTable
-              value={getFilteredLogs(type.id)}
-              className="text-sm"
-              paginator
-              rows={10}
-              rowHover
-              stripedRows
-              emptyMessage={`No hay registros de mantenimiento para ${type.name}.`}
-            >
-              <Column
-                field="date"
-                header="Fecha"
-                body={dateBodyTemplate}
-                sortable
-                headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
-              />
-              <Column
-                field="room.room_number"
-                header="Habitación"
-                body={roomBodyTemplate}
-                sortable
-                headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
-              />
-              <Column
-                header="Huésped"
-                body={stayBodyTemplate}
-                headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
-              />
-              <Column
-                field="category"
-                header="Categoría"
-                body={categoryBodyTemplate}
-                sortable
-                headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
-              />
-              <Column
-                field="subcategory"
-                header="Subcategoría"
-                body={subcategoryBodyTemplate}
-                sortable
-                headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
-              />
-              <Column
-                field="employee"
-                header="Empleado"
-                body={employeeBodyTemplate}
-                sortable
-                headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
-              />
-              <Column
-                field="observation"
-                header="Observación"
-                body={observationBodyTemplate}
-                headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
-              />
-            </DataTable>
+            <div className="bg-white rounded-3xl border border-amber-50 shadow-xl shadow-amber-100/20 overflow-hidden mt-4">
+              <DataTable
+                value={getFilteredLogs(type.id)}
+                className="text-sm"
+                scrollable
+                scrollHeight="70vh"
+                breakpoint="640px"
+                rowHover
+                stripedRows
+                emptyMessage={`No hay registros de mantenimiento para ${type.name}.`}
+              >
+                <Column
+                  field="date"
+                  header="Fecha"
+                  body={dateBodyTemplate}
+                  sortable
+                  headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+                />
+                <Column
+                  field="room.room_number"
+                  header="Habitación"
+                  body={roomBodyTemplate}
+                  sortable
+                  headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+                />
+                <Column
+                  header="Huésped"
+                  body={stayBodyTemplate}
+                  className="hidden sm:table-cell"
+                  headerClassName="hidden sm:table-cell bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+                />
+                <Column
+                  field="category"
+                  header="Categoría"
+                  body={categoryBodyTemplate}
+                  sortable
+                  headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+                />
+                <Column
+                  field="subcategory"
+                  header="Subcategoría"
+                  body={subcategoryBodyTemplate}
+                  sortable
+                  className="hidden sm:table-cell"
+                  headerClassName="hidden sm:table-cell bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+                />
+                <Column
+                  field="employee"
+                  header="Empleado"
+                  body={employeeBodyTemplate}
+                  sortable
+                  className="hidden md:table-cell"
+                  headerClassName="hidden md:table-cell bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+                />
+                <Column
+                  field="observation"
+                  header="Observación"
+                  body={observationBodyTemplate}
+                  className="hidden md:table-cell"
+                  headerClassName="hidden md:table-cell bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
+                />
+              </DataTable>
+            </div>
           </TabPanel>
         ))}
       </TabView>
