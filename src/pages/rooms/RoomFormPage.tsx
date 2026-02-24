@@ -1,10 +1,13 @@
 import { supabase } from "@/config/supabase";
 import { CATEGORIES } from "@/constants";
+import { useBlockUI } from "@/context/BlockUIContext";
+import { useDeleteRoomRate } from "@/hooks/useDeleteRoomRate";
 import { useRoomStatuses } from "@/hooks/useRoomStatuses";
 import { useRooms } from "@/hooks/useRooms";
 import { Room } from "@/types";
 import PageHeader from "@/components/ui/PageHeader";
 import { Button } from "primereact/button";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
@@ -23,6 +26,8 @@ const RoomFormPage: React.FC = () => {
 
   const { upsertRoom } = useRooms();
   const { data: roomStatuses } = useRoomStatuses();
+  const deleteRoomRate = useDeleteRoomRate();
+  const { showBlockUI, hideBlockUI } = useBlockUI();
   const [isLoading, setIsLoading] = useState(isEditMode);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
@@ -116,6 +121,38 @@ const RoomFormPage: React.FC = () => {
     navigate(`/rooms?tab=${tabParam || CATEGORIES[0]}`);
   };
 
+  const confirmRemoveRate = (index: number, personCount: number) => {
+    confirmDialog({
+      message: `¿Está seguro que desea eliminar la tarifa para ${personCount} persona(s)?`,
+      header: "Confirmar eliminación",
+      icon: "pi pi-exclamation-triangle",
+      acceptLabel: "Sí, eliminar",
+      rejectLabel: "Cancelar",
+      acceptIcon: "pi pi-check",
+      rejectIcon: "pi pi-times",
+      acceptClassName: "p-button-danger",
+      accept: async () => {
+        // Si estamos editando una habitación existente, eliminar de Supabase primero
+        if (selectedRoom?.id) {
+          showBlockUI("Eliminando tarifa...");
+          try {
+            await deleteRoomRate.mutateAsync({
+              roomId: selectedRoom.id,
+              personCount,
+            });
+          } catch (error) {
+            hideBlockUI();
+            alert("Error al eliminar la tarifa de la base de datos");
+            return;
+          }
+          hideBlockUI();
+        }
+        // Eliminar del formulario
+        remove(index);
+      },
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center p-12">
@@ -136,6 +173,7 @@ const RoomFormPage: React.FC = () => {
 
   return (
     <div className="animate-fade-in mx-auto flex max-w-4xl flex-col gap-2 pb-12">
+      <ConfirmDialog />
       <PageHeader
         title={getPageTitle()}
         subtitle={getPageSubtitle()}
@@ -259,14 +297,17 @@ const RoomFormPage: React.FC = () => {
               </div>
 
               <div className="divide-y divide-gray-50 bg-white">
-                {fields.map((field, index) => (
+                {[...fields].sort((a, b) => a.person_count - b.person_count).map((field) => {
+                  // Encontrar el índice real en el array original fields
+                  const originalIndex = fields.findIndex((f) => f.id === field.id);
+                  return (
                   <div
                     key={field.id}
                     className="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-4 p-4 transition-colors hover:bg-gray-50"
                   >
                     <div>
                       <Controller
-                        name={`rates.${index}.person_count`}
+                        name={`rates.${originalIndex}.person_count`}
                         control={control}
                         render={({ field }) => (
                           <InputNumber
@@ -288,7 +329,7 @@ const RoomFormPage: React.FC = () => {
 
                     <div className="flex justify-center">
                       <Controller
-                        name={`rates.${index}.rate`}
+                        name={`rates.${originalIndex}.rate`}
                         control={control}
                         render={({ field }) => (
                           <InputNumber
@@ -311,12 +352,17 @@ const RoomFormPage: React.FC = () => {
                       unstyled
                       type="button"
                       icon="pi pi-trash"
-                      className="p-button-text p-button-rounded p-button-danger h-10 w-10 text-white hover:bg-red-50"
-                      onClick={() => remove(index)}
-                      tooltip="Eliminar tarifa"
+                      disabled={fields.length === 1}
+                      className="flex h-10 w-10 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-30"
+                      onClick={() => {
+                        const personCount = fields[originalIndex]?.person_count || 1;
+                        confirmRemoveRate(originalIndex, personCount);
+                      }}
+                      tooltip={fields.length === 1 ? "Debe mantener al menos una tarifa" : "Eliminar tarifa"}
                     />
                   </div>
-                ))}
+                );
+                })}
               </div>
             </div>
             {fields.length === 0 && (
