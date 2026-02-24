@@ -58,7 +58,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
 
   return (
     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-      <div className="flex items-center gap-2 bg-white p-2 rounded-xl border shadow-sm">
+      <div className="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
         <Button
           icon="pi pi-chevron-left"
           onClick={handlePreviousWeek}

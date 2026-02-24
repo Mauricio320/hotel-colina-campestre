@@ -126,7 +126,7 @@ const Layout: React.FC<LayoutProps> = ({ employee, onLogout }) => {
       <div className="flex flex-1">
         {/* Desktop Sidebar */}
 
-        <aside className="hidden lg:flex flex-col w-64 border-r bg-white p-4 gap-2 w-[290px] max-w-full">
+        <aside className="hidden lg:flex flex-col w-64   bg-white p-4 gap-2 w-[290px] max-w-full">
           <div className="flex items-center gap-2 h-16 m-[-1rem] p-2 border-b border-emerald-800 bg-emerald-600 mb-1">
             <img src={wccLogo.href} alt="Logo" className="max-w-full" />
           </div>
@@ -156,6 +156,17 @@ const Layout: React.FC<LayoutProps> = ({ employee, onLogout }) => {
             header: { className: "hidden" },
             content: { className: "p-0" },
           }}
+          header={() => <div className="hidden s">
+                    <div className="relative flex items-center justify-center h-16 px-3 border-b border-emerald-800 bg-emerald-600 mb-1">
+            <img src={wccLogo.href} alt="Logo" className="max-h-full" />
+            <button
+              onClick={() => setVisible(false)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-white/40 hover:bg-white/50 text-white transition-colors"
+            >
+              <i className="pi pi-times text-sm font-bold"></i>
+            </button>
+          </div>
+          </div>}
         >
           <div className="relative flex items-center justify-center h-16 px-3 border-b border-emerald-800 bg-emerald-600 mb-1">
             <img src={wccLogo.href} alt="Logo" className="max-h-full" />
@@ -194,10 +205,11 @@ const Layout: React.FC<LayoutProps> = ({ employee, onLogout }) => {
         </Sidebar>
 
         <div className="w-full h-screen flex flex-col">
-          <header className="bg-white border-b h-16 flex items-center justify-between px-4 sticky top-0 z-50 shadow-sm shrink-0">
+          <header className="bg-white h-16 flex items-center justify-between px-4 sticky top-0 z-50 shadow-sm shrink-0">
             <div className="flex items-center gap-4">
               <Button
                 icon="pi pi-bars"
+                
                 onClick={() => setVisible(true)}
                 className="p-button-text lg:hidden"
               />

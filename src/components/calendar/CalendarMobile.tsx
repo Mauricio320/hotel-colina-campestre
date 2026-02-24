@@ -71,7 +71,7 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
   return (
     <div className="flex flex-col gap-3 mb-[80px]">
       {/* Dashboard de estadísticas del día */}
-      <div className="bg-white rounded-xl border p-3 shadow-sm">
+      <div className="bg-white rounded-xl border p-3 shadow-sm border-[#eeebe4]">
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-bold text-gray-700">
             Resumen del día {dayjs().format("D/M/YYYY")}
@@ -129,12 +129,12 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
       />
 
       {/* Contenedor principal */}
-      <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border shadow-sm overflow-hidden border-[#eeebe4]">
         <div className="overflow-auto max-h-[70vh]">
           <div className="min-w-[600px]">
             {/* Header de días - Fijo en top */}
-            <div className="flex border-b bg-[#eeebe4] sticky top-0 z-20">
-              <div className="w-[85px] p-3 border-r flex items-center justify-center bg-[#eeebe4] sticky left-0 z-30">
+            <div className="flex border-b border-[#eeebe4] bg-[#eeebe4] sticky top-0 z-20">
+              <div className="w-[85px] p-3 border-r border-[#eeebe4] flex items-center justify-center bg-[#eeebe4] sticky left-0 z-30">
                 <span className="text-[10px] font-bold text-gray-400">
                   HAB.
                 </span>
@@ -146,7 +146,7 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                   return (
                     <div
                       key={d.getTime()}
-                      className="flex flex-col items-center flex-1 min-w-[70px] p-2 border-r last:border-r-0"
+                      className="flex flex-col items-center flex-1 min-w-[70px] p-2 border-r last:border-r-0 border-[#eeebe4]"
                     >
                       <span className="text-[10px] font-bold uppercase text-gray-400">
                         {dayjs(d).format("ddd")}
@@ -224,10 +224,10 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                 return (
                   <div
                     key={room.id}
-                    className="flex border-b last:border-b-0 hover:bg-emerald-50/30 transition-colors"
+                    className="flex border-b last:border-b-0 hover:bg-emerald-50/30 transition-colors border-[#eeebe4]"
                   >
                     {/* Lateral con número de habitación - sticky en left y top */}
-                    <div className="w-[85px] p-1 border-r bg-gray-50/70 flex flex-col items-center justify-center gap-1 sticky left-0 z-10">
+                    <div className="w-[85px] p-1 border-r border-[#eeebe4] bg-gray-50/70 flex flex-col items-center justify-center gap-1 sticky left-0 z-10">
                       <span className="text-[11px] font-black text-emerald-800">
                         #{room.room_number}
                         <span className="text-[9px] text-gray-600">
@@ -266,7 +266,7 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                             return (
                               <div
                                 key={d.getTime()}
-                                className={`flex-1 min-w-[70px] border-r last:border-r-0 flex flex-col items-center justify-end pb-1 cursor-pointer ${
+                                className={`flex-1 min-w-17.5 border-[#eeebe4] border-r last:border-r-0 flex flex-col items-center justify-end pb-1 cursor-pointer ${
                                   isToday ? "bg-emerald-50" : ""
                                 }`}
                                 onClick={() =>

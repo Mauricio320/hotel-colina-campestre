@@ -1,6 +1,6 @@
-@import "primereact/resources/themes/lara-light-indigo/theme.css";
+@import "primereact/resources/themes/tailwind-light/theme.css";
 @import "primeicons/primeicons.css";
-@import "tailwindcss";
+
 /* ============ Variables de Colores del Hotel ============ */
 :root {
   /* Colores principales del sistema */
