@@ -59,10 +59,8 @@ const CleaningLogsPage: React.FC = () => {
     const isGeneral = rowData.cleaning_type === "Aseo general";
     return (
       <span
-        className={`font-black uppercase text-[10px] px-2 py-1 rounded-lg ${
-          isGeneral
-            ? "text-blue-600 bg-blue-50"
-            : "text-emerald-600 bg-emerald-50"
+        className={`rounded-lg px-2 py-1 text-[10px] font-black uppercase ${
+          isGeneral ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600"
         }`}
       >
         {rowData.cleaning_type}
@@ -71,11 +69,7 @@ const CleaningLogsPage: React.FC = () => {
   };
 
   const observationBodyTemplate = (rowData: any) => {
-    return (
-      <span className="text-sm text-gray-600">
-        {rowData.observation || "-"}
-      </span>
-    );
+    return <span className="text-sm text-gray-600">{rowData.observation || "-"}</span>;
   };
 
   // Filtrar logs por tipo de alojamiento
@@ -84,26 +78,18 @@ const CleaningLogsPage: React.FC = () => {
       cleaningLogs?.filter(
         (log) =>
           log.room?.accommodation_type_id === accommodationTypeId ||
-          log.room?.accommodation_types?.id === accommodationTypeId,
+          log.room?.accommodation_types?.id === accommodationTypeId
       ) || []
     );
   };
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in">
-      <PageHeader
-        title="Historial de Limpieza"
-        icon="pi-shield"
-        color="blue"
-        variant="simple"
-      />
-      <TabView
-        activeIndex={activeTab}
-        onTabChange={(e) => setActiveTab(e.index)}
-      >
+    <div className="animate-fade-in flex flex-col gap-6">
+      <PageHeader title="Historial de Limpieza" icon="pi-shield" color="blue" variant="simple" />
+      <TabView activeIndex={activeTab} onTabChange={(e) => setActiveTab(e.index)}>
         {accommodationTypesQuery.data?.map((type) => (
           <TabPanel key={type.id} header={type.name}>
-            <div className="bg-white rounded-3xl border border-blue-50 shadow-xl shadow-blue-100/20 overflow-hidden mt-4">
+            <div className="mt-4 overflow-hidden rounded-3xl border border-blue-50 bg-white shadow-xl shadow-blue-100/20">
               <DataTable
                 value={getFilteredLogs(type.id)}
                 className="text-sm"

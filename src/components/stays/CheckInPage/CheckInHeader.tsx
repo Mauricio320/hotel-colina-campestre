@@ -18,40 +18,41 @@ const CheckInHeader: React.FC<CheckInHeaderProps> = ({
 }) => {
   return (
     <div
-      className={`sticky top-[-38px] z-40 bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-8 flex flex-col md:flex-row items-start md:items-center gap-6 animate-fade-in  overflow-hidden `}
+      className={`animate-fade-in sticky top-[-38px] z-40 mb-8 flex flex-col items-start gap-6 overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-sm md:flex-row md:items-center`}
     >
       <div
-        className={`absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 opacity-50 bg-${color}`}
+        className={`absolute top-0 right-0 -mt-16 -mr-16 h-32 w-32 rounded-full opacity-50 bg-${color}`}
       ></div>
 
-      <div className="relative z-10 flex items-center gap-4 w-full">
+      <div className="relative z-10 flex w-full items-center gap-4">
         <Button
+          unstyled
           icon="pi pi-arrow-left"
           onClick={onBack}
-          className="p-button-rounded p-button-text p-button-secondary bg-gray-50 hover:bg-blue-50 text-gray-600 hover:text-blue-600 transition-all duration-300 shadow-sm border border-gray-100"
+          className="p-button-rounded p-button-text p-button-secondary border border-gray-100 bg-gray-50 text-gray-600 shadow-sm transition-all duration-300 hover:bg-blue-50 hover:text-blue-600"
           tooltip="Volver al calendario"
           tooltipOptions={{ position: "bottom" }}
         />
 
-        <div className="flex items-stretch gap-4 flex-1">
+        <div className="flex flex-1 items-stretch gap-4">
           <div
-            className={`w-1.5 bg-${color} rounded-full shadow-sm shadow-blue-100 self-stretch`}
+            className={`w-1.5 bg-${color} self-stretch rounded-full shadow-sm shadow-blue-100`}
           ></div>
           <div className="flex flex-col justify-center gap-1">
-            <h1 className="text-3xl font-black text-gray-900 tracking-tighter leading-none">
+            <h1 className="text-3xl leading-none font-black tracking-tighter text-gray-900">
               {title}
             </h1>
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-1">
-              <div className="flex items-center gap-2 text-gray-500 font-bold">
+            <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+              <div className="flex items-center gap-2 font-bold text-gray-500">
                 <i className={`pi pi-building text-${color}`}></i>
                 <span className="text-sm">{subtitle}</span>
               </div>
 
               {observation && (
-                <div className="flex items-center gap-2 px-3 py-1 bg-amber-50 rounded-full border border-amber-100">
+                <div className="flex items-center gap-2 rounded-full border border-amber-100 bg-amber-50 px-3 py-1">
                   <i className={`pi pi-info-circle text-xs text-${color}`}></i>
-                  <span className="text-amber-700 text-[10px] font-black uppercase tracking-wider">
+                  <span className="text-[10px] font-black tracking-wider text-amber-700 uppercase">
                     {observation}
                   </span>
                 </div>

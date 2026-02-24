@@ -29,13 +29,14 @@ export const RoomActionModal: React.FC<RoomActionModalProps> = ({
   roomStatuses,
   refectCalendar,
 }) => {
-  const [accommodationTypeEnum, setAccommodationTypeEnum] =
-    useState<AccommodationTypeEnum>(AccommodationTypeEnum.HABITACION);
+  const [accommodationTypeEnum, setAccommodationTypeEnum] = useState<AccommodationTypeEnum>(
+    AccommodationTypeEnum.HABITACION
+  );
 
   const modalHeader = (
     <div className="flex items-center gap-2">
-      <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
-        <i className="pi pi-bolt text-emerald-600 text-sm"></i>
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100">
+        <i className="pi pi-bolt text-sm text-emerald-600"></i>
       </div>
       <span className="font-bold text-gray-800">Acciones</span>
     </div>

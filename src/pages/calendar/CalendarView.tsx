@@ -61,10 +61,7 @@ const CalendarView: React.FC = () => {
         variant="simple"
       />
 
-      <TabView
-        activeIndex={activeTab}
-        onTabChange={(e) => setActiveTab(e.index)}
-      >
+      <TabView activeIndex={activeTab} onTabChange={(e) => setActiveTab(e.index)}>
         {accommodationTypesQuery.data?.map((type) => (
           <TabPanel key={type.id} header={type.name}>
             <CalendarGrid

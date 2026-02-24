@@ -1,8 +1,4 @@
-import {
-  getAdminRole,
-  getEmployeeByAuthId,
-  syncUserProfile,
-} from "@/services/auth/employeeApi";
+import { getAdminRole, getEmployeeByAuthId, syncUserProfile } from "@/services/auth/employeeApi";
 import { authQueryKeys } from "@/services/queryKeys/auth.queryKeys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React from "react";
@@ -92,7 +88,7 @@ export const useSessionQuery = () => {
     queryKey: authQueryKeys.session,
     queryFn: async () => {
       const { session } = await import("@/services/auth/authApi").then((m) =>
-        m.getCurrentSession(),
+        m.getCurrentSession()
       );
       return session;
     },

@@ -9,10 +9,7 @@ interface CalendarHeaderProps {
   onStartDateChange: (date: Date) => void;
 }
 
-export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
-  startDate,
-  onStartDateChange,
-}) => {
+export const CalendarHeader: React.FC<CalendarHeaderProps> = ({ startDate, onStartDateChange }) => {
   const overlayRef = useRef<OverlayPanel>(null);
   const endDate = dayjs(startDate).add(6, "day").toDate();
 
@@ -57,22 +54,22 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   };
 
   return (
-    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-      <div className="flex items-center gap-2 bg-white p-2 rounded-xl shadow-sm">
+    <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+      <div className="flex items-center gap-2 rounded-xl bg-white p-2 shadow-sm">
         <Button
+          unstyled
           icon="pi pi-chevron-left"
           onClick={handlePreviousWeek}
           className="p-button-text p-button-sm"
         />
         <div
-          className="px-4 py-2 min-w-[180px] text-center cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
+          className="min-w-[180px] cursor-pointer rounded-lg px-4 py-2 text-center transition-colors hover:bg-gray-50"
           onClick={(e) => overlayRef.current?.toggle(e)}
         >
-          <span className="text-sm font-bold text-gray-700">
-            {formatDateRange()}
-          </span>
+          <span className="text-sm font-bold text-gray-700">{formatDateRange()}</span>
         </div>
         <Button
+          unstyled
           icon="pi pi-chevron-right"
           onClick={handleNextWeek}
           className="p-button-text p-button-sm"
@@ -80,12 +77,7 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
       </div>
 
       <OverlayPanel ref={overlayRef} dismissable>
-        <Calendar
-          value={startDate}
-          onChange={handleDateSelect}
-          inline
-          showWeek
-        />
+        <Calendar value={startDate} onChange={handleDateSelect} inline showWeek />
       </OverlayPanel>
     </div>
   );

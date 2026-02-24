@@ -2,7 +2,7 @@ import { supabase } from "@/config/supabase";
 import { MaintenanceLog, CreateMaintenanceLogDto } from "@/types";
 
 export const createMaintenanceLog = async (
-  dto: CreateMaintenanceLogDto,
+  dto: CreateMaintenanceLogDto
 ): Promise<MaintenanceLog> => {
   const { data, error } = await supabase
     .from("maintenance_logs")
@@ -22,19 +22,19 @@ export const createMaintenanceLog = async (
   return data;
 };
 
-export const fetchMaintenanceLogsByRoom = async (
-  roomId: string,
-): Promise<MaintenanceLog[]> => {
+export const fetchMaintenanceLogsByRoom = async (roomId: string): Promise<MaintenanceLog[]> => {
   const { data, error } = await supabase
     .from("maintenance_logs")
-    .select(`
+    .select(
+      `
       *,
       category:maintenance_categories(*),
       subcategory:maintenance_subcategories(*),
       employee:employees(*),
       room:rooms(*),
       stay:stays(*)
-    `)
+    `
+    )
     .eq("room_id", roomId)
     .order("created_at", { ascending: false });
 
@@ -42,18 +42,18 @@ export const fetchMaintenanceLogsByRoom = async (
   return data || [];
 };
 
-export const fetchMaintenanceLogsByDate = async (
-  date: string,
-): Promise<MaintenanceLog[]> => {
+export const fetchMaintenanceLogsByDate = async (date: string): Promise<MaintenanceLog[]> => {
   const { data, error } = await supabase
     .from("maintenance_logs")
-    .select(`
+    .select(
+      `
       *,
       category:maintenance_categories(*),
       subcategory:maintenance_subcategories(*),
       employee:employees(*),
       room:rooms(*)
-    `)
+    `
+    )
     .eq("date", date)
     .order("created_at", { ascending: false });
 
@@ -64,14 +64,16 @@ export const fetchMaintenanceLogsByDate = async (
 export const fetchAllMaintenanceLogs = async (): Promise<MaintenanceLog[]> => {
   const { data, error } = await supabase
     .from("maintenance_logs")
-    .select(`
+    .select(
+      `
       *,
       category:maintenance_categories(*),
       subcategory:maintenance_subcategories(*),
       employee:employees(*),
       room:rooms(*),
       stay:stays(*, guest:guests!stays_guest_id_fkey(*))
-    `)
+    `
+    )
     .order("created_at", { ascending: false });
 
   if (error) throw error;

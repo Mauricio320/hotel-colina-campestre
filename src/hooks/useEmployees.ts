@@ -49,9 +49,7 @@ export const useEmployeesByRole = (roleName: string) => {
   return useQuery({
     queryKey: ["employees", "role", roleName],
     queryFn: () =>
-      import("@/services/auth/employeeApi").then((m) =>
-        m.getEmployeesByRole(roleName),
-      ),
+      import("@/services/auth/employeeApi").then((m) => m.getEmployeesByRole(roleName)),
     enabled: !!roleName,
   });
 };

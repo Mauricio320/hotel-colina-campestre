@@ -1,8 +1,8 @@
-import { paymentApi, paymentHelpers } from '@/services/payment/paymentApi';
-import { roomHistoryApi } from '@/services/room-history/roomHistoryApi';
-import { supabase } from '@/config/supabase';
-import { Stay, PaymentType } from '@/types';
-import dayjs from 'dayjs';
+import { paymentApi, paymentHelpers } from "@/services/payment/paymentApi";
+import { roomHistoryApi } from "@/services/room-history/roomHistoryApi";
+import { supabase } from "@/config/supabase";
+import { Stay, PaymentType } from "@/types";
+import dayjs from "dayjs";
 
 interface StayPaymentRecordParams {
   stayId: string;
@@ -22,17 +22,18 @@ export const useStayPaymentService = () => {
     const paymentType = paymentHelpers.determinePaymentType(
       params.amount,
       totalPrice,
-      'calendar_payment',
-      checkInDate,
+      "calendar_payment",
+      checkInDate
     );
 
-    const observation = params.customObservation ||
+    const observation =
+      params.customObservation ||
       paymentHelpers.generateObservation(paymentType, params.amount, totalPrice);
 
     await paymentApi.createPayment({
       stay_id: params.stayId,
       payment_method_id: params.paymentMethodId,
-      employee_id: params.employeeId || '',
+      employee_id: params.employeeId || "",
       amount: params.amount,
       payment_type: paymentType,
       observation,
@@ -59,38 +60,48 @@ export const useStayPaymentService = () => {
 
   const getStayDetails = async (stayId: string) => {
     const { data: stay, error: fetchErr } = await supabase
-      .from('stays')
-      .select('*, room:rooms(*)')
-      .eq('id', stayId)
+      .from("stays")
+      .select("*, room:rooms(*)")
+      .eq("id", stayId)
       .single();
 
     if (fetchErr || !stay) {
-      throw new Error('No se pudo encontrar la estancia');
+      throw new Error("No se pudo encontrar la estancia");
     }
 
     return stay;
   };
 
-  const updateStayPaymentStatus = async (stayId: string, newPaidAmount: number, stay: any, isFullyPaid: boolean) => {
-    const todayStr = dayjs().format('YYYY-MM-DD');
-    const newStatus = isFullyPaid && stay.check_in_date <= todayStr ? 'Active' : stay.status;
+  const updateStayPaymentStatus = async (
+    stayId: string,
+    newPaidAmount: number,
+    stay: any,
+    isFullyPaid: boolean
+  ) => {
+    const todayStr = dayjs().format("YYYY-MM-DD");
+    const newStatus = isFullyPaid && stay.check_in_date <= todayStr ? "Active" : stay.status;
 
     const { error: updateStayErr } = await supabase
-      .from('stays')
+      .from("stays")
       .update({
         paid_amount: newPaidAmount,
         status: newStatus,
       })
-      .eq('id', stayId);
+      .eq("id", stayId);
 
     if (updateStayErr) throw updateStayErr;
   };
 
-  const createPaymentHistoryRecord = async (params: StayPaymentRecordParams, paymentType: PaymentType, observation: string, totalPrice: number) => {
+  const createPaymentHistoryRecord = async (
+    params: StayPaymentRecordParams,
+    paymentType: PaymentType,
+    observation: string,
+    totalPrice: number
+  ) => {
     const { data: currentRoomStatus } = await supabase
-      .from('rooms')
-      .select('status_id')
-      .eq('id', params.roomId)
+      .from("rooms")
+      .select("status_id")
+      .eq("id", params.roomId)
       .single();
 
     await roomHistoryApi.createRecord({
@@ -99,10 +110,11 @@ export const useStayPaymentService = () => {
       previous_status_id: currentRoomStatus?.status_id,
       new_status_id: currentRoomStatus?.status_id,
       employee_id: params.employeeId,
-      action_type: paymentType === PaymentType.ABONO_RESERVA
-        ? 'ABONO-RESERVA'
-        : 'PAGO-COMPLETO-RESERVA',
-      observation: observation || `${paymentType}: ${params.amount.toLocaleString()} de ${totalPrice.toLocaleString()}`,
+      action_type:
+        paymentType === PaymentType.ABONO_RESERVA ? "ABONO-RESERVA" : "PAGO-COMPLETO-RESERVA",
+      observation:
+        observation ||
+        `${paymentType}: ${params.amount.toLocaleString()} de ${totalPrice.toLocaleString()}`,
     });
   };
 

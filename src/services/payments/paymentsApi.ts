@@ -1,8 +1,10 @@
 import { supabase } from "@/config/supabase";
 import { Payment } from "@/types";
 
-export interface PaymentWithRelations
-  extends Omit<Payment, "payment_method" | "employee" | "stay"> {
+export interface PaymentWithRelations extends Omit<
+  Payment,
+  "payment_method" | "employee" | "stay"
+> {
   stay: {
     order_number: number;
     guest: {
@@ -25,7 +27,7 @@ export interface PaymentWithRelations
 }
 
 export const fetchPaymentsByCategory = async (
-  categoryId: string,
+  categoryId: string
 ): Promise<PaymentWithRelations[]> => {
   const { data, error } = await supabase
     .from("payments")
@@ -39,7 +41,7 @@ export const fetchPaymentsByCategory = async (
       ),
       payment_method:payment_methods(name),
       employee:employees(first_name, last_name)
-    `,
+    `
     )
     .eq("stay.room.accommodation_type_id", categoryId)
     .order("payment_date", { ascending: false });

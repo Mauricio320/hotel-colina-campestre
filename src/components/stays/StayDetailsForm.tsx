@@ -38,18 +38,18 @@ const StayDetailsForm: React.FC<StayDetailsFormProps> = ({
   const checkOutDate = watch("check_out_date");
 
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-      <div className="flex items-center gap-2 mb-5">
-        <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-          <i className="pi pi-calendar text-blue-600 text-sm"></i>
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="mb-5 flex items-center gap-2">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100">
+          <i className="pi pi-calendar text-sm text-blue-600"></i>
         </div>
         <h3 className="font-bold text-gray-800">{title}</h3>
       </div>
 
-      <div className="bg-[#f5f2eb] rounded-xl p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="rounded-xl bg-[#f5f2eb] p-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">
+            <label className="text-xs font-bold tracking-wide text-gray-600 uppercase">
               Entrada *
             </label>
             <Controller
@@ -69,7 +69,7 @@ const StayDetailsForm: React.FC<StayDetailsFormProps> = ({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">
+            <label className="text-xs font-bold tracking-wide text-gray-600 uppercase">
               Salida *
             </label>
             <Controller
@@ -90,7 +90,7 @@ const StayDetailsForm: React.FC<StayDetailsFormProps> = ({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">
+            <label className="text-xs font-bold tracking-wide text-gray-600 uppercase">
               Huéspedes *
             </label>
             <Controller
@@ -113,7 +113,7 @@ const StayDetailsForm: React.FC<StayDetailsFormProps> = ({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">
+            <label className="text-xs font-bold tracking-wide text-gray-600 uppercase">
               Colchonetas
             </label>
             <Controller
@@ -135,19 +135,19 @@ const StayDetailsForm: React.FC<StayDetailsFormProps> = ({
           </div>
 
           <div className="flex flex-col gap-1.5 md:col-span-2">
-            <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">
+            <label className="text-xs font-bold tracking-wide text-gray-600 uppercase">
               Observación
             </label>
             <InputTextarea
               {...register("observation")}
               placeholder="Agregar observación..."
               rows={2}
-              className="w-full bg-white border-gray-200"
+              className="w-full border-gray-200 bg-white"
             />
           </div>
         </div>
 
-        <div className="flex items-center gap-2 mt-4 pt-3 border-t border-gray-300">
+        <div className="mt-4 flex items-center gap-2 border-t border-gray-300 pt-3">
           <Controller
             name="is_invoice_requested"
             control={control}
@@ -166,15 +166,17 @@ const StayDetailsForm: React.FC<StayDetailsFormProps> = ({
       </div>
 
       {personCount > 0 && checkOutDate && (
-        <div className="flex items-center gap-3 mt-3">
-          <div className="flex items-center gap-1.5 bg-emerald-100 px-2.5 py-1 rounded-full border border-emerald-200">
-            <i className="pi pi-users text-emerald-600 text-xs"></i>
+        <div className="mt-3 flex items-center gap-3">
+          <div className="flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-100 px-2.5 py-1">
+            <i className="pi pi-users text-xs text-emerald-600"></i>
             <span className="text-xs font-semibold text-emerald-700">{personCount} pers.</span>
           </div>
           {extraMattressCount > 0 && (
-            <div className="flex items-center gap-1.5 bg-amber-100 px-2.5 py-1 rounded-full border border-amber-200">
-              <i className="pi pi-circle-off text-amber-600 text-xs"></i>
-              <span className="text-xs font-semibold text-amber-700">{extraMattressCount} colch.</span>
+            <div className="flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-100 px-2.5 py-1">
+              <i className="pi pi-circle-off text-xs text-amber-600"></i>
+              <span className="text-xs font-semibold text-amber-700">
+                {extraMattressCount} colch.
+              </span>
             </div>
           )}
         </div>

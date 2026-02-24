@@ -77,9 +77,9 @@ const CompactGuestForm: React.FC<{
   const fieldPrefix = isPrimary ? "" : `additional_guests.${index}.`;
 
   return (
-    <div className="bg-[#f5f2eb] rounded-xl p-3 border border-gray-200">
-      <div className="flex items-center gap-2 mb-2">
-        <i className="pi pi-user text-gray-500 text-xs"></i>
+    <div className="rounded-xl border border-gray-200 bg-[#f5f2eb] p-3">
+      <div className="mb-2 flex items-center gap-2">
+        <i className="pi pi-user text-xs text-gray-500"></i>
         <span className="text-xs font-semibold text-gray-600">
           {isPrimary ? "Huésped Principal" : `Huésped ${index + 1}`}
         </span>
@@ -91,11 +91,7 @@ const CompactGuestForm: React.FC<{
             name={`${fieldPrefix}doc_type`}
             control={control}
             render={({ field }) => (
-              <Dropdown
-                {...field}
-                options={DocsTypesConst}
-                className="w-full text-sm"
-              />
+              <Dropdown {...field} options={DocsTypesConst} className="w-full text-sm" />
             )}
           />
         </div>
@@ -116,9 +112,10 @@ const CompactGuestForm: React.FC<{
         </div>
         <div className="col-span-2">
           <Button
+            unstyled
             type="button"
             icon={searchState.searching ? "pi pi-spin pi-spinner" : "pi pi-search"}
-            className="p-button-plain bg-white border w-full h-full text-xs"
+            className="p-button-plain h-full w-full border bg-white text-xs"
             onClick={onSearch}
             disabled={searchState.searching || watchDocNumber?.length < 5}
           />
@@ -127,7 +124,7 @@ const CompactGuestForm: React.FC<{
         {searchState.message.type && (
           <div className="col-span-12">
             <div
-              className={`px-2 py-1 rounded text-xs flex items-center gap-1 ${
+              className={`flex items-center gap-1 rounded px-2 py-1 text-xs ${
                 searchState.message.type === "success"
                   ? "bg-emerald-100 text-emerald-700"
                   : "bg-blue-100 text-blue-700"
@@ -236,7 +233,9 @@ export const AllGuestsForm: React.FC<AllGuestsFormProps> = ({
   findGuestByDoc,
 }) => {
   const { showBlockUI, hideBlockUI } = useBlockUI();
-  const [additionalSearchStates, setAdditionalSearchStates] = useState<Record<number, GuestSearchState>>({});
+  const [additionalSearchStates, setAdditionalSearchStates] = useState<
+    Record<number, GuestSearchState>
+  >({});
 
   const getAdditionalSearchState = (index: number): GuestSearchState => {
     return additionalSearchStates[index] || defaultSearchState;
@@ -335,14 +334,12 @@ export const AllGuestsForm: React.FC<AllGuestsFormProps> = ({
   const additionalCount = Math.max(0, personCount - 1);
 
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-      <div className="flex items-center gap-2 mb-5">
-        <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
-          <i className="pi pi-users text-emerald-600 text-sm"></i>
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="mb-5 flex items-center gap-2">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100">
+          <i className="pi pi-users text-sm text-emerald-600"></i>
         </div>
-        <h3 className="font-bold text-gray-800">
-          Datos de los Huéspedes ({personCount})
-        </h3>
+        <h3 className="font-bold text-gray-800">Datos de los Huéspedes ({personCount})</h3>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -364,10 +361,7 @@ export const AllGuestsForm: React.FC<AllGuestsFormProps> = ({
         {additionalCount > 0 && (
           <Accordion className="compact-guests-accordion">
             {Array.from({ length: additionalCount }).map((_, index) => (
-              <AccordionTab
-                key={`guest-${index}`}
-                header={`Huésped ${index + 2}`}
-              >
+              <AccordionTab key={`guest-${index}`} header={`Huésped ${index + 2}`}>
                 <CompactGuestForm
                   index={index}
                   isPrimary={false}

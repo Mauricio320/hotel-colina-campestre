@@ -26,9 +26,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
   const getStayEndingOnDate = (room: Room, date: Date) => {
     const dateStr = dayjs(date).format("YYYY-MM-DD");
     return room.stays?.find(
-      (stay) =>
-        stay.check_out_date === dateStr &&
-        stay.origin_was_reservation === false,
+      (stay) => stay.check_out_date === dateStr && stay.origin_was_reservation === false
     );
   };
 
@@ -44,8 +42,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
         stay.active === true &&
         (today.isSame(checkInDate, "day") ||
           today.isSame(checkOutDate, "day") ||
-          (today.isAfter(checkInDate, "day") &&
-            today.isBefore(checkOutDate, "day")))
+          (today.isAfter(checkInDate, "day") && today.isBefore(checkOutDate, "day")))
       );
     });
 
@@ -53,7 +50,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
       (stay) =>
         stay.origin_was_reservation === true &&
         stay.active === true &&
-        stay.check_in_date === todayStr,
+        stay.check_in_date === todayStr
     );
 
     return hasCheckoutToday || hasCheckInToday;
@@ -61,32 +58,30 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
 
   const totalStaysToday = todayRooms.length;
   const cleanedRooms = todayRooms.filter(
-    (room) => room.cleaning_log && room.cleaning_log.length > 0,
+    (room) => room.cleaning_log && room.cleaning_log.length > 0
   ).length;
   const pendingCleaning = totalStaysToday - cleanedRooms;
 
   return (
     <div className="flex flex-col gap-2">
       {/* Dashboard de estadísticas del día */}
-      <div className="bg-white rounded-xl border p-3 shadow-sm">
+      <div className="rounded-xl border bg-white p-3 shadow-sm">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-gray-700">
             Resumen del día {dayjs().format("D/M/YYYY")}
           </h3>
           <div className="flex gap-4">
-            <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
-              <i className="pi pi-users text-blue-600 text-sm"></i>
+            <div className="flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-1.5">
+              <i className="pi pi-users text-sm text-blue-600"></i>
               <span className="text-xs font-semibold text-blue-700">
                 Estadías: {totalStaysToday}
               </span>
             </div>
-            <div className="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-lg border border-green-100">
-              <i className="pi pi-check-circle text-green-600 text-sm"></i>
-              <span className="text-xs font-semibold text-green-700">
-                Limpias: {cleanedRooms}
-              </span>
+            <div className="flex items-center gap-2 rounded-lg border border-green-100 bg-green-50 px-3 py-1.5">
+              <i className="pi pi-check-circle text-sm text-green-600"></i>
+              <span className="text-xs font-semibold text-green-700">Limpias: {cleanedRooms}</span>
             </div>
-            <div className="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100">
+            <div className="flex items-center gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3 py-1.5">
               <span className="text-sm">🧹⚠️</span>
               <span className="text-xs font-semibold text-amber-700">
                 Pendientes: {pendingCleaning}
@@ -96,27 +91,26 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
         </div>
       </div>
 
-      <div className="overflow-auto bg-white rounded-xl border bg-[#eeebe4] max-h-[75vh]">
-        <table className="w-full border-separate border-spacing-0 min-w-[800px]">
+      <div className="max-h-[75vh] overflow-auto rounded-xl border bg-[#eeebe4] bg-white">
+        <table className="w-full min-w-[800px] border-separate border-spacing-0">
           <thead>
             <tr className="border">
-              <th className="p-2 text-center font-bold text-gray-400 w-[60px] min-w-[60px] border-r border-b sticky top-0 left-0 z-20 bg-[#eeebe4] ">
+              <th className="sticky top-0 left-0 z-20 w-[60px] min-w-[60px] border-r border-b bg-[#eeebe4] p-2 text-center font-bold text-gray-400">
                 <span className="text-[10px]">HAB.</span>
               </th>
               {days.map((d) => (
                 <th
                   key={d.getTime()}
-                  className="p-4 text-center border-r border-b last:border-r-0 sticky top-0 z-10 bg-[#eeebe4]  min-w-[120px] w-[120px]"
+                  className="sticky top-0 z-10 w-[120px] min-w-[120px] border-r border-b bg-[#eeebe4] p-4 text-center last:border-r-0"
                 >
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-bold uppercase text-gray-400">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase">
                       {dayjs(d).format("ddd")}
                     </span>
                     <span
                       className={`text-lg font-black ${
-                        dayjs(d).format("YYYY-MM-DD") ===
-                        dayjs(new Date()).format("YYYY-MM-DD")
-                          ? "text-emerald-600 font-bold text-[25px]"
+                        dayjs(d).format("YYYY-MM-DD") === dayjs(new Date()).format("YYYY-MM-DD")
+                          ? "text-[25px] font-bold text-emerald-600"
                           : "text-gray-700"
                       }`}
                     >
@@ -131,9 +125,9 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
             {(data ?? []).map((room) => (
               <tr
                 key={room.id}
-                className="border-b last:border-b-0 hover:bg-emerald-50/30 transition-colors"
+                className="border-b transition-colors last:border-b-0 hover:bg-emerald-50/30"
               >
-                <td className="p-1 border-r border-b bg-[#eeebe4] w-[60px] max-w-[60px] sticky left-0 z-5 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
+                <td className="sticky left-0 z-5 w-[60px] max-w-[60px] border-r border-b bg-[#eeebe4] p-1 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">
                   <div className="flex flex-col items-center leading-tight">
                     <div className="flex items-center gap-1">
                       <span className="text-[11px] font-black text-emerald-800">
@@ -155,8 +149,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                   const todayStr = dayjs().format("YYYY-MM-DD");
                   const isToday = dateStr === todayStr;
                   let statusColor =
-                    stay?.room_statuses?.color ||
-                    STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color;
+                    stay?.room_statuses?.color || STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color;
                   let cellContent = null;
                   let isCheckOutDay = false;
 
@@ -170,12 +163,12 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                     }
 
                     cellContent = (
-                      <div className="leading-none gap-0.5 w-full">
-                        <div className="text-[9px] font-black opacity-90 uppercase">
+                      <div className="w-full gap-0.5 leading-none">
+                        <div className="text-[9px] font-black uppercase opacity-90">
                           {/* {isFullRental ? "🏠" : "🛏️"} */}u
                         </div>
 
-                        <div className="text-[12px] flex justify-center mt-1  items-center font-bold">
+                        <div className="mt-1 flex items-center justify-center text-[12px] font-bold">
                           #{stay.order_number} - {stay.guest?.first_name}
                         </div>
                       </div>
@@ -187,9 +180,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                     statusColor = STATUS_MAP[room.status.name]?.color;
 
                     cellContent = (
-                      <span className="text-[8px] font-bold uppercase">
-                        {room.status.name}
-                      </span>
+                      <span className="text-[8px] font-bold uppercase">{room.status.name}</span>
                     );
                   }
 
@@ -197,7 +188,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                   const cleaningIndicator = isToday ? (
                     room.cleaning_log && room.cleaning_log.length > 0 ? (
                       <i
-                        className="pi pi-check-circle text-[12px] absolute top-1 right-2 text-green-200 font-bold"
+                        className="pi pi-check-circle absolute top-1 right-2 text-[12px] font-bold text-green-200"
                         title="Limpieza realizada"
                         style={{ WebkitTextStroke: "1px black" }}
                       ></i>
@@ -206,8 +197,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                         className="absolute top-1 right-2 text-[10px]"
                         title="Pendiente por limpieza"
                       >
-                        🧹{" "}
-                        {todayRooms.find((t) => t.id === room.id) ? "⚠️" : ""}
+                        🧹 {todayRooms.find((t) => t.id === room.id) ? "⚠️" : ""}
                       </span>
                     )
                   ) : null;
@@ -216,24 +206,20 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                   const hasNextStay = isCheckOutDay && nextStay;
 
                   const isCheckInDay = stay && dateStr === stay.check_in_date;
-                  const previousStay = isCheckInDay
-                    ? getStayEndingOnDate(room, d)
-                    : null;
+                  const previousStay = isCheckInDay ? getStayEndingOnDate(room, d) : null;
                   const hasPreviousStay = isCheckInDay && previousStay;
 
                   return (
                     <td
                       key={d.getTime()}
-                      className="p-1 border-r border-b last:border-r-0 bg-[#faf8f5] w-[120px] min-w-[120px]"
+                      className="w-[120px] min-w-[120px] border-r border-b bg-[#faf8f5] p-1 last:border-r-0"
                     >
                       {isCheckOutDay ? (
-                        <div className="h-10 w-full rounded-lg flex overflow-hidden">
+                        <div className="flex h-10 w-full overflow-hidden rounded-lg">
                           {/* Mitad izquierda: ocupada - abre modal de estadía */}
                           <div
-                            className={`${statusColor} text-white font-bold h-full w-1/2 flex items-center  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; justify-center rounded-l-lg rounded-r-none border-r-2 border-white/50 cursor-pointer hover:opacity-90 relative`}
-                            onClick={() =>
-                              handleRoomClick(room, d, stay || null)
-                            }
+                            className={`${statusColor} box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px; relative flex h-full w-1/2 cursor-pointer items-center justify-center rounded-l-lg rounded-r-none border-r-2 border-white/50 font-bold text-white hover:opacity-90`}
+                            onClick={() => handleRoomClick(room, d, stay || null)}
                           >
                             {cellContent}
                             {cleaningIndicator}
@@ -241,25 +227,22 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                           {/* Mitad derecha: siguiente estancia si existe, sino disponible */}
                           {hasNextStay ? (
                             <div
-                              className={`${nextStay?.room_statuses?.color || statusColor} h-full w-1/2 flex items-center justify-center rounded-r-lg rounded-l-none cursor-pointer hover:opacity-90 relative`}
-                              onClick={() =>
-                                handleRoomClick(room, d, nextStay || null)
-                              }
+                              className={`${nextStay?.room_statuses?.color || statusColor} relative flex h-full w-1/2 cursor-pointer items-center justify-center rounded-l-none rounded-r-lg hover:opacity-90`}
+                              onClick={() => handleRoomClick(room, d, nextStay || null)}
                             >
-                              <div className="flex flex-col font-bold items-center leading-none gap-0.5 w-full">
-                                <span className="text-[9px] font-black opacity-90 uppercase">
+                              <div className="flex w-full flex-col items-center gap-0.5 leading-none font-bold">
+                                <span className="text-[9px] font-black uppercase opacity-90">
                                   {!nextStay?.room_id ? "🏠" : "🛏️"}
                                 </span>
-                                <span className="text-[12px] mt-1 flex items-center">
-                                  #{nextStay?.order_number} -{" "}
-                                  {nextStay?.guest?.first_name}
+                                <span className="mt-1 flex items-center text-[12px]">
+                                  #{nextStay?.order_number} - {nextStay?.guest?.first_name}
                                 </span>
                               </div>
                               {cleaningIndicator}
                             </div>
                           ) : (
                             <div
-                              className={`${STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color} h-full w-1/2 flex items-center justify-center rounded-r-lg rounded-l-none cursor-pointer hover:opacity-90 relative`}
+                              className={`${STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color} relative flex h-full w-1/2 cursor-pointer items-center justify-center rounded-l-none rounded-r-lg hover:opacity-90`}
                               onClick={() => handleRoomClick(room, d, null)}
                             >
                               {cleaningIndicator}
@@ -267,29 +250,26 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                           )}
                         </div>
                       ) : isCheckInDay ? (
-                        <div className="h-10 w-full rounded-lg flex overflow-hidden">
+                        <div className="flex h-10 w-full overflow-hidden rounded-lg">
                           {/* Mitad izquierda: estadía anterior si existe, sino disponible */}
                           {hasPreviousStay ? (
                             <div
-                              className={`${statusColor} text-white font-bold h-full w-1/2 flex items-center justify-center rounded-l-lg rounded-r-none border-r-2 border-white/50 cursor-pointer hover:opacity-90 relative`}
-                              onClick={() =>
-                                handleRoomClick(room, d, previousStay)
-                              }
+                              className={`${statusColor} relative flex h-full w-1/2 cursor-pointer items-center justify-center rounded-l-lg rounded-r-none border-r-2 border-white/50 font-bold text-white hover:opacity-90`}
+                              onClick={() => handleRoomClick(room, d, previousStay)}
                             >
-                              <div className="flex flex-col items-center leading-none gap-0.5 w-full">
-                                <span className="text-[9px] font-black opacity-90 uppercase">
+                              <div className="flex w-full flex-col items-center gap-0.5 leading-none">
+                                <span className="text-[9px] font-black uppercase opacity-90">
                                   {!previousStay?.room_id ? "🏠" : "🛏️"}
                                 </span>
-                                <span className="text-[12px] mt-1 flex items-center">
-                                  #{previousStay?.order_number} -{" "}
-                                  {previousStay?.guest?.first_name}
+                                <span className="mt-1 flex items-center text-[12px]">
+                                  #{previousStay?.order_number} - {previousStay?.guest?.first_name}
                                 </span>
                               </div>
                               {cleaningIndicator}
                             </div>
                           ) : (
                             <div
-                              className={`${STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color} h-full w-1/2 flex items-center justify-center rounded-l-lg rounded-r-none border-r-2 border-white/50 cursor-pointer hover:opacity-90 relative`}
+                              className={`${STATUS_MAP[RoomStatusEnum.DISPONIBLE]?.color} relative flex h-full w-1/2 cursor-pointer items-center justify-center rounded-l-lg rounded-r-none border-r-2 border-white/50 hover:opacity-90`}
                               onClick={() => handleRoomClick(room, d, null)}
                             >
                               {cleaningIndicator}
@@ -297,7 +277,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                           )}
                           {/* Mitad derecha: nueva estadía (check-in) */}
                           <div
-                            className={`${statusColor} h-full w-1/2 flex items-center justify-center rounded-r-lg rounded-l-none cursor-pointer hover:opacity-90 relative`}
+                            className={`${statusColor} relative flex h-full w-1/2 cursor-pointer items-center justify-center rounded-l-none rounded-r-lg hover:opacity-90`}
                             onClick={() => handleRoomClick(room, d, stay)}
                           >
                             {cellContent}
@@ -306,7 +286,7 @@ export const CalendarTable: React.FC<CalendarTableProps> = ({
                         </div>
                       ) : (
                         <div
-                          className={`h-10 text-gray-700 w-full rounded-lg flex items-center justify-center text-white font-bold transition-all ${statusColor}  overflow-hidden cursor-pointer relative`}
+                          className={`flex h-10 w-full items-center justify-center rounded-lg font-bold text-gray-700 text-white transition-all ${statusColor} relative cursor-pointer overflow-hidden`}
                           onClick={() => handleRoomClick(room, d, stay)}
                         >
                           {cellContent}

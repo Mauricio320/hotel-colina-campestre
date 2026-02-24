@@ -19,15 +19,13 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [invoiceStartDate, setInvoiceStartDate] = useState<Date | null>(null);
   const [invoiceEndDate, setInvoiceEndDate] = useState<Date | null>(null);
-  const [occupancyStartDate, setOccupancyStartDate] = useState<Date | null>(
-    null,
-  );
+  const [occupancyStartDate, setOccupancyStartDate] = useState<Date | null>(null);
   const [occupancyEndDate, setOccupancyEndDate] = useState<Date | null>(null);
   const { fetchAll: accommodationTypesQuery } = useAccommodationTypes();
 
   if (userRole !== Role.Admin) {
     return (
-      <div className="p-4 bg-red-50 text-red-700 rounded border border-red-200 font-bold">
+      <div className="rounded border border-red-200 bg-red-50 p-4 font-bold text-red-700">
         Acceso denegado. Solo administradores.
       </div>
     );
@@ -104,7 +102,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
           accommodation_type_id,
           guest:guests!stays_guest_id_fkey(first_name, last_name, doc_number),
           room:rooms(room_number, accommodation_type_id)
-        `,
+        `
         )
         .gte("check_in_date", formattedStartDate)
         .lte("check_in_date", formattedEndDate)
@@ -139,14 +137,11 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
           typeStays.length > 0
             ? typeStays.map((stay: any) => {
                 const paymentStatus = getPaymentStatus(stay);
-                const pending =
-                  (stay.total_price || 0) - (stay.paid_amount || 0);
+                const pending = (stay.total_price || 0) - (stay.paid_amount || 0);
 
                 return {
                   "N° Orden": stay.order_number,
-                  Huésped: stay.guest
-                    ? `${stay.guest.first_name} ${stay.guest.last_name}`
-                    : "N/A",
+                  Huésped: stay.guest ? `${stay.guest.first_name} ${stay.guest.last_name}` : "N/A",
                   Documento: stay.guest?.doc_number || "N/A",
                   "Fecha Check-in": stay.check_in_date,
                   "Fecha Check-out": stay.check_out_date,
@@ -209,7 +204,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
       const { data } = await supabase
         .from("room_history")
         .select(
-          "timestamp, action_type, observation, room:rooms(room_number), employee:employees(first_name, last_name)",
+          "timestamp, action_type, observation, room:rooms(room_number), employee:employees(first_name, last_name)"
         )
         .order("timestamp", { ascending: false });
 
@@ -223,10 +218,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
             : "Sistema",
           Observacion: h.observation || "",
         }));
-        exportToExcel(
-          formatted,
-          `historial_completo_${dayjs().format("YYYY-MM-DD")}`,
-        );
+        exportToExcel(formatted, `historial_completo_${dayjs().format("YYYY-MM-DD")}`);
       }
     } catch (error) {
       console.error("Error generating history report:", error);
@@ -254,7 +246,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
           employee:employees(first_name, last_name),
           stay:stays(order_number, check_in_date, check_out_date),
           guest:guests!payments_guest_id_fkey(first_name, last_name, doc_number)
-        `,
+        `
         )
         .gte("payment_date", startDate.toISOString())
         .lte("payment_date", endDate.toISOString())
@@ -293,10 +285,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
             : "Sistema",
           Observación: p.observation || "",
         }));
-        exportToExcel(
-          formatted,
-          `reporte_pagos_detallado_${today.format("YYYY-MM")}`,
-        );
+        exportToExcel(formatted, `reporte_pagos_detallado_${today.format("YYYY-MM")}`);
       } else {
         alert("No hay pagos registrados en el mes actual");
       }
@@ -342,7 +331,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
           payment_method:payment_methods(name),
           employee:employees(first_name, last_name),
           stay:stays!inner(order_number, check_in_date, check_out_date, room:rooms(room_number, accommodation_type_id), guest:guests!stays_guest_id_fkey(first_name, last_name, doc_number))
-        `,
+        `
         )
         .gte("payment_date", formattedStartDate)
         .lte("payment_date", formattedEndDate)
@@ -351,9 +340,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
       if (paymentsError) throw paymentsError;
 
       if (!paymentsData || paymentsData.length === 0) {
-        alert(
-          "No hay datos de pagos para exportar en el rango de fechas seleccionado",
-        );
+        alert("No hay datos de pagos para exportar en el rango de fechas seleccionado");
         setLoading(false);
         return;
       }
@@ -365,8 +352,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
       for (const accType of accommodationTypes) {
         // Filtrar pagos por tipo de acomodación (a través de la habitación de la estadía)
         const typePayments = paymentsData.filter((payment: any) => {
-          const roomAccTypeId = (payment.stay as any)?.room
-            ?.accommodation_type_id;
+          const roomAccTypeId = (payment.stay as any)?.room?.accommodation_type_id;
           return roomAccTypeId === accType.id;
         });
 
@@ -396,9 +382,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
                     ? `${(payment.stay as any).guest.first_name} ${(payment.stay as any).guest.last_name}`
                     : "N/A",
                   Documento: (payment.stay as any)?.guest?.doc_number || "N/A",
-                  "Fecha Pago": dayjs(payment.payment_date).format(
-                    "DD/MM/YYYY",
-                  ),
+                  "Fecha Pago": dayjs(payment.payment_date).format("DD/MM/YYYY"),
                   Método: (payment.payment_method as any)?.name || "N/A",
                   Monto: Number(payment.amount),
                   "Tipo Pago": getPaymentTypeDisplay(payment.payment_type),
@@ -481,7 +465,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
           check_out_date,
           room:rooms(room_number, accommodation_type_id),
           stay_guests(guest_id)
-        `,
+        `
         )
         .gte("check_in_date", formattedStartDate)
         .lte("check_in_date", formattedEndDate)
@@ -513,10 +497,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
 
         for (const stay of typeStays) {
           const roomNumber = (stay.room as any)?.room_number || "N/A";
-          const nights = dayjs(stay.check_out_date).diff(
-            dayjs(stay.check_in_date),
-            "day",
-          );
+          const nights = dayjs(stay.check_out_date).diff(dayjs(stay.check_in_date), "day");
           const guestCount = (stay.stay_guests as any[])?.length || 1;
 
           if (roomStats.has(roomNumber)) {
@@ -567,9 +548,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
       });
 
       if (!hasData) {
-        alert(
-          "No hay datos de ocupación para exportar en el rango de fechas seleccionado",
-        );
+        alert("No hay datos de ocupación para exportar en el rango de fechas seleccionado");
         setLoading(false);
         return;
       }
@@ -588,32 +567,26 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-indigo-100 rounded-2xl text-indigo-600 shadow-sm">
+          <div className="rounded-2xl bg-indigo-100 p-3 text-indigo-600 shadow-sm">
             <i className="pi pi-chart-bar text-xl"></i>
           </div>
-          <h2 className="text-3xl font-black text-gray-800 tracking-tighter">
-            Módulo de Reportes
-          </h2>
+          <h2 className="text-3xl font-black tracking-tighter text-gray-800">Módulo de Reportes</h2>
         </div>
-        {loading && (
-          <ProgressSpinner style={{ width: "30px", height: "30px" }} />
-        )}
+        {loading && <ProgressSpinner style={{ width: "30px", height: "30px" }} />}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card
           title="Reporte Facturas Habitaciones"
-          className="shadow-sm border-t-4 border-emerald-500"
+          className="border-t-4 border-emerald-500 shadow-sm"
         >
-          <p className="text-gray-600 mb-4">
-            Genera un archivo Excel con una hoja por cada tipo de acomodación.
-            Incluye información de huéspedes, montos, abonos y estado de pago.
+          <p className="mb-4 text-gray-600">
+            Genera un archivo Excel con una hoja por cada tipo de acomodación. Incluye información
+            de huéspedes, montos, abonos y estado de pago.
           </p>
-          <div className="flex flex-col gap-3 mb-4">
+          <div className="mb-4 flex flex-col gap-3">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-gray-600">
-                Fecha Inicio
-              </label>
+              <label className="text-xs font-bold text-gray-600">Fecha Inicio</label>
               <Calendar
                 value={startDate}
                 onChange={(e) => setStartDate(e.value as Date)}
@@ -624,9 +597,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-gray-600">
-                Fecha Fin
-              </label>
+              <label className="text-xs font-bold text-gray-600">Fecha Fin</label>
               <Calendar
                 value={endDate}
                 onChange={(e) => setEndDate(e.value as Date)}
@@ -638,9 +609,10 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
             </div>
           </div>
           <Button
+            unstyled
             label="Descargar Excel de Pagos"
             icon="pi pi-file-excel"
-            className="p-button-success w-full font-bold p-3"
+            className="p-button-success w-full p-3 font-bold"
             onClick={handleRoomPaymentsReport}
             disabled={loading}
           />
@@ -648,17 +620,15 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
 
         <Card
           title="Reporte de Facturas por Categoría"
-          className="shadow-sm border-t-4 border-yellow-500"
+          className="border-t-4 border-yellow-500 shadow-sm"
         >
-          <p className="text-gray-600 mb-4">
-            Genera un archivo Excel con una hoja por cada tipo de acomodación.
-            Muestra los pagos registrados con método, tipo y empleado.
+          <p className="mb-4 text-gray-600">
+            Genera un archivo Excel con una hoja por cada tipo de acomodación. Muestra los pagos
+            registrados con método, tipo y empleado.
           </p>
-          <div className="flex flex-col gap-3 mb-4">
+          <div className="mb-4 flex flex-col gap-3">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-gray-600">
-                Fecha Inicio
-              </label>
+              <label className="text-xs font-bold text-gray-600">Fecha Inicio</label>
               <Calendar
                 value={invoiceStartDate}
                 onChange={(e) => setInvoiceStartDate(e.value as Date)}
@@ -669,9 +639,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-gray-600">
-                Fecha Fin
-              </label>
+              <label className="text-xs font-bold text-gray-600">Fecha Fin</label>
               <Calendar
                 value={invoiceEndDate}
                 onChange={(e) => setInvoiceEndDate(e.value as Date)}
@@ -683,9 +651,10 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
             </div>
           </div>
           <Button
+            unstyled
             label="Descargar Excel de Facturas"
             icon="pi pi-file-pdf"
-            className="p-button-warning w-full font-bold p-3"
+            className="p-button-warning w-full p-3 font-bold"
             onClick={handlePaymentsInvoiceReport}
             disabled={loading}
           />
@@ -693,17 +662,15 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
 
         <Card
           title="Reporte de Ocupación por Habitación"
-          className="shadow-sm border-t-4 border-purple-500"
+          className="border-t-4 border-purple-500 shadow-sm"
         >
-          <p className="text-gray-600 mb-4">
-            Genera un archivo Excel con una hoja por cada tipo de acomodación.
-            Muestra el total de noches ocupadas y huéspedes por habitación.
+          <p className="mb-4 text-gray-600">
+            Genera un archivo Excel con una hoja por cada tipo de acomodación. Muestra el total de
+            noches ocupadas y huéspedes por habitación.
           </p>
-          <div className="flex flex-col gap-3 mb-4">
+          <div className="mb-4 flex flex-col gap-3">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-gray-600">
-                Fecha Inicio
-              </label>
+              <label className="text-xs font-bold text-gray-600">Fecha Inicio</label>
               <Calendar
                 value={occupancyStartDate}
                 onChange={(e) => setOccupancyStartDate(e.value as Date)}
@@ -714,9 +681,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-gray-600">
-                Fecha Fin
-              </label>
+              <label className="text-xs font-bold text-gray-600">Fecha Fin</label>
               <Calendar
                 value={occupancyEndDate}
                 onChange={(e) => setOccupancyEndDate(e.value as Date)}
@@ -728,9 +693,10 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
             </div>
           </div>
           <Button
+            unstyled
             label="Descargar Excel de Ocupación"
             icon="pi pi-file-excel"
-            className="p-button-help w-full font-bold p-3 bg-purple-500 text-white"
+            className="p-button-help w-full bg-purple-500 p-3 font-bold text-white"
             onClick={handleOccupancyReport}
             disabled={loading}
           />

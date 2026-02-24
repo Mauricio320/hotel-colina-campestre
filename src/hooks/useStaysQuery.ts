@@ -42,7 +42,7 @@ export const useStayById = (stayId: string | undefined) => {
       const { data, error } = await supabase
         .from("stays")
         .select(
-          "*, guest:guests!stays_guest_id_fkey(*), room:rooms(*), accommodation_type:accommodation_types(*)",
+          "*, guest:guests!stays_guest_id_fkey(*), room:rooms(*), accommodation_type:accommodation_types(*)"
         )
         .eq("id", stayId)
         .single();

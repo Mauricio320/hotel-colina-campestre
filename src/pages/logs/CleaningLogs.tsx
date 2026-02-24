@@ -27,9 +27,7 @@ const CleaningLogs: React.FC = () => {
 
   const [selectedRoomId, setSelectedRoomId] = useState<string>("");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
-  const [selectedCleaningType, setSelectedCleaningType] = useState<
-    CleaningType | ""
-  >("");
+  const [selectedCleaningType, setSelectedCleaningType] = useState<CleaningType | "">("");
   const [observation, setObservation] = useState<string>("");
 
   const rooms = roomsQuery.data || [];
@@ -57,8 +55,7 @@ const CleaningLogs: React.FC = () => {
     }
   };
 
-  const isFormValid =
-    selectedRoomId && selectedEmployeeId && selectedCleaningType;
+  const isFormValid = selectedRoomId && selectedEmployeeId && selectedCleaningType;
 
   return (
     <div className="flex flex-col gap-6">
@@ -72,11 +69,9 @@ const CleaningLogs: React.FC = () => {
           content: { className: "p-4" },
         }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-black text-gray-500 uppercase">
-              Habitación
-            </label>
+            <label className="text-xs font-black text-gray-500 uppercase">Habitación</label>
             <Dropdown
               value={selectedRoomId}
               onChange={(e) => setSelectedRoomId(e.value)}
@@ -93,9 +88,7 @@ const CleaningLogs: React.FC = () => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-black text-gray-500 uppercase">
-              Tipo de Limpieza
-            </label>
+            <label className="text-xs font-black text-gray-500 uppercase">Tipo de Limpieza</label>
             <Dropdown
               value={selectedCleaningType}
               onChange={(e) => setSelectedCleaningType(e.value)}
@@ -127,9 +120,7 @@ const CleaningLogs: React.FC = () => {
           </div>
 
           <div className="flex flex-col gap-2 md:col-span-2 lg:col-span-1">
-            <label className="text-xs font-black text-gray-500 uppercase">
-              Observación
-            </label>
+            <label className="text-xs font-black text-gray-500 uppercase">Observación</label>
             <InputTextarea
               value={observation}
               onChange={(e) => setObservation(e.target.value)}
@@ -142,9 +133,10 @@ const CleaningLogs: React.FC = () => {
 
         <div className="mt-4 flex justify-end">
           <Button
+            unstyled
             label="Guardar Registro"
             icon="pi pi-check-circle"
-            className="bg-emerald-600 hover:bg-emerald-700 border-none text-white px-6 py-3 text-base font-black rounded-xl shadow-lg"
+            className="rounded-xl border-none bg-emerald-600 px-6 py-3 text-base font-black text-white shadow-lg hover:bg-emerald-700"
             onClick={handleSubmit}
             disabled={!isFormValid || createCleaningLog.isPending}
             loading={createCleaningLog.isPending}
@@ -190,9 +182,7 @@ const CleaningLogs: React.FC = () => {
             <Column
               header="Encargado"
               body={(row) =>
-                row.employee
-                  ? `${row.employee.first_name} ${row.employee.last_name}`
-                  : "-"
+                row.employee ? `${row.employee.first_name} ${row.employee.last_name}` : "-"
               }
               sortable
             />

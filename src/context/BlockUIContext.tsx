@@ -9,9 +9,7 @@ interface BlockUIContextType {
 
 const BlockUIContext = createContext<BlockUIContextType | undefined>(undefined);
 
-export const BlockUIProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const BlockUIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [message, setMessage] = useState<string | undefined>(undefined);
 

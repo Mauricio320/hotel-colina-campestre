@@ -11,7 +11,7 @@ const GlobalBlockUI: React.FC<GlobalBlockUIProps> = ({ visible, message }) => {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm transition-all duration-200">
-      <div className="bg-white p-6 rounded-2xl shadow-2xl flex flex-col items-center gap-4 animate-fade-in max-w-sm mx-4">
+      <div className="animate-fade-in mx-4 flex max-w-sm flex-col items-center gap-4 rounded-2xl bg-white p-6 shadow-2xl">
         <ProgressSpinner
           style={{ width: "50px", height: "50px" }}
           strokeWidth="4"
@@ -19,9 +19,7 @@ const GlobalBlockUI: React.FC<GlobalBlockUIProps> = ({ visible, message }) => {
           animationDuration=".5s"
         />
         {message && (
-          <p className="text-gray-700 font-bold text-center text-lg animate-pulse">
-            {message}
-          </p>
+          <p className="animate-pulse text-center text-lg font-bold text-gray-700">{message}</p>
         )}
       </div>
     </div>

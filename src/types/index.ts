@@ -224,7 +224,7 @@ export interface CleaningLog {
   room_id: string;
   stay_id?: string;
   employee_id: string;
-  cleaning_type: 'Aseo parcial' | 'Aseo general';
+  cleaning_type: "Aseo parcial" | "Aseo general";
   date: string;
   observation?: string;
   created_at: string;
@@ -233,11 +233,11 @@ export interface CleaningLog {
   employee?: Employee;
 }
 
-export type CleaningType = 'Aseo parcial' | 'Aseo general';
+export type CleaningType = "Aseo parcial" | "Aseo general";
 
 export interface MaintenanceCategory {
   id: string;
-  name: 'General' | 'Electricidad' | 'Agua' | 'Aire acondicionado';
+  name: "General" | "Electricidad" | "Agua" | "Aire acondicionado";
   icon?: string;
   color?: string;
   is_active: boolean;

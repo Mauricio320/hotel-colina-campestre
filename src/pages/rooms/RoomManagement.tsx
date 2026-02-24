@@ -53,9 +53,7 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
   };
 
   const openMaintenanceHistory = (room: Room) => {
-    navigate(
-      `/rooms/maintenance-history/${room.id}?tab=${CATEGORIES[activeTab]}`,
-    );
+    navigate(`/rooms/maintenance-history/${room.id}?tab=${CATEGORIES[activeTab]}`);
   };
 
   const formatRates = (rates: RoomRate[]): string => {
@@ -88,36 +86,37 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
     );
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in">
+    <div className="animate-fade-in flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-emerald-100 rounded-2xl text-emerald-600 shadow-sm">
+          <div className="rounded-2xl bg-emerald-100 p-3 text-emerald-600 shadow-sm">
             <i className="pi pi-building text-xl"></i>
           </div>
-          <h2 className="text-xl sm:text-3xl font-black text-gray-800 tracking-tighter">
+          <h2 className="text-xl font-black tracking-tighter text-gray-800 sm:text-3xl">
             Gestión de Habitaciones
           </h2>
         </div>
         {isAdmin && (
           <div className="flex flex-wrap items-center gap-2">
             <Button
+              unstyled
               label="Actualizar Tarifas"
               icon="pi pi-money-bill"
-              className="bg-amber-500 text-white border-none rounded-xl font-bold shadow-sm hover:bg-amber-600 transition-all py-2 px-3 text-sm flex-1 sm:flex-none"
+              className="flex-1 rounded-xl border-none bg-amber-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-amber-600 sm:flex-none"
               onClick={() => setShowBulkRateModal(true)}
             />
             <Button
+              unstyled
               label="Historial Tarifas"
               icon="pi pi-history"
-              className="bg-gray-500 text-white border-none rounded-xl font-bold shadow-sm hover:bg-gray-600 transition-all py-2 px-3 text-sm flex-1 sm:flex-none"
-              onClick={() =>
-                navigate(`/rooms/rate-history?tab=${CATEGORIES[activeTab]}`)
-              }
+              className="flex-1 rounded-xl border-none bg-gray-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-gray-600 sm:flex-none"
+              onClick={() => navigate(`/rooms/rate-history?tab=${CATEGORIES[activeTab]}`)}
             />
             <Button
+              unstyled
               label="Nueva Habitación"
               icon="pi pi-plus"
-              className="bg-emerald-600 text-white border-none rounded-xl font-bold shadow-sm hover:bg-emerald-700 transition-all py-2 px-3 text-sm w-full sm:w-auto"
+              className="w-full rounded-xl border-none bg-emerald-600 px-3 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-700 sm:w-auto"
               onClick={openCreate}
             />
           </div>
@@ -127,7 +126,7 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
       <TabView activeIndex={activeTab} onTabChange={handleTabChange}>
         {CATEGORIES.map((cat) => (
           <TabPanel key={cat} header={cat}>
-            <div className="bg-white rounded-3xl border border-emerald-50 shadow-xl shadow-emerald-100/20 overflow-hidden mt-4">
+            <div className="mt-4 overflow-hidden rounded-3xl border border-emerald-50 bg-white shadow-xl shadow-emerald-100/20">
               <DataTable
                 value={
                   roomsQuery.data?.sort((a, b) => {
@@ -153,18 +152,14 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                   sortable
                   headerClassName="bg-gray-50/50 text-emerald-400 font-bold uppercase text-[10px] tracking-widest p-4"
                   body={(row) => (
-                    <span className="font-black text-emerald-600 text-lg">
-                      {row.room_number}
-                    </span>
+                    <span className="text-lg font-black text-emerald-600">{row.room_number}</span>
                   )}
                 />
                 <Column
                   header="Capacidad"
                   headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
                   body={(rowData) => (
-                    <div className="font-bold text-gray-700">
-                      {getRoomCapacity(rowData)}
-                    </div>
+                    <div className="font-bold text-gray-700">{getRoomCapacity(rowData)}</div>
                   )}
                 />
                 <Column
@@ -174,7 +169,7 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                   headerClassName="hidden sm:table-cell bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
                   body={(rowData) => (
                     <div
-                      className="text-xs text-gray-500 italic font-medium"
+                      className="text-xs font-medium text-gray-500 italic"
                       title={rowData.observation || "Sin descripción"}
                     >
                       {rowData.observation ? (
@@ -193,7 +188,7 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
                   header="Tarifas"
                   headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
                   body={(rowData) => (
-                    <div className="font-black text-emerald-700 text-sm">
+                    <div className="text-sm font-black text-emerald-700">
                       {formatRates(rowData.rates || [])}
                     </div>
                   )}
@@ -252,10 +247,7 @@ const RoomManagement: React.FC<RoomManagementProps> = ({ userRole }) => {
         ))}
       </TabView>
 
-      <BulkRateUpdateModal
-        visible={showBulkRateModal}
-        onHide={() => setShowBulkRateModal(false)}
-      />
+      <BulkRateUpdateModal visible={showBulkRateModal} onHide={() => setShowBulkRateModal(false)} />
     </div>
   );
 };

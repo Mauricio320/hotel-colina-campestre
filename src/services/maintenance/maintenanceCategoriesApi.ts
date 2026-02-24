@@ -13,7 +13,7 @@ export const fetchMaintenanceCategories = async (): Promise<MaintenanceCategory[
 };
 
 export const fetchMaintenanceSubcategoriesByCategory = async (
-  categoryId: string,
+  categoryId: string
 ): Promise<MaintenanceSubcategory[]> => {
   const { data, error } = await supabase
     .from("maintenance_subcategories")

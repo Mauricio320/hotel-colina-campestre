@@ -9,15 +9,7 @@ export const setupGlobalLocale = () => {
   // Configurar locale para PrimeReact
   addLocale("es", {
     firstDayOfWeek: 1,
-    dayNames: [
-      "domingo",
-      "lunes",
-      "martes",
-      "miércoles",
-      "jueves",
-      "viernes",
-      "sábado",
-    ],
+    dayNames: ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"],
     dayNamesShort: ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"],
     dayNamesMin: ["D", "L", "M", "X", "J", "V", "S"],
     today: "Hoy",

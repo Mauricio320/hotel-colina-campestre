@@ -8,9 +8,4 @@ export const STATUS_MAP: Record<string, { label: string; color: string }> = {
   Mantenimiento: { label: "Mantenimiento", color: "bg-gray-400" },
 };
 
-export const DOC_TYPES = [
-  "Cédula de Ciudadanía",
-  "Cédula de Extranjería",
-  "Pasaporte",
-  "NIT",
-];
+export const DOC_TYPES = ["Cédula de Ciudadanía", "Cédula de Extranjería", "Pasaporte", "NIT"];

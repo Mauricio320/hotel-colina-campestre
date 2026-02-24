@@ -32,19 +32,13 @@ const RoomPayments: React.FC = () => {
 
   const calculatePending = (row: any) => {
     const stayPayments = payments[row.id] || [];
-    const totalPaid = stayPayments.reduce(
-      (sum, payment) => sum + Number(payment.amount),
-      0,
-    );
+    const totalPaid = stayPayments.reduce((sum, payment) => sum + Number(payment.amount), 0);
     return (row.total_price || 0) - totalPaid;
   };
 
   const getTotalPaidFromPayments = (row: any) => {
     const stayPayments = payments[row.id] || [];
-    return stayPayments.reduce(
-      (sum, payment) => sum + Number(payment.amount),
-      0,
-    );
+    return stayPayments.reduce((sum, payment) => sum + Number(payment.amount), 0);
   };
 
   const getPaymentTypeDisplay = (type: string) => {
@@ -63,22 +57,19 @@ const RoomPayments: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in">
+    <div className="animate-fade-in flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-green-100 rounded-2xl text-green-600 shadow-sm">
+          <div className="rounded-2xl bg-green-100 p-3 text-green-600 shadow-sm">
             <i className="pi pi-money-bill text-xl"></i>
           </div>
-          <h2 className="text-xl sm:text-3xl font-black text-gray-800 tracking-tighter">
+          <h2 className="text-xl font-black tracking-tighter text-gray-800 sm:text-3xl">
             Pagos Habitaciones
           </h2>
         </div>
       </div>
 
-      <TabView
-        activeIndex={activeTab}
-        onTabChange={(e) => setActiveTab(e.index)}
-      >
+      <TabView activeIndex={activeTab} onTabChange={(e) => setActiveTab(e.index)}>
         {accommodationTypesQuery?.data?.map((cat, index) => (
           <TabPanel key={cat.id} header={cat.name}>
             <RoomPaymentsTable

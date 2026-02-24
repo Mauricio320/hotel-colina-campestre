@@ -1,15 +1,14 @@
-
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { guestApi } from '@/services/guests/guestApi';
-import { Guest } from '@/types';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { guestApi } from "@/services/guests/guestApi";
+import { Guest } from "@/types";
 
 export const useGuests = () => {
   const queryClient = useQueryClient();
 
   const guestsQuery = useQuery({
-    queryKey: ['guests'],
+    queryKey: ["guests"],
     queryFn: () => guestApi.fetchAll(),
-    staleTime: 1000 * 60 * 5
+    staleTime: 1000 * 60 * 5,
   });
 
   const findGuestByDoc = async (docNumber: string) => {
@@ -21,7 +20,7 @@ export const useGuests = () => {
       return guestApi.upsert(guestData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['guests'] });
+      queryClient.invalidateQueries({ queryKey: ["guests"] });
     },
   });
 

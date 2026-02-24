@@ -40,16 +40,17 @@ const AvailabilityConflictModal: React.FC<AvailabilityConflictModalProps> = ({
 
   const header = (
     <div className="flex items-center gap-3">
-      <i className="pi pi-exclamation-triangle text-red-500 text-2xl"></i>
-      <span className="text-xl font-black text-gray-800 tracking-tight">
+      <i className="pi pi-exclamation-triangle text-2xl text-red-500"></i>
+      <span className="text-xl font-black tracking-tight text-gray-800">
         Conflicto de Disponibilidad
       </span>
     </div>
   );
 
   const footer = (
-    <div className="flex justify-end mt-4">
+    <div className="mt-4 flex justify-end">
       <Button
+        unstyled
         label="Entendido"
         icon="pi pi-check"
         onClick={onHide}
@@ -68,14 +69,12 @@ const AvailabilityConflictModal: React.FC<AvailabilityConflictModalProps> = ({
       breakpoints={{ "960px": "75vw", "641px": "90vw" }}
     >
       <div className="flex flex-col gap-4">
-        <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-700">
-          <p className="font-bold flex items-center gap-2">
+        <div className="rounded-2xl border border-red-100 bg-red-50 p-4 text-red-700">
+          <p className="flex items-center gap-2 font-bold">
             <i className="pi pi-info-circle"></i>
             {currentMessage.title}
           </p>
-          <p className="text-sm mt-1">
-            {currentMessage.description}
-          </p>
+          <p className="mt-1 text-sm">{currentMessage.description}</p>
         </div>
 
         <DataTable
@@ -108,27 +107,19 @@ const AvailabilityConflictModal: React.FC<AvailabilityConflictModalProps> = ({
               const firstName = row.guest?.first_name || row.guests?.first_name;
               const lastName = row.guest?.last_name || row.guests?.last_name;
               const fullName = [firstName, lastName].filter(Boolean).join(" ");
-              return (
-                <span className="text-gray-700">
-                  {fullName || "Sin huésped"}
-                </span>
-              );
+              return <span className="text-gray-700">{fullName || "Sin huésped"}</span>;
             }}
           />
 
           <Column
             header="Entrada"
             field="check_in_date"
-            body={(row) =>
-              new Date(row.check_in_date + "T12:00:00").toLocaleDateString()
-            }
+            body={(row) => new Date(row.check_in_date + "T12:00:00").toLocaleDateString()}
           />
           <Column
             header="Salida"
             field="check_out_date"
-            body={(row) =>
-              new Date(row.check_out_date + "T12:00:00").toLocaleDateString()
-            }
+            body={(row) => new Date(row.check_out_date + "T12:00:00").toLocaleDateString()}
           />
         </DataTable>
       </div>

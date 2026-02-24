@@ -3,11 +3,7 @@ import { Room } from "@/types";
 import dayjs from "dayjs";
 
 export const roomsApi = {
-  updateStatus: async (
-    roomId: string,
-    statusId: string,
-    selectedDate: Date,
-  ): Promise<Room> => {
+  updateStatus: async (roomId: string, statusId: string, selectedDate: Date): Promise<Room> => {
     const { data, error } = await supabase
       .from("rooms")
       .update({
@@ -30,7 +26,7 @@ export const fetchRoomById = async (id: string): Promise<Room> => {
       `
         *,
         room_statuses(name, color)
-      `,
+      `
     )
     .eq("id", id)
     .eq("is_active", true)

@@ -29,8 +29,8 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({
       draggable={false}
     >
       <div className="flex flex-col gap-4">
-        <div className="text-center mb-4">
-          <div className="text-2xl mb-2">🏨</div>
+        <div className="mb-4 text-center">
+          <div className="mb-2 text-2xl">🏨</div>
           <h3 className="text-lg font-bold text-gray-800">
             {selectedRoom?.room_number} - Check-in
           </h3>
@@ -39,16 +39,18 @@ export const CheckInModal: React.FC<CheckInModalProps> = ({
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="mt-4 grid grid-cols-2 gap-4">
           <Button
+            unstyled
             label="Cancelar"
             className="p-button-text p-button-plain font-bold"
             onClick={onHide}
           />
           <Button
+            unstyled
             label="Confirmar Check-in"
             icon="pi pi-check"
-            className="bg-emerald-600 border-none text-white font-black py-4 rounded-xl shadow-lg"
+            className="rounded-xl border-none bg-emerald-600 py-4 font-black text-white shadow-lg"
             onClick={onConfirmCheckIn}
           />
         </div>

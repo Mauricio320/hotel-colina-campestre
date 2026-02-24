@@ -6,9 +6,7 @@ export const useRoomRateHistory = (roomId?: string | null) => {
   return useQuery<RoomRateHistory[]>({
     queryKey: ["room-rate-history", roomId],
     queryFn: () =>
-      roomId
-        ? roomRateHistoryApi.fetchByRoomId(roomId)
-        : roomRateHistoryApi.fetchAll(),
+      roomId ? roomRateHistoryApi.fetchByRoomId(roomId) : roomRateHistoryApi.fetchAll(),
     staleTime: 1000 * 60 * 5,
   });
 };

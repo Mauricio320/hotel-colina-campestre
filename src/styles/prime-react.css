@@ -96,9 +96,7 @@
 }
 
 /* Botones secundarios (outlined) */
-.p-button.p-button-outlined:not(.p-button-success):not(.p-button-warning):not(
-    .p-button-danger
-  ) {
+.p-button.p-button-outlined:not(.p-button-success):not(.p-button-warning):not(.p-button-danger) {
   background-color: transparent !important;
   border-color: var(--hotel-border) !important;
   color: var(--hotel-text-secondary) !important;
@@ -108,9 +106,9 @@
   transition: all 0.2s ease !important;
 }
 
-.p-button.p-button-outlined:hover:not(.p-button-success):not(
-    .p-button-warning
-  ):not(.p-button-danger) {
+.p-button.p-button-outlined:hover:not(.p-button-success):not(.p-button-warning):not(
+    .p-button-danger
+  ) {
   background-color: var(--hotel-background) !important;
   border-color: var(--hotel-text-primary) !important;
   color: var(--hotel-text-primary) !important;
@@ -305,10 +303,7 @@ html {
   align-items: center;
   box-shadow: none !important;
 }
-.p-tabview
-  .p-tabview-nav
-  li:not(.p-highlight):not(.p-disabled):hover
-  .p-tabview-nav-link {
+.p-tabview .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link {
   background: #e2e8f0;
   color: #475569;
 }

@@ -1,9 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/config/supabase';
-import { roomHistoryApi } from '@/services/room-history/roomHistoryApi';
-import { roomsApi } from '@/services/rooms/roomsApi';
-import { Stay } from '@/types';
-import dayjs from 'dayjs';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/config/supabase";
+import { roomHistoryApi } from "@/services/room-history/roomHistoryApi";
+import { roomsApi } from "@/services/rooms/roomsApi";
+import { Stay } from "@/types";
+import dayjs from "dayjs";
 
 interface CreateStayParams {
   room_id: string;
@@ -22,7 +22,7 @@ interface StayPaymentParams {
     amount: number;
     payment_method_id: string;
     employee_id?: string;
-    context?: 'reservation' | 'checkin_direct';
+    context?: "reservation" | "checkin_direct";
     customObservation?: string;
   };
 }
@@ -33,26 +33,26 @@ export const useStaysCreation = () => {
   const createStay = useMutation({
     mutationFn: async (stayData: CreateStayParams) => {
       const { data: availableStatus } = await supabase
-        .from('room_statuses')
-        .select('id')
-        .eq('name', 'Disponible')
+        .from("room_statuses")
+        .select("id")
+        .eq("name", "Disponible")
         .single();
 
-      const todayStr = dayjs().format('YYYY-MM-DD');
+      const todayStr = dayjs().format("YYYY-MM-DD");
 
       const { data: currentStay } = await supabase
-        .from('stays')
-        .select('id')
-        .eq('room_id', stayData.room_id)
-        .eq('status', 'Active')
-        .lte('check_in_date', todayStr)
-        .gte('check_out_date', todayStr)
+        .from("stays")
+        .select("id")
+        .eq("room_id", stayData.room_id)
+        .eq("status", "Active")
+        .lte("check_in_date", todayStr)
+        .gte("check_out_date", todayStr)
         .maybeSingle();
 
       const { data: roomBefore } = await supabase
-        .from('rooms')
-        .select('status_id')
-        .eq('id', stayData.room_id)
+        .from("rooms")
+        .select("status_id")
+        .eq("id", stayData.room_id)
         .single();
 
       const effectivePrevStatusId = currentStay
@@ -60,22 +60,23 @@ export const useStaysCreation = () => {
         : availableStatus?.id || roomBefore?.status_id;
 
       const { data: stay, error: stayError } = await supabase
-        .from('stays')
+        .from("stays")
         .insert(stayData)
         .select()
         .single();
 
       if (stayError) throw stayError;
 
-      const statusName = stayData.status === 'Active' ? 'Ocupado' : 'Reservado';
+      const statusName = stayData.status === "Active" ? "Ocupado" : "Reservado";
       const { data: statusData } = await supabase
-        .from('room_statuses')
-        .select('id')
-        .eq('name', statusName)
+        .from("room_statuses")
+        .select("id")
+        .eq("name", statusName)
         .single();
 
       if (statusData) {
-        const shouldUpdateRoom = stayData.check_in_date === todayStr || stayData.status === 'Active';
+        const shouldUpdateRoom =
+          stayData.check_in_date === todayStr || stayData.status === "Active";
 
         if (shouldUpdateRoom) {
           await roomsApi.updateStatus(stayData.room_id, statusData.id, new Date());
@@ -87,7 +88,7 @@ export const useStaysCreation = () => {
           previous_status_id: effectivePrevStatusId,
           new_status_id: statusData.id,
           employee_id: stayData.employee_id,
-          action_type: stayData.status === 'Active' ? 'CHECK-IN' : 'RESERVA',
+          action_type: stayData.status === "Active" ? "CHECK-IN" : "RESERVA",
           observation: stayData.observation || `Registro de ${statusName} desde Calendario`,
         });
       }
@@ -95,9 +96,9 @@ export const useStaysCreation = () => {
       return stay;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['stays'] });
-      queryClient.invalidateQueries({ queryKey: ['rooms'] });
-      queryClient.invalidateQueries({ queryKey: ['room_history'] });
+      queryClient.invalidateQueries({ queryKey: ["stays"] });
+      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      queryClient.invalidateQueries({ queryKey: ["room_history"] });
     },
   });
 

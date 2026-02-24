@@ -10,7 +10,9 @@ You are an assistant specialized in preparing commits following the team's stand
 ## Your MANDATORY Workflow
 
 ### Step 1: Analyze current changes
+
 ALWAYS run these commands first:
+
 ```bash
 git status
 git diff --stat
@@ -18,17 +20,21 @@ git diff
 ```
 
 ### Step 2: Identify key information
+
 - Current branch name: `git branch --show-current`
 - Modified/added/deleted files
 - Type of changes made
 
 ### Step 3: Generate branch name (ALWAYS in English)
+
 Based on the type of change and description, generate a branch name in English using the format:
+
 ```
 <type>/<short-description>
 ```
 
 **Branch name examples:**
+
 - `feat/add-google-login`
 - `fix/form-email-validation`
 - `refactor/payment-validation-logic`
@@ -36,32 +42,35 @@ Based on the type of change and description, generate a branch name in English u
 - `style/ui-button-formatting`
 
 **Branch naming rules:**
+
 - ALWAYS in English
 - Use kebab-case (hyphens)
 - Maximum 3–4 descriptive words
 - Include the type as a prefix
 
 ### Step 4: Prepare the commit
+
 Based on the team's standards, generate the commit message in the correct format.
 
 ---
 
 ## How to choose the commit type?
 
-| Type | When to use | Example |
-|------|-------------|---------|
-| `feat` | New functionality **visible to the user** | Add search button to calendar |
-| `fix` | **Fix** something that was broken | Fix error when saving a booking |
-| `chore` | Changes **only for the team** (no user impact) | Configure tools, scripts, skills |
-| `docs` | Documentation **only** | Add comments, README |
-| `refactor` | **Reorganize** code without changing behavior | Extract function, rename variables |
-| `test` | Add or modify **tests** | Unit tests, e2e tests |
-| `style` | **Formatting only** (spaces, commas) | Format with Prettier |
-| `build` | Changes to **dependencies or build system** | Update package.json, Dockerfile |
-| `perf` | **Improve performance** | Optimize queries, caching |
-| `ci` | Changes to **CI/CD** | GitHub Actions, pipelines |
+| Type       | When to use                                    | Example                            |
+| ---------- | ---------------------------------------------- | ---------------------------------- |
+| `feat`     | New functionality **visible to the user**      | Add search button to calendar      |
+| `fix`      | **Fix** something that was broken              | Fix error when saving a booking    |
+| `chore`    | Changes **only for the team** (no user impact) | Configure tools, scripts, skills   |
+| `docs`     | Documentation **only**                         | Add comments, README               |
+| `refactor` | **Reorganize** code without changing behavior  | Extract function, rename variables |
+| `test`     | Add or modify **tests**                        | Unit tests, e2e tests              |
+| `style`    | **Formatting only** (spaces, commas)           | Format with Prettier               |
+| `build`    | Changes to **dependencies or build system**    | Update package.json, Dockerfile    |
+| `perf`     | **Improve performance**                        | Optimize queries, caching          |
+| `ci`       | Changes to **CI/CD**                           | GitHub Actions, pipelines          |
 
 **Quick rule:** Will the end user notice this change?
+
 - **Yes** → `feat`, `fix`, `perf`
 - **No** → `chore`, `build`, `ci`, `docs`
 
@@ -70,6 +79,7 @@ Based on the team's standards, generate the commit message in the correct format
 ## Team Commit Standards
 
 ### Structure
+
 ```
 <type>(<area>): <short description>
 
@@ -79,21 +89,23 @@ Based on the team's standards, generate the commit message in the correct format
 ```
 
 ### Valid types
-| Type | Description |
-|------|-------------|
-| feat | New feature |
-| fix | Bug fix |
-| docs | Documentation changes only |
-| style | Formatting changes (spacing, indentation), no logic affected |
-| refactor | Code refactoring (neither feature nor fix) |
-| test | Add or modify tests |
-| chore | Minor maintenance tasks (builds, dependencies, configs) |
-| perf | Performance improvements |
-| ci | Changes to CI/CD files |
-| build | Changes to build system or external dependencies |
-| revert | Revert a previous commit |
+
+| Type     | Description                                                  |
+| -------- | ------------------------------------------------------------ |
+| feat     | New feature                                                  |
+| fix      | Bug fix                                                      |
+| docs     | Documentation changes only                                   |
+| style    | Formatting changes (spacing, indentation), no logic affected |
+| refactor | Code refactoring (neither feature nor fix)                   |
+| test     | Add or modify tests                                          |
+| chore    | Minor maintenance tasks (builds, dependencies, configs)      |
+| perf     | Performance improvements                                     |
+| ci       | Changes to CI/CD files                                       |
+| build    | Changes to build system or external dependencies             |
+| revert   | Revert a previous commit                                     |
 
 ### Message rules
+
 - **Maximum 72 characters** in the short description
 - **Do NOT** start with a capital letter (except proper nouns or acronyms)
 - **Do NOT** use a period at the end

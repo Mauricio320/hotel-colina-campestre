@@ -47,7 +47,7 @@ const MaintenanceLogsPage: React.FC = () => {
   const categoryBodyTemplate = (rowData: any) => {
     return (
       <div className="flex flex-col">
-        <span className="font-black text-amber-600 uppercase text-[10px] bg-amber-50 px-2 py-1 rounded-lg">
+        <span className="rounded-lg bg-amber-50 px-2 py-1 text-[10px] font-black text-amber-600 uppercase">
           {rowData.category?.name}
         </span>
       </div>
@@ -55,11 +55,7 @@ const MaintenanceLogsPage: React.FC = () => {
   };
 
   const subcategoryBodyTemplate = (rowData: any) => {
-    return (
-      <span className="text-sm text-gray-600">
-        {rowData.subcategory?.name || "-"}
-      </span>
-    );
+    return <span className="text-sm text-gray-600">{rowData.subcategory?.name || "-"}</span>;
   };
 
   const stayBodyTemplate = (rowData: any) => {
@@ -74,11 +70,7 @@ const MaintenanceLogsPage: React.FC = () => {
   };
 
   const observationBodyTemplate = (rowData: any) => {
-    return (
-      <span className="text-sm text-gray-600">
-        {rowData.observation || "-"}
-      </span>
-    );
+    return <span className="text-sm text-gray-600">{rowData.observation || "-"}</span>;
   };
 
   // Filtrar logs por tipo de alojamiento
@@ -87,13 +79,13 @@ const MaintenanceLogsPage: React.FC = () => {
       maintenanceLogs?.filter(
         (log) =>
           log.room?.accommodation_type_id === accommodationTypeId ||
-          log.room?.accommodation_types?.id === accommodationTypeId,
+          log.room?.accommodation_types?.id === accommodationTypeId
       ) || []
     );
   };
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in">
+    <div className="animate-fade-in flex flex-col gap-6">
       <PageHeader
         title="Historial de Mantenimiento"
         icon="pi-wrench"
@@ -101,13 +93,10 @@ const MaintenanceLogsPage: React.FC = () => {
         variant="simple"
       />
 
-      <TabView
-        activeIndex={activeTab}
-        onTabChange={(e) => setActiveTab(e.index)}
-      >
+      <TabView activeIndex={activeTab} onTabChange={(e) => setActiveTab(e.index)}>
         {accommodationTypesQuery.data?.map((type) => (
           <TabPanel key={type.id} header={type.name}>
-            <div className="bg-white rounded-3xl border border-amber-50 shadow-xl shadow-amber-100/20 overflow-hidden mt-4">
+            <div className="mt-4 overflow-hidden rounded-3xl border border-amber-50 bg-white shadow-xl shadow-amber-100/20">
               <DataTable
                 value={getFilteredLogs(type.id)}
                 className="text-sm"
