@@ -11,9 +11,7 @@ export interface RoomRateHistoryInsert {
 
 export const roomRateHistoryApi = {
   create: async (historyData: RoomRateHistoryInsert[]): Promise<void> => {
-    const { error } = await supabase
-      .from("room_rate_history")
-      .insert(historyData);
+    const { error } = await supabase.from("room_rate_history").insert(historyData);
 
     if (error) throw new Error(error.message);
   },

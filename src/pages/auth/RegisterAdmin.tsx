@@ -64,7 +64,7 @@ const RegisterAdmin: React.FC = () => {
           navigate("/");
         } else {
           alert(
-            "¡Registro exitoso! Aunque la confirmación esté desactivada en tus ajustes, si no puedes entrar, verifica si Supabase envió un correo de confirmación por defecto.",
+            "¡Registro exitoso! Aunque la confirmación esté desactivada en tus ajustes, si no puedes entrar, verifica si Supabase envió un correo de confirmación por defecto."
           );
           navigate("/login");
         }
@@ -77,7 +77,7 @@ const RegisterAdmin: React.FC = () => {
       // Hemos actualizado el trigger para que no sea fatal (EXCEPTION WHEN OTHERS THEN RETURN new).
       if (err.message?.includes("Database error saving new user")) {
         setErrorMsg(
-          "Error interno del servidor al crear el perfil. Es posible que el usuario se haya creado en la lista de Autenticación pero el perfil de Empleado falló. Intenta iniciar sesión.",
+          "Error interno del servidor al crear el perfil. Es posible que el usuario se haya creado en la lista de Autenticación pero el perfil de Empleado falló. Intenta iniciar sesión."
         );
       } else {
         setErrorMsg(err.message || "Error inesperado durante el registro.");
@@ -88,40 +88,29 @@ const RegisterAdmin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-emerald-900 p-4 py-12">
-      <Card className="w-full max-w-2xl shadow-2xl border-t-4 border-emerald-600">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-black text-gray-800 tracking-tight">
+    <div className="flex min-h-screen items-center justify-center bg-emerald-900 p-4 py-12">
+      <Card className="w-full max-w-2xl border-t-4 border-emerald-600 shadow-2xl">
+        <div className="mb-8 text-center">
+          <h2 className="text-3xl font-black tracking-tight text-gray-800">
             Registro de Administrador
           </h2>
-          <p className="text-gray-500 font-medium">
-            Crea una nueva cuenta administrativa
-          </p>
+          <p className="font-medium text-gray-500">Crea una nueva cuenta administrativa</p>
         </div>
 
         {errorMsg && (
           <div className="mb-6">
-            <Message
-              className="w-full justify-start p-3"
-              severity="error"
-              text={errorMsg}
-            />
-            <div className="mt-2 p-3 bg-emerald-50 text-emerald-800 text-xs rounded border border-emerald-200">
+            <Message className="w-full justify-start p-3" severity="error" text={errorMsg} />
+            <div className="mt-2 rounded border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
               <i className="pi pi-info-circle mr-1"></i>
-              Si ves un error de base de datos persistente, asegúrate de haber
-              ejecutado el script SQL en el editor de Supabase.
+              Si ves un error de base de datos persistente, asegúrate de haber ejecutado el script
+              SQL en el editor de Supabase.
             </div>
           </div>
         )}
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="grid grid-cols-1 md:grid-cols-2 gap-5"
-        >
+        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-bold text-gray-700">
-              Tipo Documento
-            </label>
+            <label className="text-sm font-bold text-gray-700">Tipo Documento</label>
             <Controller
               name="doc_type"
               control={control}
@@ -138,25 +127,19 @@ const RegisterAdmin: React.FC = () => {
               )}
             />
             {errors.doc_type && (
-              <small className="p-error">
-                {errors.doc_type.message as string}
-              </small>
+              <small className="p-error">{errors.doc_type.message as string}</small>
             )}
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-bold text-gray-700">
-              Número Documento
-            </label>
+            <label className="text-sm font-bold text-gray-700">Número Documento</label>
             <InputText
               {...register("doc_number", { required: "Campo requerido" })}
               className={`w-full ${errors.doc_number ? "p-invalid" : ""}`}
               placeholder="Ej: 10203040"
             />
             {errors.doc_number && (
-              <small className="p-error">
-                {errors.doc_number.message as string}
-              </small>
+              <small className="p-error">{errors.doc_number.message as string}</small>
             )}
           </div>
 
@@ -167,9 +150,7 @@ const RegisterAdmin: React.FC = () => {
               className={`w-full ${errors.first_name ? "p-invalid" : ""}`}
             />
             {errors.first_name && (
-              <small className="p-error">
-                {errors.first_name.message as string}
-              </small>
+              <small className="p-error">{errors.first_name.message as string}</small>
             )}
           </div>
 
@@ -180,16 +161,12 @@ const RegisterAdmin: React.FC = () => {
               className={`w-full ${errors.last_name ? "p-invalid" : ""}`}
             />
             {errors.last_name && (
-              <small className="p-error">
-                {errors.last_name.message as string}
-              </small>
+              <small className="p-error">{errors.last_name.message as string}</small>
             )}
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-bold text-gray-700">
-              Correo Electrónico
-            </label>
+            <label className="text-sm font-bold text-gray-700">Correo Electrónico</label>
             <InputText
               {...register("email", {
                 required: "Campo requerido",
@@ -198,26 +175,16 @@ const RegisterAdmin: React.FC = () => {
               className={`w-full ${errors.email ? "p-invalid" : ""}`}
               placeholder="admin@hotel.com"
             />
-            {errors.email && (
-              <small className="p-error">
-                {errors.email.message as string}
-              </small>
-            )}
+            {errors.email && <small className="p-error">{errors.email.message as string}</small>}
           </div>
 
           <div className="flex flex-col gap-1">
             <label className="text-sm font-bold text-gray-700">Teléfono</label>
-            <InputText
-              {...register("phone")}
-              className="w-full"
-              placeholder="300 123 4567"
-            />
+            <InputText {...register("phone")} className="w-full" placeholder="300 123 4567" />
           </div>
 
           <div className="flex flex-col gap-1 md:col-span-2">
-            <label className="text-sm font-bold text-gray-700">
-              Contraseña
-            </label>
+            <label className="text-sm font-bold text-gray-700">Contraseña</label>
             <Controller
               name="password"
               control={control}
@@ -238,28 +205,22 @@ const RegisterAdmin: React.FC = () => {
               )}
             />
             {errors.password && (
-              <small className="p-error">
-                {errors.password.message as string}
-              </small>
+              <small className="p-error">{errors.password.message as string}</small>
             )}
           </div>
 
-          <div className="md:col-span-2 flex flex-col gap-4 mt-6">
+          <div className="mt-6 flex flex-col gap-4 md:col-span-2">
             <Button
+              unstyled
               type="submit"
               label="Crear Cuenta de Administrador"
               icon="pi pi-user-plus"
-              className="bg-emerald-600 p-3 border-none shadow-md hover:bg-emerald-700 transition-all"
+              className="border-none bg-emerald-600 p-3 shadow-md transition-all hover:bg-emerald-700"
               loading={loading}
             />
             <div className="text-center text-sm">
-              <span className="text-gray-500 font-medium">
-                ¿Ya tienes cuenta?{" "}
-              </span>
-              <Link
-                to="/login"
-                className="text-emerald-600 font-bold hover:underline"
-              >
+              <span className="font-medium text-gray-500">¿Ya tienes cuenta? </span>
+              <Link to="/login" className="font-bold text-emerald-600 hover:underline">
                 Inicia sesión aquí
               </Link>
             </div>

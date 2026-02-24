@@ -41,8 +41,7 @@ export const usePayments = () => {
 
   // Mutation for creating a single payment
   const createPaymentMutation = useMutation({
-    mutationFn: (paymentData: CreatePaymentDto) =>
-      paymentApi.createPayment(paymentData),
+    mutationFn: (paymentData: CreatePaymentDto) => paymentApi.createPayment(paymentData),
     onSuccess: (data, variables) => {
       // Invalidate related queries
       queryClient.invalidateQueries({
@@ -65,8 +64,7 @@ export const usePayments = () => {
 
   // Mutation for creating stay with payment
   const createStayWithPaymentMutation = useMutation({
-    mutationFn: (data: StayWithPaymentDto) =>
-      paymentApi.createStayWithPayment(data),
+    mutationFn: (data: StayWithPaymentDto) => paymentApi.createStayWithPayment(data),
     onSuccess: () => {
       // Invalidate all major queries after creating a new stay with payment
       queryClient.invalidateQueries({ queryKey: ["stays"] });
@@ -125,7 +123,7 @@ export const usePayments = () => {
       context?: "reservation" | "checkin_direct" | "calendar_payment";
       checkInDate?: Date;
       customObservation?: string;
-    },
+    }
   ) => {
     const {
       totalPrice,
@@ -140,17 +138,13 @@ export const usePayments = () => {
       baseData.amount,
       totalPrice || 0,
       context,
-      checkInDate,
+      checkInDate
     );
 
     // Generate observation
     const observation =
       customObservation ||
-      paymentHelpers.generateObservation(
-        paymentType,
-        baseData.amount,
-        totalPrice || 0,
-      );
+      paymentHelpers.generateObservation(paymentType, baseData.amount, totalPrice || 0);
 
     return createPaymentMutation.mutateAsync({
       ...baseData,
@@ -168,20 +162,16 @@ export const usePayments = () => {
         context?: "reservation" | "checkin_direct" | "calendar_payment";
         customObservation?: string;
       };
-    },
+    }
   ) => {
     const { paymentData, stayData } = data;
-    const {
-      context = "reservation",
-      customObservation,
-      ...databasePaymentData
-    } = paymentData;
+    const { context = "reservation", customObservation, ...databasePaymentData } = paymentData;
 
     const paymentType = paymentHelpers.determinePaymentType(
       databasePaymentData.amount,
       stayData.total_price || 0,
       context,
-      stayData.check_in_date ? new Date(stayData.check_in_date) : undefined,
+      stayData.check_in_date ? new Date(stayData.check_in_date) : undefined
     );
 
     const observation =
@@ -189,7 +179,7 @@ export const usePayments = () => {
       paymentHelpers.generateObservation(
         paymentType,
         databasePaymentData.amount,
-        stayData.total_price || 0,
+        stayData.total_price || 0
       );
 
     return createStayWithPaymentMutation.mutateAsync({

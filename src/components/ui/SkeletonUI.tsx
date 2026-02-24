@@ -37,9 +37,7 @@ export const SkeletonUI: React.FC<SkeletonUIProps> = ({
           />
         );
       case "custom":
-        return (
-          <div className={`${baseClasses} ${animateClass} ${className}`} />
-        );
+        return <div className={`${baseClasses} ${animateClass} ${className}`} />;
       case "text":
       default:
         if (lines === 1) {

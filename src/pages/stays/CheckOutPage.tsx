@@ -103,35 +103,32 @@ const CheckOutPage: React.FC = () => {
     );
 
   return (
-    <div className="max-w-2xl mx-auto pb-12 animate-fade-in">
-      <div className="flex items-center gap-4 mb-8">
+    <div className="animate-fade-in mx-auto max-w-2xl pb-12">
+      <div className="mb-8 flex items-center gap-4">
         <Button
+          unstyled
           icon="pi pi-arrow-left"
           onClick={() => navigate(`/calendar?tab=${tabParam}`)}
           className="p-button-text p-button-plain p-button-rounded"
         />
-        <h1 className="text-3xl font-black text-gray-800">
-          Liquidación y Check-out
-        </h1>
+        <h1 className="text-3xl font-black text-gray-800">Liquidación y Check-out</h1>
       </div>
 
-      <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 flex flex-col gap-6">
+      <div className="flex flex-col gap-6 rounded-3xl border border-gray-100 bg-white p-8 shadow-xl">
         <StaySummaryHeader stay={stay} />
 
         <div className="h-1 bg-gray-100"></div>
 
         <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <span className="font-bold text-gray-500">Total Estadía</span>
             <span className="text-xl font-bold text-gray-800">
               $ {stay.total_price.toLocaleString()}
             </span>
           </div>
-          <div className="flex justify-between items-center text-green-600">
+          <div className="flex items-center justify-between text-green-600">
             <span className="font-bold">Abonos Realizados</span>
-            <span className="text-xl font-bold">
-              - $ {stay.paid_amount.toLocaleString()}
-            </span>
+            <span className="text-xl font-bold">- $ {stay.paid_amount.toLocaleString()}</span>
           </div>
         </div>
 
@@ -143,16 +140,17 @@ const CheckOutPage: React.FC = () => {
             value={observation}
             onChange={(e) => setObservation(e.target.value)}
             rows={3}
-            className="w-full bg-[#eeebe4] border-gray-100"
+            className="w-full border-gray-100 bg-[#eeebe4]"
             placeholder="Ingrese notas adicionales o novedades aquí..."
           />
         </div>
 
         <div className="flex justify-end">
           <Button
+            unstyled
             label="Confirmar Check-out"
             icon="pi pi-check-circle"
-            className="bg-green-500 border-none text-white  px-8 rounded-2xl font-black shadow-lg"
+            className="rounded-2xl border-none bg-green-500 px-8 font-black text-white shadow-lg"
             onClick={handleCheckOut}
           />
         </div>

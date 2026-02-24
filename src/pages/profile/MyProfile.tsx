@@ -97,43 +97,39 @@ const MyProfileContent: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
+    <div className="mx-auto max-w-6xl p-4">
       {/* Header con avatar */}
-      <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 rounded-2xl p-8 mb-6 text-white shadow-lg">
-        <div className="flex flex-col md:flex-row items-center gap-6">
+      <div className="mb-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 p-8 text-white shadow-lg">
+        <div className="flex flex-col items-center gap-6 md:flex-row">
           <Avatar
             label={getInitials()}
             shape="circle"
-            className="bg-white text-emerald-600 font-black text-4xl"
+            className="bg-white text-4xl font-black text-emerald-600"
             style={{ width: "100px", height: "100px" }}
           />
           <div className="text-center md:text-left">
-            <h1 className="text-3xl font-black mb-1">
+            <h1 className="mb-1 text-3xl font-black">
               {employee?.first_name} {employee?.last_name}
             </h1>
-            <p className="text-emerald-100 mb-3">{employee?.email || user?.email}</p>
-            <Badge
-              value={userRole}
-              className="bg-white text-emerald-600 font-bold px-3 py-1"
-            />
+            <p className="mb-3 text-emerald-100">{employee?.email || user?.email}</p>
+            <Badge value={userRole} className="bg-white px-3 py-1 font-bold text-emerald-600" />
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Información Personal */}
         <Card
-          className="lg:col-span-2 shadow-sm border-0"
+          className="border-0 shadow-sm lg:col-span-2"
           pt={{
             root: { className: "rounded-2xl overflow-hidden" },
             header: {
-              className:
-                "bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center gap-2",
+              className: "bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center gap-2",
             },
           }}
           header={
             <>
-              <i className="pi pi-user text-emerald-600 text-xl"></i>
+              <i className="pi pi-user text-xl text-emerald-600"></i>
               <span className="font-bold text-gray-800">Información Personal</span>
             </>
           }
@@ -142,7 +138,7 @@ const MyProfileContent: React.FC = () => {
             onSubmit={profileForm.handleSubmit(onUpdateProfile)}
             className="flex flex-col gap-5"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               {/* Nombres */}
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-bold text-gray-700">
@@ -152,13 +148,13 @@ const MyProfileContent: React.FC = () => {
                   {...profileForm.register("first_name", {
                     required: "Campo requerido",
                   })}
-                  className={`w-full bg-gray-50/50 border-gray-200 rounded-lg ${
+                  className={`w-full rounded-lg border-gray-200 bg-gray-50/50 ${
                     profileErrors.first_name ? "p-invalid" : ""
                   }`}
                   placeholder="Ingrese sus nombres"
                 />
                 {profileErrors.first_name && (
-                  <small className="text-red-500 text-xs">
+                  <small className="text-xs text-red-500">
                     {profileErrors.first_name.message as string}
                   </small>
                 )}
@@ -173,13 +169,13 @@ const MyProfileContent: React.FC = () => {
                   {...profileForm.register("last_name", {
                     required: "Campo requerido",
                   })}
-                  className={`w-full bg-gray-50/50 border-gray-200 rounded-lg ${
+                  className={`w-full rounded-lg border-gray-200 bg-gray-50/50 ${
                     profileErrors.last_name ? "p-invalid" : ""
                   }`}
                   placeholder="Ingrese sus apellidos"
                 />
                 {profileErrors.last_name && (
-                  <small className="text-red-500 text-xs">
+                  <small className="text-xs text-red-500">
                     {profileErrors.last_name.message as string}
                   </small>
                 )}
@@ -187,9 +183,7 @@ const MyProfileContent: React.FC = () => {
 
               {/* Tipo de Documento */}
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-bold text-gray-700">
-                  Tipo de Documento
-                </label>
+                <label className="text-sm font-bold text-gray-700">Tipo de Documento</label>
                 <Controller
                   name="doc_type"
                   control={profileForm.control}
@@ -198,7 +192,7 @@ const MyProfileContent: React.FC = () => {
                       {...field}
                       options={DocsTypesConst}
                       disabled
-                      className="w-full bg-gray-100 border-gray-200 rounded-lg"
+                      className="w-full rounded-lg border-gray-200 bg-gray-100"
                     />
                   )}
                 />
@@ -206,13 +200,11 @@ const MyProfileContent: React.FC = () => {
 
               {/* Número de Documento */}
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-bold text-gray-700">
-                  Número de Documento
-                </label>
+                <label className="text-sm font-bold text-gray-700">Número de Documento</label>
                 <InputText
                   {...profileForm.register("doc_number")}
                   disabled
-                  className="w-full bg-gray-100 border-gray-200 rounded-lg"
+                  className="w-full rounded-lg border-gray-200 bg-gray-100"
                 />
               </div>
 
@@ -225,13 +217,13 @@ const MyProfileContent: React.FC = () => {
                   {...profileForm.register("phone", {
                     required: "Campo requerido",
                   })}
-                  className={`w-full bg-gray-50/50 border-gray-200 rounded-lg ${
+                  className={`w-full rounded-lg border-gray-200 bg-gray-50/50 ${
                     profileErrors.phone ? "p-invalid" : ""
                   }`}
                   placeholder="300 123 4567"
                 />
                 {profileErrors.phone && (
-                  <small className="text-red-500 text-xs">
+                  <small className="text-xs text-red-500">
                     {profileErrors.phone.message as string}
                   </small>
                 )}
@@ -239,17 +231,13 @@ const MyProfileContent: React.FC = () => {
 
               {/* Email */}
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-bold text-gray-700">
-                  Correo Electrónico
-                </label>
+                <label className="text-sm font-bold text-gray-700">Correo Electrónico</label>
                 <InputText
                   {...profileForm.register("email")}
                   disabled
-                  className="w-full bg-gray-100 border-gray-200 rounded-lg"
+                  className="w-full rounded-lg border-gray-200 bg-gray-100"
                 />
-                <small className="text-gray-400 text-xs">
-                  El correo no se puede modificar
-                </small>
+                <small className="text-xs text-gray-400">El correo no se puede modificar</small>
               </div>
 
               {/* Ciudad */}
@@ -257,19 +245,17 @@ const MyProfileContent: React.FC = () => {
                 <label className="text-sm font-bold text-gray-700">Ciudad</label>
                 <InputText
                   {...profileForm.register("city")}
-                  className="w-full bg-gray-50/50 border-gray-200 rounded-lg"
+                  className="w-full rounded-lg border-gray-200 bg-gray-50/50"
                   placeholder="Ciudad de residencia"
                 />
               </div>
 
               {/* Dirección */}
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-bold text-gray-700">
-                  Dirección
-                </label>
+                <label className="text-sm font-bold text-gray-700">Dirección</label>
                 <InputText
                   {...profileForm.register("address")}
-                  className="w-full bg-gray-50/50 border-gray-200 rounded-lg"
+                  className="w-full rounded-lg border-gray-200 bg-gray-50/50"
                   placeholder="Dirección de residencia"
                 />
               </div>
@@ -278,27 +264,27 @@ const MyProfileContent: React.FC = () => {
             <Divider className="my-2" />
 
             <Button
+              unstyled
               type="submit"
               label="Guardar Cambios"
               icon="pi pi-save"
-              className="bg-emerald-600 border-emerald-600 text-white w-full md:w-auto px-6 py-3 font-bold rounded-xl shadow-md hover:shadow-lg transition-all"
+              className="w-full rounded-xl border-emerald-600 bg-emerald-600 px-6 py-3 font-bold text-white shadow-md transition-all hover:shadow-lg md:w-auto"
             />
           </form>
         </Card>
 
         {/* Seguridad */}
         <Card
-          className="shadow-sm border-0 h-fit"
+          className="h-fit border-0 shadow-sm"
           pt={{
             root: { className: "rounded-2xl overflow-hidden" },
             header: {
-              className:
-                "bg-amber-50 px-6 py-4 border-b border-amber-100 flex items-center gap-2",
+              className: "bg-amber-50 px-6 py-4 border-b border-amber-100 flex items-center gap-2",
             },
           }}
           header={
             <>
-              <i className="pi pi-shield text-amber-600 text-xl"></i>
+              <i className="pi pi-shield text-xl text-amber-600"></i>
               <span className="font-bold text-gray-800">Seguridad</span>
             </>
           }
@@ -307,11 +293,10 @@ const MyProfileContent: React.FC = () => {
             onSubmit={passwordForm.handleSubmit(onChangePassword)}
             className="flex flex-col gap-5"
           >
-            <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-100">
-              <p className="text-sm text-gray-600 mb-0">
-                <i className="pi pi-info-circle text-amber-500 mr-2"></i>
-                Para cambiar tu contraseña, introduce la nueva contraseña y
-                confírmala.
+            <div className="rounded-xl border border-amber-100 bg-amber-50/50 p-4">
+              <p className="mb-0 text-sm text-gray-600">
+                <i className="pi pi-info-circle mr-2 text-amber-500"></i>
+                Para cambiar tu contraseña, introduce la nueva contraseña y confírmala.
               </p>
             </div>
 
@@ -341,7 +326,7 @@ const MyProfileContent: React.FC = () => {
                 )}
               />
               {passwordErrors.new_password && (
-                <small className="text-red-500 text-xs">
+                <small className="text-xs text-red-500">
                   {passwordErrors.new_password.message as string}
                 </small>
               )}
@@ -349,8 +334,7 @@ const MyProfileContent: React.FC = () => {
 
             <div className="flex flex-col gap-2">
               <label className="text-sm font-bold text-gray-700">
-                Confirmar Contraseña{" "}
-                <span className="text-amber-500">*</span>
+                Confirmar Contraseña <span className="text-amber-500">*</span>
               </label>
               <Controller
                 name="confirm_password"
@@ -370,10 +354,11 @@ const MyProfileContent: React.FC = () => {
             </div>
 
             <Button
+              unstyled
               type="submit"
               label="Cambiar Contraseña"
               icon="pi pi-key"
-              className="bg-amber-500 border-amber-500 text-white w-full py-3 font-bold rounded-xl shadow-md hover:shadow-lg transition-all"
+              className="w-full rounded-xl border-amber-500 bg-amber-500 py-3 font-bold text-white shadow-md transition-all hover:shadow-lg"
             />
           </form>
         </Card>

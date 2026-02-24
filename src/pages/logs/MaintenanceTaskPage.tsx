@@ -28,11 +28,7 @@ const MaintenanceTaskPage: React.FC = () => {
   const navigate = useNavigate();
   const { showBlockUI, hideBlockUI } = useBlockUI();
 
-  const {
-    data: room,
-    isLoading: roomLoading,
-    error: roomError,
-  } = useRoomById(room_id || null);
+  const { data: room, isLoading: roomLoading, error: roomError } = useRoomById(room_id || null);
 
   const {
     data: maintenanceEmployees,
@@ -40,18 +36,18 @@ const MaintenanceTaskPage: React.FC = () => {
     error: employeesError,
   } = useEmployeesByRole("Mantenimiento");
 
-  const { data: categories, isLoading: categoriesLoading } =
-    useMaintenanceCategories();
+  const { data: categories, isLoading: categoriesLoading } = useMaintenanceCategories();
 
-  const [selectedCategory, setSelectedCategory] =
-    useState<MaintenanceCategory | null>(null);
-  const [selectedSubcategory, setSelectedSubcategory] =
-    useState<MaintenanceSubcategory | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<MaintenanceCategory | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<MaintenanceSubcategory | null>(
+    null
+  );
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const [observation, setObservation] = useState<string>("");
 
-  const { data: subcategories, isLoading: subcategoriesLoading } =
-    useMaintenanceSubcategories(selectedCategory?.id || null);
+  const { data: subcategories, isLoading: subcategoriesLoading } = useMaintenanceSubcategories(
+    selectedCategory?.id || null
+  );
 
   const createMaintenanceLog = useCreateMaintenanceLog();
   const createRoomHistory = useCreateRoomHistory();
@@ -95,13 +91,7 @@ const MaintenanceTaskPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (
-      !room ||
-      !selectedEmployeeId ||
-      !selectedCategory ||
-      !selectedSubcategory
-    )
-      return;
+    if (!room || !selectedEmployeeId || !selectedCategory || !selectedSubcategory) return;
 
     showBlockUI("Guardando...");
     try {
@@ -115,9 +105,7 @@ const MaintenanceTaskPage: React.FC = () => {
         date: dayjs().format("YYYY-MM-DD"),
       });
 
-      const maintenanceStatus = roomStatuses?.find(
-        (s) => s.name === "Mantenimiento",
-      );
+      const maintenanceStatus = roomStatuses?.find((s) => s.name === "Mantenimiento");
 
       await createRoomHistory.mutateAsync({
         room_id: room.id,
@@ -152,12 +140,11 @@ const MaintenanceTaskPage: React.FC = () => {
     }
   };
 
-  const isFormValid =
-    room && selectedEmployeeId && selectedCategory && selectedSubcategory;
+  const isFormValid = room && selectedEmployeeId && selectedCategory && selectedSubcategory;
 
   if (roomLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
         <ProgressSpinner />
         <p className="text-gray-500">Cargando habitacion...</p>
       </div>
@@ -166,25 +153,21 @@ const MaintenanceTaskPage: React.FC = () => {
 
   if (roomError || !room) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-4">
         <i className="pi pi-exclamation-circle text-5xl text-red-500"></i>
-        <h3 className="text-xl font-bold text-gray-800 text-center">
-          Habitacion no encontrada
-        </h3>
-        <p className="text-gray-500 text-center">
+        <h3 className="text-center text-xl font-bold text-gray-800">Habitacion no encontrada</h3>
+        <p className="text-center text-gray-500">
           No se pudo cargar la habitacion. Verifica la URL.
         </p>
         {roomError && (
-          <p className="text-xs text-red-400 text-center max-w-xs">
-            Error: {roomError.message}
-          </p>
+          <p className="max-w-xs text-center text-xs text-red-400">Error: {roomError.message}</p>
         )}
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto pb-12 animate-fade-in">
+    <div className="animate-fade-in mx-auto max-w-4xl pb-12">
       <ConfirmDialog />
       <PageHeader
         title={`Hab ${room.room_number} · ${accommodationTypeName}`}
@@ -196,12 +179,10 @@ const MaintenanceTaskPage: React.FC = () => {
         backTooltip="Volver al calendario"
       />
 
-      <Card className="shadow-md border-0">
+      <Card className="border-0 shadow-md">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">
-            <p className="text-sm font-black text-gray-500 uppercase tracking-wide">
-              Categoria
-            </p>
+            <p className="text-sm font-black tracking-wide text-gray-500 uppercase">Categoria</p>
             {categoriesLoading ? (
               <div className="flex items-center justify-center p-4">
                 <ProgressSpinner style={{ width: "2rem", height: "2rem" }} />
@@ -212,10 +193,10 @@ const MaintenanceTaskPage: React.FC = () => {
                   <button
                     key={category.id}
                     onClick={() => handleCategorySelect(category)}
-                    className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
+                    className={`flex flex-col items-center justify-center rounded-xl border-2 p-4 transition-all ${
                       selectedCategory?.id === category.id
                         ? `border-transparent text-white shadow-lg`
-                        : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                        : "border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100"
                     }`}
                     style={
                       selectedCategory?.id === category.id
@@ -223,9 +204,7 @@ const MaintenanceTaskPage: React.FC = () => {
                         : {}
                     }
                   >
-                    <span className="font-bold text-center">
-                      {category.name}
-                    </span>
+                    <span className="text-center font-bold">{category.name}</span>
                   </button>
                 ))}
               </div>
@@ -233,8 +212,8 @@ const MaintenanceTaskPage: React.FC = () => {
           </div>
 
           {selectedCategory && (
-            <div className="flex flex-col gap-3 animate-fade-in">
-              <p className="text-sm font-black text-gray-500 uppercase tracking-wide">
+            <div className="animate-fade-in flex flex-col gap-3">
+              <p className="text-sm font-black tracking-wide text-gray-500 uppercase">
                 Tipo de problema
               </p>
               {subcategoriesLoading ? (
@@ -247,13 +226,13 @@ const MaintenanceTaskPage: React.FC = () => {
                     <button
                       key={sub.id}
                       onClick={() => handleSubcategorySelect(sub)}
-                      className={`flex items-center justify-center p-3 rounded-xl border-2 transition-all text-center ${
+                      className={`flex items-center justify-center rounded-xl border-2 p-3 text-center transition-all ${
                         selectedSubcategory?.id === sub.id
                           ? "border-amber-500 bg-amber-50 text-amber-900 shadow-sm"
                           : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
                       }`}
                     >
-                      <span className="font-bold text-sm">{sub.name}</span>
+                      <span className="text-sm font-bold">{sub.name}</span>
                     </button>
                   ))}
                 </div>
@@ -262,26 +241,22 @@ const MaintenanceTaskPage: React.FC = () => {
           )}
 
           <div className="flex flex-col gap-3">
-            <p className="text-sm font-black text-gray-500 uppercase tracking-wide">
-              Encargado
-            </p>
+            <p className="text-sm font-black tracking-wide text-gray-500 uppercase">Encargado</p>
 
             {employeesLoading ? (
               <div className="flex items-center justify-center p-4">
                 <ProgressSpinner style={{ width: "2rem", height: "2rem" }} />
               </div>
             ) : employeesError ? (
-              <div className="text-center p-4 text-red-500">
-                <i className="pi pi-exclamation-circle text-2xl mb-2"></i>
+              <div className="p-4 text-center text-red-500">
+                <i className="pi pi-exclamation-circle mb-2 text-2xl"></i>
                 <p className="text-sm">Error al cargar empleados</p>
               </div>
             ) : employees.length === 0 ? (
-              <div className="text-center p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                <i className="pi pi-users text-3xl text-gray-400 mb-2"></i>
-                <p className="text-gray-500 text-sm">
-                  No hay empleados con rol "Mantenimiento"
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
+              <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-6 text-center">
+                <i className="pi pi-users mb-2 text-3xl text-gray-400"></i>
+                <p className="text-sm text-gray-500">No hay empleados con rol "Mantenimiento"</p>
+                <p className="mt-1 text-xs text-gray-400">
                   Contacta al administrador para crear empleados con este rol
                 </p>
               </div>
@@ -291,14 +266,14 @@ const MaintenanceTaskPage: React.FC = () => {
                   <button
                     key={emp.id}
                     onClick={() => handleEmployeeSelect(emp.id)}
-                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${
+                    className={`flex items-center gap-3 rounded-xl border-2 p-4 text-left transition-all ${
                       selectedEmployeeId === emp.id
                         ? "border-amber-500 bg-amber-50 shadow-sm"
                         : "border-gray-200 bg-white hover:bg-gray-50"
                     }`}
                   >
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                      className={`flex h-10 w-10 items-center justify-center rounded-full font-bold ${
                         selectedEmployeeId === emp.id
                           ? "bg-amber-500 text-white"
                           : "bg-gray-200 text-gray-600"
@@ -314,7 +289,7 @@ const MaintenanceTaskPage: React.FC = () => {
                       <p className="text-xs text-gray-500">Mantenimiento</p>
                     </div>
                     {selectedEmployeeId === emp.id && (
-                      <i className="pi pi-check-circle text-amber-500 text-xl ml-auto"></i>
+                      <i className="pi pi-check-circle ml-auto text-xl text-amber-500"></i>
                     )}
                   </button>
                 ))}
@@ -323,7 +298,7 @@ const MaintenanceTaskPage: React.FC = () => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <p className="text-sm font-black text-gray-500 uppercase tracking-wide">
+            <p className="text-sm font-black tracking-wide text-gray-500 uppercase">
               Observacion (opcional)
             </p>
             <InputTextarea
@@ -331,20 +306,17 @@ const MaintenanceTaskPage: React.FC = () => {
               onChange={(e) => setObservation(e.target.value)}
               placeholder="Describe el problema con mas detalle..."
               rows={3}
-              className="w-full border-gray-200 rounded-xl"
+              className="w-full rounded-xl border-gray-200"
             />
           </div>
 
           <Button
+            unstyled
             label="Guardar Mantenimiento"
             icon="pi pi-check"
-            className="bg-amber-500 hover:bg-amber-600 border-none text-white w-full py-4 text-lg font-black rounded-2xl shadow-lg mt-2"
+            className="mt-2 w-full rounded-2xl border-none bg-amber-500 py-4 text-lg font-black text-white shadow-lg hover:bg-amber-600"
             onClick={handleSubmit}
-            disabled={
-              !isFormValid ||
-              createMaintenanceLog.isPending ||
-              employees.length === 0
-            }
+            disabled={!isFormValid || createMaintenanceLog.isPending || employees.length === 0}
             loading={createMaintenanceLog.isPending}
           />
         </div>

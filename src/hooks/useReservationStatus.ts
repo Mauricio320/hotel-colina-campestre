@@ -1,4 +1,4 @@
-import { Stay } from '@/types';
+import { Stay } from "@/types";
 
 interface ReservationPaymentStatus {
   isFullyPaid: boolean;

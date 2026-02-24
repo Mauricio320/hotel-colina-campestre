@@ -1,5 +1,5 @@
-import React from 'react';
-import { TaskCompletionForm } from '@/components/tasks/TaskCompletionForm';
+import React from "react";
+import { TaskCompletionForm } from "@/components/tasks/TaskCompletionForm";
 
 interface RoomStatusFormProps {
   onSubmit: () => void;

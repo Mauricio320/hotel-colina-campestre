@@ -1,20 +1,10 @@
 import { supabase } from "@/config/supabase";
-import {
-  CreatePayment,
-  paymentApi,
-  paymentHelpers,
-} from "@/services/payment/paymentApi";
+import { CreatePayment, paymentApi, paymentHelpers } from "@/services/payment/paymentApi";
 import { CreatePriceOverrides } from "@/services/price-overrides/priceOverridesApi";
 import { CreateRoomHistory } from "@/services/room-history/roomHistoryApi";
 import { StayCreateService, cancelStay } from "@/services/stays/staysApi";
 import { stayGuestsApi } from "@/services/stay-guests/stayGuestsApi";
-import {
-  CreatePaymentDto,
-  Payment,
-  PaymentType,
-  PriceOverride,
-  Stay,
-} from "@/types";
+import { CreatePaymentDto, Payment, PaymentType, PriceOverride, Stay } from "@/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useStays = () => {
@@ -84,10 +74,7 @@ export const useStays = () => {
         .single();
 
       if (statusData) {
-        if (
-          stayData.check_in_date === todayStr ||
-          stayData.status === "Active"
-        ) {
+        if (stayData.check_in_date === todayStr || stayData.status === "Active") {
           await supabase
             .from("rooms")
             .update({
@@ -104,9 +91,7 @@ export const useStays = () => {
           new_status_id: statusData.id,
           employee_id: stayData.employee_id,
           action_type: stayData.status === "Active" ? "CHECK-IN" : "RESERVA",
-          observation:
-            stayData.observation ||
-            `Registro de ${statusName} desde Calendario`,
+          observation: stayData.observation || `Registro de ${statusName} desde Calendario`,
         });
       }
 
@@ -143,8 +128,7 @@ export const useStays = () => {
         .eq("id", stayId)
         .single();
 
-      if (fetchErr || !stay)
-        throw new Error("No se pudo encontrar la estancia");
+      if (fetchErr || !stay) throw new Error("No se pudo encontrar la estancia");
 
       const todayStr = new Date().toLocaleDateString("sv-SE");
       const totalPrice = stay.total_price || 0;
@@ -154,12 +138,11 @@ export const useStays = () => {
         amount,
         totalPrice,
         "calendar_payment",
-        checkInDate,
+        checkInDate
       );
 
       const observation =
-        customObservation ||
-        paymentHelpers.generateObservation(paymentType, amount, totalPrice);
+        customObservation || paymentHelpers.generateObservation(paymentType, amount, totalPrice);
 
       const paymentData: CreatePaymentDto = {
         stay_id: stayId,
@@ -181,10 +164,7 @@ export const useStays = () => {
         .from("stays")
         .update({
           paid_amount: newPaidAmount,
-          status:
-            isFullyPaid && stay.check_in_date <= todayStr
-              ? "Active"
-              : stay.status,
+          status: isFullyPaid && stay.check_in_date <= todayStr ? "Active" : stay.status,
         })
         .eq("id", stayId);
 
@@ -212,15 +192,11 @@ export const useStays = () => {
         await supabase.from("room_history").insert({
           room_id: roomId,
           stay_id: stayId,
-          previous_status_id:
-            status_id || currentRoomStatus?.status_id || reservedStatus?.id,
-          new_status_id:
-            status_id || currentRoomStatus?.status_id || reservedStatus?.id, // Keep same status after payment
+          previous_status_id: status_id || currentRoomStatus?.status_id || reservedStatus?.id,
+          new_status_id: status_id || currentRoomStatus?.status_id || reservedStatus?.id, // Keep same status after payment
           employee_id: employeeId,
           action_type:
-            paymentType === PaymentType.ABONO_RESERVA
-              ? "ABONO-RESERVA"
-              : "PAGO-COMPLETO-RESERVA",
+            paymentType === PaymentType.ABONO_RESERVA ? "ABONO-RESERVA" : "PAGO-COMPLETO-RESERVA",
           observation:
             observation ||
             `${paymentType}: ${amount.toLocaleString()} de ${totalPrice.toLocaleString()}`,
@@ -308,9 +284,7 @@ export const useStays = () => {
           data.paymentData.amount,
           data.stayData.total_price || 0,
           data.paymentData.context || "reservation",
-          data.stayData.check_in_date
-            ? new Date(data.stayData.check_in_date)
-            : undefined,
+          data.stayData.check_in_date ? new Date(data.stayData.check_in_date) : undefined
         );
 
         const observation =
@@ -318,10 +292,9 @@ export const useStays = () => {
           paymentHelpers.generateObservation(
             paymentType,
             data.paymentData.amount,
-            data.stayData.total_price || 0,
+            data.stayData.total_price || 0
           );
-        const statusName =
-          data.stayData.status === "Active" ? "Ocupado" : "Reservado";
+        const statusName = data.stayData.status === "Active" ? "Ocupado" : "Reservado";
         const { data: statusData } = await supabase
           .from("room_statuses")
           .select("id")
@@ -352,14 +325,12 @@ export const useStays = () => {
 
         const todayStr = new Date().toLocaleDateString("sv-SE");
         const isRoomStay = !!data.stayData.room_id;
-        const accommodationId =
-          data.stayData.room_id || data.stayData.accommodation_type_id;
+        const accommodationId = data.stayData.room_id || data.stayData.accommodation_type_id;
 
         if (statusData && accommodationId) {
           if (isRoomStay) {
             const shouldUpdateRoomStatus =
-              data.stayData.check_in_date === todayStr ||
-              data.stayData.status === "Active";
+              data.stayData.check_in_date === todayStr || data.stayData.status === "Active";
 
             if (shouldUpdateRoomStatus) {
               await supabase
@@ -385,8 +356,7 @@ export const useStays = () => {
               .select("status_id")
               .eq("id", accommodationId)
               .single();
-            if (currentRoomStatus)
-              previousStatusId = currentRoomStatus.status_id;
+            if (currentRoomStatus) previousStatusId = currentRoomStatus.status_id;
           }
 
           await supabase.from("room_history").insert({
@@ -396,10 +366,7 @@ export const useStays = () => {
             previous_status_id: previousStatusId,
             new_status_id: statusData.id,
             employee_id: data.paymentData.employee_id,
-            action_type:
-              paymentType === PaymentType.PAGO_CHECKIN_DIRECTO
-                ? "CHECK-IN"
-                : "RESERVA",
+            action_type: paymentType === PaymentType.PAGO_CHECKIN_DIRECTO ? "CHECK-IN" : "RESERVA",
             observation: observation || `Registro de ${statusName} con pago`,
           });
         }
@@ -440,13 +407,7 @@ export const useStays = () => {
   };
 };
 
-const createStay = async ({
-  new_status_id,
-  staySet,
-}: {
-  staySet: Stay;
-  new_status_id: string;
-}) => {
+const createStay = async ({ new_status_id, staySet }: { staySet: Stay; new_status_id: string }) => {
   staySet.room_status_id = new_status_id;
   return StayCreateService(staySet);
 };
@@ -522,14 +483,12 @@ export const useCreateOnStayWithPayment = async ({
 export const CheckAvailability = async (
   accommodationTypeId: string,
   checkInDate: string,
-  checkOutDate: string,
+  checkOutDate: string
 ) => {
   // Buscar stays que tengan directamente el accommodation_type_id
   const { data: directStays, error: error1 } = await supabase
     .from("stays")
-    .select(
-      "id,check_in_date, check_out_date, order_number, accommodation_types!inner(name)",
-    )
+    .select("id,check_in_date, check_out_date, order_number, accommodation_types!inner(name)")
     .eq("active", true)
     .eq("accommodation_type_id", accommodationTypeId)
     .gte("check_out_date", checkInDate)
@@ -545,7 +504,7 @@ export const CheckAvailability = async (
       room_number,
       accommodation_type_id
       )
-    `,
+    `
     )
     .eq("active", true)
     .eq("rooms.accommodation_type_id", accommodationTypeId)
@@ -558,17 +517,12 @@ export const CheckAvailability = async (
 
   // Combinar y eliminar duplicados
   const allStays = [...(directStays || []), ...(roomStays || [])];
-  const uniqueStays = Array.from(
-    new Map(allStays.map((stay) => [stay.id, stay])).values(),
-  );
+  const uniqueStays = Array.from(new Map(allStays.map((stay) => [stay.id, stay])).values());
 
   return { data: uniqueStays, error: null };
 };
 
-export const UpdateStay = async ({
-  id,
-  ...updates
-}: { id: string } & Partial<Stay>) => {
+export const UpdateStay = async ({ id, ...updates }: { id: string } & Partial<Stay>) => {
   const { data, error } = await supabase
     .from("stays")
     .update(updates)

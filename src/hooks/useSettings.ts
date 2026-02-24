@@ -5,7 +5,11 @@ import { settingsQueryKeys } from "@/services/queryKeys/settings.queryKeys";
 export const useSettings = () => {
   const queryClient = useQueryClient();
 
-  const { data: settingsData, isLoading, error } = useQuery({
+  const {
+    data: settingsData,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: settingsQueryKeys.settings,
     queryFn: getSettings,
     enabled: true,
@@ -26,7 +30,11 @@ export const useSettings = () => {
 export const usePaymentMethods = () => {
   const queryClient = useQueryClient();
 
-  const { data: paymentMethods, isLoading, error } = useQuery({
+  const {
+    data: paymentMethods,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: settingsQueryKeys.paymentMethods,
     queryFn: getPaymentMethods,
     enabled: true,

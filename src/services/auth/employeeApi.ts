@@ -1,17 +1,11 @@
 import { supabase } from "@/config/supabase";
-import {
-  EmployeeWithRole,
-  SyncProfileData,
-  RoleData,
-} from "./types/employee.types";
+import { EmployeeWithRole, SyncProfileData, RoleData } from "./types/employee.types";
 import { AuthErrorType } from "./types";
 
 /**
  * Fetches employee data by auth_id
  */
-export const getEmployeeByAuthId = async (
-  authId: string,
-): Promise<EmployeeWithRole | null> => {
+export const getEmployeeByAuthId = async (authId: string): Promise<EmployeeWithRole | null> => {
   try {
     const { data, error } = await supabase
       .from("employees")
@@ -20,10 +14,7 @@ export const getEmployeeByAuthId = async (
       .maybeSingle();
 
     if (error) {
-      if (
-        error.code === "PGRST116" ||
-        error.message.includes('relation "public.employees"')
-      ) {
+      if (error.code === "PGRST116" || error.message.includes('relation "public.employees"')) {
         throw new Error(AuthErrorType.DATABASE_NOT_READY);
       }
       throw new Error(error.message);
@@ -65,9 +56,7 @@ export const getAdminRole = async (): Promise<RoleData | null> => {
 /**
  * Syncs or creates user profile in employees table
  */
-export const syncUserProfile = async (
-  authId: string,
-): Promise<EmployeeWithRole | null> => {
+export const syncUserProfile = async (authId: string): Promise<EmployeeWithRole | null> => {
   try {
     // Get current auth user
     const {
@@ -92,8 +81,7 @@ export const syncUserProfile = async (
       first_name: authUser.user_metadata?.first_name || "Usuario",
       last_name: authUser.user_metadata?.last_name || "Nuevo",
       role_id: adminRole.id,
-      doc_number:
-        authUser.user_metadata?.doc_number || `SYNC-${authId.slice(0, 5)}`,
+      doc_number: authUser.user_metadata?.doc_number || `SYNC-${authId.slice(0, 5)}`,
       doc_type: authUser.user_metadata?.doc_type || "Cédula de Ciudadanía",
     };
 
@@ -143,9 +131,7 @@ export const getAllEmployees = async (): Promise<EmployeeWithRole[]> => {
 /**
  * Gets employees by role name
  */
-export const getEmployeesByRole = async (
-  roleName: string,
-): Promise<EmployeeWithRole[]> => {
+export const getEmployeesByRole = async (roleName: string): Promise<EmployeeWithRole[]> => {
   try {
     const { data, error } = await supabase
       .from("employees")
@@ -171,7 +157,7 @@ export const getEmployeesByRole = async (
  */
 export const updateEmployeeProfile = async (
   employeeId: string,
-  updates: Partial<EmployeeWithRole>,
+  updates: Partial<EmployeeWithRole>
 ): Promise<EmployeeWithRole | null> => {
   try {
     const { data, error } = await supabase

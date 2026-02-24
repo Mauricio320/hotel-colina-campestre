@@ -22,19 +22,11 @@ const PaymentsInvoice: React.FC = () => {
   }, [location.state]);
 
   return (
-    <div className="p-4 animate-fade-in">
+    <div className="animate-fade-in p-4">
       <div className="mb-4">
-        <PageHeader
-          title="Pagos de facturas"
-          icon="pi-file-pdf"
-          color="red"
-          variant="simple"
-        />
+        <PageHeader title="Pagos de facturas" icon="pi-file-pdf" color="red" variant="simple" />
       </div>
-      <TabView
-        activeIndex={activeTab}
-        onTabChange={(e) => setActiveTab(e.index)}
-      >
+      <TabView activeIndex={activeTab} onTabChange={(e) => setActiveTab(e.index)}>
         {accommodationTypesQuery?.data?.map((dt) => (
           <TabPanel key={dt.id} header={dt.name}>
             <PaymentsInvoiceTable

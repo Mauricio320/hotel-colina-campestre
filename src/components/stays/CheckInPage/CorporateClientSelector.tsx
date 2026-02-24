@@ -15,21 +15,25 @@ const CorporateClientSelector: React.FC<CorporateClientSelectorProps> = ({
   onResetDiscount,
 }) => {
   return (
-    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-      <div className="flex items-center gap-2 mb-5">
-        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${hasDiscount ? "bg-orange-100" : "bg-blue-100"}`}>
-          <i className={`pi ${hasDiscount ? "pi-percentage text-orange-600" : "pi-briefcase text-blue-600"} text-sm`}></i>
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="mb-5 flex items-center gap-2">
+        <div
+          className={`flex h-8 w-8 items-center justify-center rounded-lg ${hasDiscount ? "bg-orange-100" : "bg-blue-100"}`}
+        >
+          <i
+            className={`pi ${hasDiscount ? "pi-percentage text-orange-600" : "pi-briefcase text-blue-600"} text-sm`}
+          ></i>
         </div>
         <h3 className="font-bold text-gray-800">Cliente Empresarial</h3>
       </div>
 
-      <div className="bg-[#f5f2eb] rounded-xl p-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+      <div className="rounded-xl bg-[#f5f2eb] p-4">
+        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+          <div className="flex w-full items-center gap-3 sm:w-auto">
             {hasDiscount ? (
               <>
-                <div className="flex items-center gap-1.5 bg-orange-100 px-3 py-1.5 rounded-full border border-orange-200">
-                  <i className="pi pi-tag text-orange-600 text-xs"></i>
+                <div className="flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-100 px-3 py-1.5">
+                  <i className="pi pi-tag text-xs text-orange-600"></i>
                   <span className="text-sm font-bold text-orange-700">
                     -${discountAmount.toLocaleString()}
                   </span>
@@ -38,8 +42,8 @@ const CorporateClientSelector: React.FC<CorporateClientSelectorProps> = ({
               </>
             ) : (
               <>
-                <div className="flex items-center gap-1.5 bg-blue-100 px-3 py-1.5 rounded-full border border-blue-200">
-                  <i className="pi pi-info-circle text-blue-600 text-xs"></i>
+                <div className="flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5">
+                  <i className="pi pi-info-circle text-xs text-blue-600"></i>
                   <span className="text-sm text-gray-600">¿Tarifa especial?</span>
                 </div>
               </>
@@ -48,17 +52,19 @@ const CorporateClientSelector: React.FC<CorporateClientSelectorProps> = ({
 
           {hasDiscount ? (
             <Button
+              unstyled
               label="Restablecer"
               icon="pi pi-refresh"
-              className="p-button-outlined p-button-danger p-button-sm rounded-lg w-full sm:w-auto"
+              className="p-button-outlined p-button-danger p-button-sm w-full rounded-lg sm:w-auto"
               onClick={onResetDiscount}
             />
           ) : (
             <Button
+              unstyled
               label="Autorizar"
               icon="pi pi-lock"
               type="button"
-              className="p-button-outlined p-button-warning p-button-sm rounded-lg w-full sm:w-auto"
+              className="p-button-outlined p-button-warning p-button-sm w-full rounded-lg sm:w-auto"
               onClick={onOpenModal}
             />
           )}

@@ -54,7 +54,8 @@
 
 /* Animación flotante para logo */
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -64,13 +65,21 @@
 
 /* Animación de sacudida para errores */
 @keyframes shake {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
-  10%, 30%, 50%, 70%, 90% {
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: translateX(-5px);
   }
-  20%, 40%, 60%, 80% {
+  20%,
+  40%,
+  60%,
+  80% {
     transform: translateX(5px);
   }
 }
@@ -102,8 +111,8 @@
 
 /* Efectos de brillo premium */
 .drop-shadow-2xl {
-  filter: drop-shadow(0 25px 50px -12px rgba(16, 185, 129, 0.25)) 
-          drop-shadow(0 0 30px rgba(16, 185, 129, 0.3));
+  filter: drop-shadow(0 25px 50px -12px rgba(16, 185, 129, 0.25))
+    drop-shadow(0 0 30px rgba(16, 185, 129, 0.3));
 }
 
 /* Delays personalizados */
@@ -145,11 +154,13 @@
 }
 
 .hover\:scale-110:hover {
-  transform: scale(1.10);
+  transform: scale(1.1);
 }
 
 .hover\:shadow-xl:hover {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* Gradientes personalizados */

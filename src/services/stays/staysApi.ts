@@ -15,14 +15,7 @@ export interface CancelStayParams {
 }
 
 export const cancelStay = async (params: CancelStayParams): Promise<void> => {
-  const {
-    stayId,
-    roomId,
-    observation,
-    employeeId,
-    availableStatusId,
-    previous_status_id,
-  } = params;
+  const { stayId, roomId, observation, employeeId, availableStatusId, previous_status_id } = params;
 
   const observationWithPrefix = `[CANCELADO] ${new Date().toLocaleDateString()}: ${observation}`;
 

@@ -432,7 +432,7 @@ const CheckInPage: React.FC = () => {
     );
 
   return (
-    <div className="max-w-4xl mx-auto pb-12 animate-fade-in">
+    <div className="animate-fade-in mx-auto max-w-4xl pb-12">
       <CheckInHeader
         title={isCheckInMode ? "Check-in" : "Nueva Reserva"}
         subtitle={accommodationTitleLabel}
@@ -518,9 +518,10 @@ const CheckInPage: React.FC = () => {
 
         <div className="flex justify-end">
           <Button
+            unstyled={true}
             type="submit"
             label={isCheckInMode ? "Confirmar Check-in" : "Confirmar Reserva"}
-            className={`p-button text-white w-[250px] ${isCheckInMode ? "bg-emerald-500" : "bg-yellow-500"}`}
+            className={`w-62.5 p-2 rounded-md text-white ${isCheckInMode ? "bg-emerald-500" : "bg-yellow-500"}`}
           />
         </div>
       </form>

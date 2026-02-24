@@ -54,7 +54,7 @@ export const staysInvoiceApi = {
         room:rooms(*),
         payment_method:payment_methods(name),
         price_override:price_overrides(*,employee:employees(first_name, last_name))
-      `,
+      `
       )
       .eq("id", stayId)
       .single();
@@ -71,7 +71,7 @@ export const staysInvoiceApi = {
         *,
         payment_method:payment_methods(name),
         employee:employees(first_name, last_name)
-      `,
+      `
       )
       .eq("stay_id", stayId)
       .order("payment_date", { ascending: true });

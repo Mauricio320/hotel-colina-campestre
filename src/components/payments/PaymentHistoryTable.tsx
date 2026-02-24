@@ -44,11 +44,11 @@ const CompactPaymentCard: React.FC<{ payment: Payment }> = ({ payment }) => {
 
   return (
     <div
-      className={`flex items-center justify-between px-2 py-1 rounded-xl border ${typeColor} transition-all hover:shadow-sm`}
+      className={`flex items-center justify-between rounded-xl border px-2 py-1 ${typeColor} transition-all hover:shadow-sm`}
     >
       <div className="flex items-center gap-3">
         <div className="flex flex-col">
-          <span className="text-xs font-bold uppercase tracking-wide">
+          <span className="text-xs font-bold tracking-wide uppercase">
             {getPaymentTypeDisplay(payment.payment_type)}
           </span>
           <span className="text-[10px] opacity-70">
@@ -60,9 +60,7 @@ const CompactPaymentCard: React.FC<{ payment: Payment }> = ({ payment }) => {
           </span>
         </div>
       </div>
-      <span className="text-sm font-black">
-        $ {Number(payment.amount).toLocaleString()}
-      </span>
+      <span className="text-sm font-black">$ {Number(payment.amount).toLocaleString()}</span>
     </div>
   );
 };
@@ -79,7 +77,7 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
   if (variant === "compact") {
     return (
       <div className="flex flex-col gap-2">
-        <h4 className="text-xs font-bold text-gray-400 uppercase flex items-center gap-2">
+        <h4 className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase">
           <i className="pi pi-money-bill text-xs"></i>
           Pagos Registrados ({payments.length})
         </h4>
@@ -95,30 +93,30 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
   // Versión tabla (por defecto)
   return (
     <div className="mb-12">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+      <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
         <i className="pi pi-money-bill text-gray-600"></i>
         Historial de Pagos y Abonos
       </h3>
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
+      <div className="overflow-hidden rounded-lg border border-gray-200">
         <table className="w-full">
           <thead>
-            <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="py-3 px-4 text-left text-xs font-medium text-gray-600 uppercase">
+            <tr className="border-b border-gray-200 bg-gray-50">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">
                 Fecha y Hora
               </th>
-              <th className="py-3 px-4 text-left text-xs font-medium text-gray-600 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">
                 Método de Pago
               </th>
-              <th className="py-3 px-4 text-right text-xs font-medium text-gray-600 uppercase">
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase">
                 Monto
               </th>
-              <th className="py-3 px-4 text-center text-xs font-medium text-gray-600 uppercase">
+              <th className="px-4 py-3 text-center text-xs font-medium text-gray-600 uppercase">
                 Tipo
               </th>
-              <th className="py-3 px-4 text-left text-xs font-medium text-gray-600 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">
                 Registrado por
               </th>
-              <th className="py-3 px-4 text-left text-xs font-medium text-gray-600 uppercase">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-600 uppercase">
                 Observación
               </th>
             </tr>
@@ -126,7 +124,7 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
           <tbody className="divide-y divide-gray-200">
             {payments.map((payment) => (
               <tr key={payment.id}>
-                <td className="py-3 px-4">
+                <td className="px-4 py-3">
                   <div className="flex flex-col">
                     <span className="text-sm text-gray-900">
                       {new Date(payment.payment_date).toLocaleDateString()}
@@ -136,30 +134,29 @@ const PaymentHistoryTable: React.FC<PaymentHistoryTableProps> = ({
                     </span>
                   </div>
                 </td>
-                <td className="py-3 px-4">
+                <td className="px-4 py-3">
                   <span className="text-sm text-gray-900">
                     {payment.payment_method?.name || "No especificado"}
                   </span>
                 </td>
-                <td className="py-3 px-4 text-right">
+                <td className="px-4 py-3 text-right">
                   <span className="text-sm font-medium text-gray-900">
                     {Number(payment.amount).toLocaleString()}
                   </span>
                 </td>
-                <td className="py-3 px-4 text-center">
+                <td className="px-4 py-3 text-center">
                   <span
-                    className={`text-xs font-medium px-2 py-1 rounded ${getPaymentTypeColor(payment.payment_type)}`}
+                    className={`rounded px-2 py-1 text-xs font-medium ${getPaymentTypeColor(payment.payment_type)}`}
                   >
                     {getPaymentTypeDisplay(payment.payment_type)}
                   </span>
                 </td>
-                <td className="py-3 px-4">
+                <td className="px-4 py-3">
                   <span className="text-sm text-gray-900">
-                    {payment.employee?.first_name}{" "}
-                    {payment.employee?.last_name || "Sistema"}
+                    {payment.employee?.first_name} {payment.employee?.last_name || "Sistema"}
                   </span>
                 </td>
-                <td className="py-3 px-4">
+                <td className="px-4 py-3">
                   <span className="text-sm text-gray-600 italic">
                     {payment.observation || "Sin observación"}
                   </span>

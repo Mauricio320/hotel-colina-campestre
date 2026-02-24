@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useRef,
-} from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { useEmployeeWithSync } from "@/hooks/useEmployee";
 import { useAuthMutations } from "@/hooks/useAuthMutations";
 import { getCurrentSession, onAuthStateChange } from "@/services/auth/authApi";
@@ -37,9 +31,7 @@ export interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [dbError, setDbError] = useState<string | null>(null);
@@ -170,7 +162,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     {
       value: contextValue,
     },
-    children,
+    children
   );
 };
 

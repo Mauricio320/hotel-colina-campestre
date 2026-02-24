@@ -13,12 +13,14 @@ export interface CreateCleaningLogDto {
 export const fetchCleaningLogs = async (): Promise<CleaningLog[]> => {
   const { data, error } = await supabase
     .from("cleaning_logs")
-    .select(`
+    .select(
+      `
       *,
       room:rooms!inner(*, status:room_statuses(*)),
       stay:stays!cleaning_logs_stay_id_fkey(*, guest:guests!stays_guest_id_fkey(*)),
       employee:employees!inner(*)
-    `)
+    `
+    )
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -28,12 +30,14 @@ export const fetchCleaningLogs = async (): Promise<CleaningLog[]> => {
 export const fetchCleaningLogsByRoom = async (roomId: string): Promise<CleaningLog[]> => {
   const { data, error } = await supabase
     .from("cleaning_logs")
-    .select(`
+    .select(
+      `
       *,
       room:rooms!inner(*),
       stay:stays!cleaning_logs_stay_id_fkey(*, guest:guests!stays_guest_id_fkey(*)),
       employee:employees!inner(*)
-    `)
+    `
+    )
     .eq("room_id", roomId)
     .order("created_at", { ascending: false });
 
@@ -52,12 +56,14 @@ export const createCleaningLog = async (dto: CreateCleaningLogDto): Promise<Clea
       date: dto.date,
       observation: dto.observation || null,
     })
-    .select(`
+    .select(
+      `
       *,
       room:rooms!inner(*),
       stay:stays!cleaning_logs_stay_id_fkey(*, guest:guests!stays_guest_id_fkey(*)),
       employee:employees!inner(*)
-    `)
+    `
+    )
     .single();
 
   if (error) throw error;

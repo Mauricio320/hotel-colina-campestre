@@ -17,9 +17,7 @@ const RoomCleaningHistoryPage: React.FC = () => {
   const tabParam = searchParams.get("tab");
 
   const { data: room, isLoading: loadingRoom } = useRoomById(roomId || null);
-  const { data: cleaningLogs, isLoading: loadingLogs } = useCleaningLogsByRoom(
-    roomId || null,
-  );
+  const { data: cleaningLogs, isLoading: loadingLogs } = useCleaningLogsByRoom(roomId || null);
 
   const loading = loadingRoom || loadingLogs;
 
@@ -40,14 +38,14 @@ const RoomCleaningHistoryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-full p-12">
+      <div className="flex h-full items-center justify-center p-12">
         <ProgressSpinner />
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto flex flex-col gap-2 animate-fade-in pb-12">
+    <div className="animate-fade-in mx-auto flex max-w-6xl flex-col gap-2 pb-12">
       <PageHeader
         title={`Historial de Aseo - Habitación ${room?.room_number || ""}`}
         subtitle="Registro completo de limpiezas realizadas"
@@ -56,7 +54,7 @@ const RoomCleaningHistoryPage: React.FC = () => {
         onBack={handleBack}
       />
 
-      <div className="bg-white rounded-3xl p-1 shadow-xl border border-gray-100 overflow-hidden">
+      <div className="overflow-hidden rounded-3xl border border-gray-100 bg-white p-1 shadow-xl">
         <DataTable
           value={cleaningLogs || []}
           responsiveLayout="stack"
@@ -104,7 +102,7 @@ const RoomCleaningHistoryPage: React.FC = () => {
             headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
             body={(row) => (
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-700">
                   {row.employee ? row.employee.first_name[0] : "S"}
                 </div>
                 <span className="font-medium text-gray-700">
@@ -131,9 +129,7 @@ const RoomCleaningHistoryPage: React.FC = () => {
             header="Observaciones"
             headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
             body={(row) => (
-              <span className="text-gray-600 italic text-xs">
-                {row.observation || "-"}
-              </span>
+              <span className="text-xs text-gray-600 italic">{row.observation || "-"}</span>
             )}
           />
         </DataTable>

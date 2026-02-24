@@ -17,24 +17,30 @@ Un sistema de gestión hotelera construido con React, TypeScript y Supabase.
 ## 🚀 Instalación y ejecución local
 
 ### Requisitos previos
+
 - Node.js
 - pnpm (recomendado) o npm
 
 ### Pasos
 
 1. **Clonar el repositorio e instalar dependencias:**
+
    ```bash
    pnpm install
    ```
-   *(También puedes usar `npm install`)*
+
+   _(También puedes usar `npm install`)_
 
 2. **Configurar variables de entorno:**
    Crea un archivo `.env` en la raíz del proyecto agregando las siguientes variables obligatorias:
+
    ```env
    VITE_SUPABASE_URL=tu_supabase_url
    VITE_SUPABASE_ANON_KEY=tu_supabase_anon_key
    ```
-   *Opcional para características de IA (también en `.env.local` si prefieres):*
+
+   _Opcional para características de IA (también en `.env.local` si prefieres):_
+
    ```env
    GEMINI_API_KEY=tu_gemini_api_key
    ```
@@ -56,6 +62,7 @@ El proyecto sigue una arquitectura estricta de 3 capas para el manejo de datos:
 ## 👥 Roles de Usuario
 
 El sistema cuenta con un control de acceso basado en roles (RBAC) gestionado a través de Supabase Auth:
+
 - **Admin**: Acceso completo.
 - **Recepcionista**: Gestión de reservas, huéspedes, pagos y habitaciones.
 - **Limpieza**: Visualización de bitácoras de limpieza.

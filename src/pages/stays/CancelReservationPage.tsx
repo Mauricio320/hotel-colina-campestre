@@ -20,11 +20,7 @@ const CancelReservationPage: React.FC = () => {
   const { showBlockUI, hideBlockUI } = useBlockUI();
   const { employee } = useAuth();
 
-  const {
-    data: stay,
-    isLoading: stayLoading,
-    error: stayError,
-  } = useStayById(stayId || null);
+  const { data: stay, isLoading: stayLoading, error: stayError } = useStayById(stayId || null);
 
   const cancelStay = useCancelStay();
   const { data: roomStatuses } = useRoomStatuses();
@@ -73,8 +69,7 @@ const CancelReservationPage: React.FC = () => {
     }
 
     confirmDialog({
-      message:
-        "¿Esta seguro que desea cancelar esta reserva? Esta accion no se puede deshacer.",
+      message: "¿Esta seguro que desea cancelar esta reserva? Esta accion no se puede deshacer.",
       header: "Confirmar cancelacion",
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Si, cancelar",
@@ -90,7 +85,7 @@ const CancelReservationPage: React.FC = () => {
 
   if (stayLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
         <ProgressSpinner />
         <p className="text-gray-500">Cargando reserva...</p>
       </div>
@@ -99,35 +94,23 @@ const CancelReservationPage: React.FC = () => {
 
   if (stayError || !stay) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-4">
         <i className="pi pi-exclamation-circle text-5xl text-red-500"></i>
-        <h3 className="text-xl font-bold text-gray-800 text-center">
-          Reserva no encontrada
-        </h3>
-        <p className="text-gray-500 text-center">
-          No se pudo cargar la reserva. Verifica la URL.
-        </p>
+        <h3 className="text-center text-xl font-bold text-gray-800">Reserva no encontrada</h3>
+        <p className="text-center text-gray-500">No se pudo cargar la reserva. Verifica la URL.</p>
         {stayError && (
-          <p className="text-xs text-red-400 text-center max-w-xs">
-            Error: {stayError.message}
-          </p>
+          <p className="max-w-xs text-center text-xs text-red-400">Error: {stayError.message}</p>
         )}
       </div>
     );
   }
 
   const displayDate = dayjs().format("DD/MM/YYYY");
-  const guestName = stay.guest
-    ? `${stay.guest.first_name} ${stay.guest.last_name}`
-    : "Sin huesped";
+  const guestName = stay.guest ? `${stay.guest.first_name} ${stay.guest.last_name}` : "Sin huesped";
   const roomNumber = stay.room?.room_number || "-";
   const accommodationType = stay.room?.accommodation_types?.name || "-";
-  const checkInDate = stay.check_in_date
-    ? dayjs(stay.check_in_date).format("DD/MM/YYYY")
-    : "-";
-  const checkOutDate = stay.check_out_date
-    ? dayjs(stay.check_out_date).format("DD/MM/YYYY")
-    : "-";
+  const checkInDate = stay.check_in_date ? dayjs(stay.check_in_date).format("DD/MM/YYYY") : "-";
+  const checkOutDate = stay.check_out_date ? dayjs(stay.check_out_date).format("DD/MM/YYYY") : "-";
   const totalPrice =
     stay.total_price?.toLocaleString("es-CO", {
       style: "currency",
@@ -136,7 +119,7 @@ const CancelReservationPage: React.FC = () => {
     }) || "$0";
 
   return (
-    <div className="max-w-4xl mx-auto pb-12 animate-fade-in">
+    <div className="animate-fade-in mx-auto max-w-4xl pb-12">
       <ConfirmDialog />
       <PageHeader
         title={`Reserva #${stay.order_number || "-"}`}
@@ -148,10 +131,10 @@ const CancelReservationPage: React.FC = () => {
         backTooltip="Volver al calendario"
       />
 
-      <Card className="shadow-md border-0">
+      <Card className="border-0 shadow-md">
         <div className="flex flex-col gap-6">
-          <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-            <h3 className="text-sm font-black text-gray-500 uppercase tracking-wide mb-3">
+          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+            <h3 className="mb-3 text-sm font-black tracking-wide text-gray-500 uppercase">
               Informacion de la reserva
             </h3>
             <div className="grid grid-cols-2 gap-4">
@@ -175,13 +158,13 @@ const CancelReservationPage: React.FC = () => {
               </div>
               <div className="col-span-2">
                 <p className="text-xs text-gray-500">Total</p>
-                <p className="font-bold text-lg text-gray-800">{totalPrice}</p>
+                <p className="text-lg font-bold text-gray-800">{totalPrice}</p>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col gap-2">
-            <p className="text-sm font-black text-gray-500 uppercase tracking-wide">
+            <p className="text-sm font-black tracking-wide text-gray-500 uppercase">
               Motivo de cancelacion <span className="text-red-500">*</span>
             </p>
             <InputTextarea
@@ -189,18 +172,18 @@ const CancelReservationPage: React.FC = () => {
               onChange={(e) => setObservation(e.target.value)}
               placeholder="Ingrese el motivo por el cual se cancela la reserva..."
               rows={4}
-              className="w-full border-gray-200 rounded-xl"
+              className="w-full rounded-xl border-gray-200"
             />
             <p className="text-xs text-gray-400">
-              Este campo es obligatorio. La observacion quedara registrada en el
-              historial.
+              Este campo es obligatorio. La observacion quedara registrada en el historial.
             </p>
           </div>
 
           <Button
+            unstyled
             label="Cancelar Reserva"
             icon="pi pi-times-circle"
-            className="bg-red-500 hover:bg-red-600 border-none text-white w-full py-4 text-lg font-black rounded-2xl shadow-lg mt-2"
+            className="mt-2 w-full rounded-2xl border-none bg-red-500 py-4 text-lg font-black text-white shadow-lg hover:bg-red-600"
             onClick={() => {
               confirmCancel();
             }}

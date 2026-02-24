@@ -19,6 +19,6 @@ export const FormattedConflicts = (conflictingStays?: ConflictingStay[]) => {
               room_number: conflict.room.room_number,
             }
           : undefined,
-      }) as Stay,
+      }) as Stay
   );
 };

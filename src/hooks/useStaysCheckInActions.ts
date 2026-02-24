@@ -1,9 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/config/supabase';
-import { roomsApi } from '@/services/rooms/roomsApi';
-import { roomHistoryApi } from '@/services/room-history/roomHistoryApi';
-import { Stay } from '@/types';
-import dayjs from 'dayjs';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/config/supabase";
+import { roomsApi } from "@/services/rooms/roomsApi";
+import { roomHistoryApi } from "@/services/room-history/roomHistoryApi";
+import { Stay } from "@/types";
+import dayjs from "dayjs";
 
 interface CheckInParams {
   stay?: Stay;
@@ -19,27 +19,25 @@ export const useStaysCheckInActions = () => {
   const performCheckIn = useMutation({
     mutationFn: async (params: CheckInParams) => {
       const occupiedStatus = await supabase
-        .from('room_statuses')
-        .select('id')
-        .eq('name', 'Ocupado')
+        .from("room_statuses")
+        .select("id")
+        .eq("name", "Ocupado")
         .single();
 
       if (!occupiedStatus.data) {
-        throw new Error('Estado Ocupado no encontrado');
+        throw new Error("Estado Ocupado no encontrado");
       }
 
       const currentRoom = await supabase
-        .from('rooms')
-        .select('status_id')
-        .eq('id', params.roomId)
+        .from("rooms")
+        .select("status_id")
+        .eq("id", params.roomId)
         .single();
 
       const promises = [];
-      
+
       if (params.stay) {
-        promises.push(
-          supabase.from('stays').update({ status: 'Active' }).eq('id', params.stay.id)
-        );
+        promises.push(supabase.from("stays").update({ status: "Active" }).eq("id", params.stay.id));
       }
 
       promises.push(
@@ -54,15 +52,15 @@ export const useStaysCheckInActions = () => {
         previous_status_id: currentRoom.data?.status_id,
         new_status_id: occupiedStatus.data.id,
         employee_id: params.employeeId,
-        action_type: params.stay ? 'CHECK-IN-RESERVA' : 'CHECK-IN-DIRECTO',
-        observation: params.observation || 'Check-in sin observación',
+        action_type: params.stay ? "CHECK-IN-RESERVA" : "CHECK-IN-DIRECTO",
+        observation: params.observation || "Check-in sin observación",
       });
 
       return { success: true };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['rooms'] });
-      queryClient.invalidateQueries({ queryKey: ['stays'] });
+      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      queryClient.invalidateQueries({ queryKey: ["stays"] });
     },
   });
 

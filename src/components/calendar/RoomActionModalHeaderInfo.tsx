@@ -9,35 +9,33 @@ interface RoomActionModalHeaderInfoProps {
   accommodationTypeEnum?: AccommodationTypeEnum;
 }
 
-export const RoomActionModalHeaderInfo: React.FC<
-  RoomActionModalHeaderInfoProps
-> = ({ room, date, accommodationTypeEnum }) => {
+export const RoomActionModalHeaderInfo: React.FC<RoomActionModalHeaderInfoProps> = ({
+  room,
+  date,
+  accommodationTypeEnum,
+}) => {
   return (
-    <div className="bg-[#f5f2eb] rounded-xl p-4 border border-gray-200">
+    <div className="rounded-xl border border-gray-200 bg-[#f5f2eb] p-4">
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <i className="pi pi-calendar text-gray-500 text-sm"></i>
-            <span className="text-sm text-gray-600">
-              {dayjs(date).format("DD/MM/YYYY")}
-            </span>
+            <i className="pi pi-calendar text-sm text-gray-500"></i>
+            <span className="text-sm text-gray-600">{dayjs(date).format("DD/MM/YYYY")}</span>
           </div>
           {accommodationTypeEnum === AccommodationTypeEnum.HABITACION && (
             <div className="flex items-center gap-1.5">
-              <i className="pi pi-home text-gray-500 text-xs"></i>
-              <span className="text-sm font-bold text-gray-800">
-                Hab. {room?.room_number}
-              </span>
+              <i className="pi pi-home text-xs text-gray-500"></i>
+              <span className="text-sm font-bold text-gray-800">Hab. {room?.room_number}</span>
             </div>
           )}
         </div>
 
         {accommodationTypeEnum === AccommodationTypeEnum.HABITACION && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {room?.rates?.map((rate) => (
               <div
                 key={rate.id}
-                className="flex items-center justify-between bg-white p-2 px-3 rounded-lg border border-gray-200"
+                className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-2 px-3"
               >
                 <div className="flex items-center gap-2">
                   <i className="pi pi-users text-xs text-emerald-600"></i>
@@ -54,7 +52,7 @@ export const RoomActionModalHeaderInfo: React.FC<
         )}
 
         {accommodationTypeEnum === AccommodationTypeEnum.APARTAMENTO && (
-          <div className="bg-white p-3 rounded-lg border border-gray-200 flex items-center justify-between">
+          <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3">
             <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
               <i className="pi pi-building text-xs text-emerald-600"></i>
               Alquiler Completo

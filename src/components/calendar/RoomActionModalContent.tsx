@@ -42,8 +42,7 @@ export const RoomActionModalContent = ({
   const { employee } = useAuth();
   const { createRecord } = useRoomHistory();
 
-  const isHabitacion =
-    accommodationTypeEnum === AccommodationTypeEnum.HABITACION;
+  const isHabitacion = accommodationTypeEnum === AccommodationTypeEnum.HABITACION;
 
   const id = isHabitacion ? room?.id : accommodationType.id;
   const params = [
@@ -106,9 +105,7 @@ export const RoomActionModalContent = ({
 
     const targetStatusName = getTargetStatusName(action);
     const targetStatus = roomStatuses.find((s) => s.name === targetStatusName);
-    const disponibleId = roomStatuses.find(
-      (s) => s.name === RoomStatusEnum.DISPONIBLE,
-    )?.id;
+    const disponibleId = roomStatuses.find((s) => s.name === RoomStatusEnum.DISPONIBLE)?.id;
 
     if (!targetStatus) {
       showBlockUI("Error al encontrar el estado de la habitación");
@@ -181,73 +178,66 @@ const ActionsButtons = ({
   const navigate = useNavigate();
 
   // Verificar si es el día actual
-  const isToday =
-    date && dayjs(date).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD");
+  const isToday = date && dayjs(date).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD");
 
   // Verificar si ya tiene limpieza realizada
   const hasCleaning = room?.cleaning_log && room.cleaning_log.length > 0;
 
   const handleLimpieza = () => {
     const roomId =
-      accommodationTypeEnum === AccommodationTypeEnum.HABITACION
-        ? room?.id
-        : accommodationType?.id;
+      accommodationTypeEnum === AccommodationTypeEnum.HABITACION ? room?.id : accommodationType?.id;
 
     if (!roomId) return;
 
-    const queryParams = activeStay?.id
-      ? `?stay_id=${activeStay.id}&tab=${activeTab}`
-      : "";
+    const queryParams = activeStay?.id ? `?stay_id=${activeStay.id}&tab=${activeTab}` : "";
     navigate(`/limpieza/${roomId}${queryParams}`);
   };
 
   const handleMantenimiento = () => {
     const roomId =
-      accommodationTypeEnum === AccommodationTypeEnum.HABITACION
-        ? room?.id
-        : accommodationType?.id;
+      accommodationTypeEnum === AccommodationTypeEnum.HABITACION ? room?.id : accommodationType?.id;
 
     if (!roomId) return;
 
-    const queryParams = activeStay?.id
-      ? `?stay_id=${activeStay.id}&tab=${activeTab}`
-      : "";
+    const queryParams = activeStay?.id ? `?stay_id=${activeStay.id}&tab=${activeTab}` : "";
     navigate(`/mantenimiento/${roomId}${queryParams}`);
   };
 
   return (
-    <div
-      className={`grid ${isToday ? "grid-cols-2" : "grid-cols-1"} justify-center gap-3`}
-    >
+    <div className={`grid ${isToday ? "grid-cols-2" : "grid-cols-1"} justify-center gap-3`}>
       {isToday && (
         <Button
+          unstyled
           icon="pi pi-sign-in"
           label="Check-in"
-          className="p-3 bg-[#ff3d47] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
+          className="flex h-auto flex-col items-center gap-1 rounded-xl border-none bg-[#ff3d47] p-3 font-bold text-white shadow-sm"
           onClick={onGoToCheckIn}
         />
       )}
       <Button
+        unstyled
         icon="pi pi-calendar"
         label="Reservar"
-        className="p-3 bg-[#f9b000] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
+        className="flex h-auto flex-col items-center gap-1 rounded-xl border-none bg-[#f9b000] p-3 font-bold text-white shadow-sm"
         onClick={onGoToBooking}
       />
       {/* Botones de Limpieza y Mantenimiento - solo visibles el día actual */}
       {isToday && (
         <>
           <Button
+            unstyled
             icon="pi pi-sparkles"
             label={hasCleaning ? "Limpieza realizada" : "Limpieza"}
-            className="p-3 bg-[#2d79ff] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
+            className="flex h-auto flex-col items-center gap-1 rounded-xl border-none bg-[#2d79ff] p-3 font-bold text-white shadow-sm"
             hidden={accommodationTypeEnum === AccommodationTypeEnum.APARTAMENTO}
             disabled={hasCleaning}
             onClick={handleLimpieza}
           />
           <Button
+            unstyled
             icon="pi pi-wrench"
             label="Mantenimiento"
-            className="p-3 bg-[#6e7687] border-none text-white font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
+            className="flex h-auto flex-col items-center gap-1 rounded-xl border-none bg-[#6e7687] p-3 font-bold text-white shadow-sm"
             hidden={accommodationTypeEnum === AccommodationTypeEnum.APARTAMENTO}
             onClick={handleMantenimiento}
           />

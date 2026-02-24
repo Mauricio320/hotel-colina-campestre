@@ -13,13 +13,10 @@ export const useBulkUpdateRoomRates = () => {
   return useMutation({
     mutationFn: async ({ updates, employeeId }: BulkUpdateParams) => {
       // Usar RPC para hacer todo en una sola transacción en el servidor
-      const { error } = await supabase.rpc(
-        "bulk_update_room_rates_with_history",
-        {
-          updates: JSON.stringify(updates),
-          employee_id: employeeId,
-        }
-      );
+      const { error } = await supabase.rpc("bulk_update_room_rates_with_history", {
+        updates: JSON.stringify(updates),
+        employee_id: employeeId,
+      });
 
       if (error) throw error;
     },

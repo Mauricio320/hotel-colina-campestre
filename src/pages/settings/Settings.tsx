@@ -25,8 +25,7 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
     const { data } = await supabase.from("settings").select("*");
     if (data) {
       const iva = data.find((s) => s.key === "iva_percentage")?.value || 19;
-      const mat =
-        data.find((s) => s.key === "extra_mattress_price")?.value || 30000;
+      const mat = data.find((s) => s.key === "extra_mattress_price")?.value || 30000;
       reset({ iva, extra_mattress: mat });
     }
     setLoading(false);
@@ -34,7 +33,7 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
 
   if (userRole !== Role.Admin) {
     return (
-      <div className="p-4 bg-red-50 text-red-700 rounded border border-red-200">
+      <div className="rounded border border-red-200 bg-red-50 p-4 text-red-700">
         Acceso denegado. Solo administradores.
       </div>
     );
@@ -42,10 +41,7 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
 
   const onSubmit = async (data: any) => {
     try {
-      await supabase
-        .from("settings")
-        .update({ value: data.iva })
-        .eq("key", "iva_percentage");
+      await supabase.from("settings").update({ value: data.iva }).eq("key", "iva_percentage");
       await supabase
         .from("settings")
         .update({ value: data.extra_mattress })
@@ -60,14 +56,9 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Parámetros Globales"
-        icon="pi-cog"
-        color="gray"
-        variant="simple"
-      />
+      <PageHeader title="Parámetros Globales" icon="pi-cog" color="gray" variant="simple" />
 
-      <Card className="shadow-sm max-w-xl border-t-4 border-emerald-600">
+      <Card className="max-w-xl border-t-4 border-emerald-600 shadow-sm">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
             <label htmlFor="iva" className="font-bold text-gray-700">
@@ -85,8 +76,7 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
               maxFractionDigits={0}
             />
             <small className="text-gray-500">
-              Este valor se sumará al total si el huésped solicita Factura
-              Electrónica.
+              Este valor se sumará al total si el huésped solicita Factura Electrónica.
             </small>
           </div>
 
@@ -106,16 +96,16 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
               maxFractionDigits={0}
             />
             <small className="text-gray-500">
-              Costo fijo por noche al agregar una colchoneta extra a la
-              habitación.
+              Costo fijo por noche al agregar una colchoneta extra a la habitación.
             </small>
           </div>
 
           <Button
+            unstyled
             type="submit"
             label="Actualizar Parámetros"
             icon="pi pi-save"
-            className="bg-emerald-600 mt-2 p-3 font-bold text-white"
+            className="mt-2 bg-emerald-600 p-3 font-bold text-white"
           />
         </form>
       </Card>

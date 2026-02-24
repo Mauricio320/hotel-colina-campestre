@@ -16,13 +16,7 @@ export const useStayConflict = ({
   active = true,
 }: ConflictParams) => {
   return useQuery({
-    queryKey: [
-      "stay-conflicts",
-      accommodationTypeId,
-      checkInDate,
-      checkOutDate,
-      active,
-    ],
+    queryKey: ["stay-conflicts", accommodationTypeId, checkInDate, checkOutDate, active],
     queryFn: async () => {
       if (!accommodationTypeId || !checkInDate || !checkOutDate || !active) {
         return [];
@@ -50,7 +44,7 @@ export const useStayConflict = ({
           *,
           guest:guests!stays_guest_id_fkey(*),
           room:rooms(*)
-        `,
+        `
         )
         .eq("active", true)
         .lt("check_in_date", checkOutStr)
@@ -59,7 +53,7 @@ export const useStayConflict = ({
       // Filtro jerárquico: El conflicto puede ser con el alojamiento mismo o con cualquiera de sus habitaciones
       if (roomIds.length > 0) {
         query = query.or(
-          `accommodation_type_id.eq.${accommodationTypeId},room_id.in.(${roomIds.join(",")})`,
+          `accommodation_type_id.eq.${accommodationTypeId},room_id.in.(${roomIds.join(",")})`
         );
       } else {
         query = query.eq("accommodation_type_id", accommodationTypeId);

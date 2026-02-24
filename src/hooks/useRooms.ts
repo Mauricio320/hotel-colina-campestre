@@ -38,13 +38,7 @@ export const useRooms = (category?: string) => {
   });
 
   const upsertRoom = useMutation({
-    mutationFn: async ({
-      room,
-      rates,
-    }: {
-      room: Partial<Room>;
-      rates: Partial<RoomRate>[];
-    }) => {
+    mutationFn: async ({ room, rates }: { room: Partial<Room>; rates: Partial<RoomRate>[] }) => {
       const { data: savedRoom, error: roomError } = await supabase
         .from("rooms")
         .upsert(room)
@@ -60,9 +54,7 @@ export const useRooms = (category?: string) => {
           person_count: r.person_count,
           rate: r.rate,
         }));
-        const { error: ratesError } = await supabase
-          .from("room_rates")
-          .insert(ratesToInsert);
+        const { error: ratesError } = await supabase.from("room_rates").insert(ratesToInsert);
         if (ratesError) throw ratesError;
       }
 
@@ -115,8 +107,7 @@ export const useRooms = (category?: string) => {
         new_status_id: statusId,
         action_type: actionType,
         observation:
-          observation ||
-          `Cambio de estado manual a ${actionType} para el día ${targetDate}`,
+          observation || `Cambio de estado manual a ${actionType} para el día ${targetDate}`,
         employee_id: employeeId,
       });
       if (logError) throw logError;
@@ -137,11 +128,7 @@ interface RoomsQueryCategoryParams {
   endDate: string;
 }
 
-export const RoomsQueryAndStayCategory = ({
-  id,
-  startDate,
-  endDate,
-}: RoomsQueryCategoryParams) => {
+export const RoomsQueryAndStayCategory = ({ id, startDate, endDate }: RoomsQueryCategoryParams) => {
   return useQuery({
     queryKey: ["rooms", id, startDate, endDate],
     queryFn: async ({ signal }) => {
@@ -153,7 +140,7 @@ export const RoomsQueryAndStayCategory = ({
           `id, status, order_number, room_id, cancelled, guest_id, employee_id, check_in_date, check_out_date, total_price, paid_amount, payment_method_id, has_extra_mattress, extra_mattress_price, is_invoice_requested, iva_amount, observation, origin_was_reservation, iva_percentage, person_count, extra_mattress_count, extra_mattress_unit_price, accommodation_type_id, room_status_id, active,
           room:rooms(*),
           guest:guests!stays_guest_id_fkey(*),
-          room_statuses(*)`,
+          room_statuses(*)`
         )
         .eq("accommodation_type_id", id)
         .eq("cancelled", false)
@@ -177,7 +164,7 @@ export const RoomsQueryAndStayCategory = ({
     ),
     cleaning_log: cleaning_logs(id),
     accommodation_types(*)
-  `,
+  `
         )
         .eq("is_active", true)
         .eq("accommodation_type_id", id)
@@ -201,9 +188,7 @@ export const RoomsQueryAndStayCategory = ({
             room.stays.push(stay as unknown as Stay);
           }
         });
-        room.stays.sort((a, b) =>
-          a.check_in_date.localeCompare(b.check_in_date),
-        );
+        room.stays.sort((a, b) => a.check_in_date.localeCompare(b.check_in_date));
         return room;
       });
     },
@@ -264,7 +249,7 @@ export const useRoomHistory = (roomId: string | null) => {
       const { data, error } = await supabase
         .from("room_history")
         .select(
-          "*, employee:employees(*), new_status:room_statuses!new_status_id(*), prev_status:room_statuses!previous_status_id(*), stay:stays(*)",
+          "*, employee:employees(*), new_status:room_statuses!new_status_id(*), prev_status:room_statuses!previous_status_id(*), stay:stays(*)"
         )
         .eq("room_id", roomId)
         .order("timestamp", { ascending: false });

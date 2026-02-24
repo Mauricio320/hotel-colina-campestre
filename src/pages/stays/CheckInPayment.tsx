@@ -69,18 +69,14 @@ export const CheckInPayment = () => {
 
   const navigateCalendar = () => navigate(`/calendar?tab=${tabParam}`);
 
-  const getStatusId = (name: RoomStatusEnum) =>
-    roomStatuses?.find((rs) => rs.name === name)?.id;
+  const getStatusId = (name: RoomStatusEnum) => roomStatuses?.find((rs) => rs.name === name)?.id;
 
   const handlePayment = async () => {
     showBlockUI("Procesando pago...");
-    const isFullPayment =
-      getValues("paid_amount") >= stay?.total_price - paymentSummary?.totalPaid;
+    const isFullPayment = getValues("paid_amount") >= stay?.total_price - paymentSummary?.totalPaid;
     const room_status_current_id = getStatusId(RoomStatusEnum.OCUPADO);
 
-    const customObservation = isFullPayment
-      ? "Liquidación completa de reserva"
-      : "Abono parcial";
+    const customObservation = isFullPayment ? "Liquidación completa de reserva" : "Abono parcial";
     const isApartmentAction = !!stay.accommodation_type_id;
 
     const keyId = isApartmentAction
@@ -110,8 +106,7 @@ export const CheckInPayment = () => {
       ...keyId,
       stay_id: stayId,
       previous_status_id: stay.room_status_id,
-      new_status_id:
-        pendingBalance > 0 ? stay.room_status_id : room_status_current_id,
+      new_status_id: pendingBalance > 0 ? stay.room_status_id : room_status_current_id,
       employee_id: employee.id,
       action_type:
         getValues("paid_amount") >= stay?.total_price
@@ -121,9 +116,7 @@ export const CheckInPayment = () => {
     });
 
     setTimeout(() => {
-      Promise.all([refetch(), refetchPaymentSummary()]).then(() =>
-        hideBlockUI(),
-      );
+      Promise.all([refetch(), refetchPaymentSummary()]).then(() => hideBlockUI());
     }, 1000);
   };
 
@@ -156,7 +149,7 @@ export const CheckInPayment = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto pb-12 animate-fade-in">
+    <div className="animate-fade-in mx-auto max-w-2xl pb-12">
       <PageHeader
         title="CheckIn/Abonos Reserva"
         subtitle={dayjs().format("DD/MM/YYYY")}
@@ -166,22 +159,19 @@ export const CheckInPayment = () => {
         backTooltip="Volver al calendario"
       />
 
-      <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 flex flex-col gap-6">
+      <div className="flex flex-col gap-6 rounded-3xl border border-gray-100 bg-white p-8 shadow-xl">
         <StaySummaryHeader stay={stay} />
         <div className="h-1 bg-gray-100"></div>
-        <PaymentHistoryTable
-          payments={paymentSummary?.payments || []}
-          variant="compact"
-        />
+        <PaymentHistoryTable payments={paymentSummary?.payments || []} variant="compact" />
 
         <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <span className="font-bold text-gray-500">Total Estadía</span>
             <span className="text-xl font-bold text-gray-800">
               $ {stay?.total_price?.toLocaleString() || 0}
             </span>
           </div>
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <span className="font-bold text-gray-500">Saldo pendiente </span>
             <span className="text-xl font-bold text-gray-800">
               $ {pendingBalance.toLocaleString()}
@@ -192,9 +182,9 @@ export const CheckInPayment = () => {
         {/* Sección de Abono */}
         {pendingBalance > 0 && (
           <div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 bg-[#eeebe4] rounded-2xl">
-                <span className="text-xs text-gray-400 font-bold uppercase block mb-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="rounded-2xl bg-[#eeebe4] p-4">
+                <span className="mb-2 block text-xs font-bold text-gray-400 uppercase">
                   Método de Pago
                 </span>
                 <Controller
@@ -214,8 +204,8 @@ export const CheckInPayment = () => {
                 />
               </div>
 
-              <div className="p-4 bg-[#eeebe4] rounded-2xl">
-                <span className="text-xs text-gray-400 font-bold uppercase block mb-2">
+              <div className="rounded-2xl bg-[#eeebe4] p-4">
+                <span className="mb-2 block text-xs font-bold text-gray-400 uppercase">
                   Monto a Abonar
                 </span>
                 <Controller
@@ -239,40 +229,38 @@ export const CheckInPayment = () => {
             </div>
 
             <Button
-              label={
-                pendingBalance > 0 ? "Confirmar Abono" : "Confirmar Check-In"
-              }
+              unstyled
+              label={pendingBalance > 0 ? "Confirmar Abono" : "Confirmar Check-In"}
               icon="pi pi-check-circle"
-              className={`w-full mt-4  border-none text-white py-3 rounded-2xl font-black shadow-lg  transition-all bg-emerald-500 hover:bg-emerald-600`}
+              className={`mt-4 w-full rounded-2xl border-none bg-emerald-500 py-3 font-black text-white shadow-lg transition-all hover:bg-emerald-600`}
               onClick={handlePayment}
               disabled={
-                !watch("paid_amount") ||
-                watch("paid_amount") <= 0 ||
-                !watch("payment_method_id")
+                !watch("paid_amount") || watch("paid_amount") <= 0 || !watch("payment_method_id")
               }
             />
           </div>
         )}
         {pendingBalance <= 0 && (
           <div>
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-              <div className="p-4 bg-[#eeebe4] rounded-2xl">
-                <span className="text-xs text-gray-400 font-bold uppercase block mb-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-1">
+              <div className="rounded-2xl bg-[#eeebe4] p-4">
+                <span className="mb-2 block text-xs font-bold text-gray-400 uppercase">
                   Observación del Check-in (Opcional)
                 </span>
                 <InputTextarea
                   {...register("observation")}
                   rows={3}
-                  className="w-full bg-[#eeebe4] border-gray-100"
+                  className="w-full border-gray-100 bg-[#eeebe4]"
                   placeholder="Ingrese notas adicionales o novedades aquí..."
                 />
               </div>
             </div>
 
             <Button
+              unstyled
               label="Confirmar Check-In"
               icon="pi pi-check-circle"
-              className={`w-full mt-4  border-none text-white py-3 rounded-2xl font-black shadow-lg  transition-all bg-emerald-500 hover:bg-emerald-600`}
+              className={`mt-4 w-full rounded-2xl border-none bg-emerald-500 py-3 font-black text-white shadow-lg transition-all hover:bg-emerald-600`}
               onClick={handleCheckIn}
             />
           </div>

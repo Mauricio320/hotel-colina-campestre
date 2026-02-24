@@ -24,10 +24,7 @@ const InvoiceDetailPage: React.FC = () => {
   // Función para calcular precio por noche
   const calculatePricePerNight = () => {
     if (!stay || nights <= 0) return 0;
-    const basePrice =
-      stay.total_price -
-      (stay.iva_amount || 0) -
-      (stay.extra_mattress_price || 0);
+    const basePrice = stay.total_price - (stay.iva_amount || 0) - (stay.extra_mattress_price || 0);
     return Math.round(basePrice / nights);
   };
 
@@ -48,10 +45,10 @@ const InvoiceDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <ProgressSpinner className="w-12 h-12 mb-4" strokeWidth="4" />
-          <p className="text-gray-600 font-medium">Cargando factura...</p>
+          <ProgressSpinner className="mb-4 h-12 w-12" strokeWidth="4" />
+          <p className="font-medium text-gray-600">Cargando factura...</p>
         </div>
       </div>
     );
@@ -59,16 +56,15 @@ const InvoiceDetailPage: React.FC = () => {
 
   if (error || !stay) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center max-w-md">
-          <i className="pi pi-exclamation-triangle text-red-600 text-4xl mb-3"></i>
-          <h2 className="text-xl font-bold text-red-800 mb-2">
-            Error al cargar factura
-          </h2>
-          <p className="text-red-600 mb-4">
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="max-w-md text-center">
+          <i className="pi pi-exclamation-triangle mb-3 text-4xl text-red-600"></i>
+          <h2 className="mb-2 text-xl font-bold text-red-800">Error al cargar factura</h2>
+          <p className="mb-4 text-red-600">
             {error || "No se encontró la información de la reserva."}
           </p>
           <Button
+            unstyled
             label="Volver a Pagos"
             icon="pi pi-arrow-left"
             onClick={handleBack}
@@ -80,7 +76,7 @@ const InvoiceDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto pb-12 animate-fade-in print:p-4">
+    <div className="animate-fade-in mx-auto max-w-6xl pb-12 print:p-4">
       <PageHeader
         title={`Factura #${stay?.order_number || "N/A"}`}
         subtitle={
@@ -96,20 +92,18 @@ const InvoiceDetailPage: React.FC = () => {
         backTooltip="Volver a pagos"
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Columna Izquierda - Info Cliente y Reserva */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6 lg:col-span-2">
           {/* Header Compacto */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex justify-between items-start">
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 border border-gray-300 rounded flex items-center justify-center">
+                <div className="flex h-10 w-10 items-center justify-center rounded border border-gray-300">
                   <i className="pi pi-building text-xl text-gray-600"></i>
                 </div>
                 <div>
-                  <h1 className="text-xl font-semibold text-gray-900">
-                    Hotel Colina Campestre
-                  </h1>
+                  <h1 className="text-xl font-semibold text-gray-900">Hotel Colina Campestre</h1>
                   <p className="text-xs text-gray-600">NIT: 123.456.789-0</p>
                 </div>
               </div>
@@ -118,40 +112,34 @@ const InvoiceDetailPage: React.FC = () => {
                   Factura #{stay?.order_number || "N/A"}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {new Date(
-                    stay?.created_at || new Date(),
-                  ).toLocaleDateString()}{" "}
-                  - {new Date().toLocaleTimeString()}
+                  {new Date(stay?.created_at || new Date()).toLocaleDateString()} -{" "}
+                  {new Date().toLocaleTimeString()}
                 </p>
               </div>
             </div>
           </div>
 
           {/* Datos del Cliente */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-gray-500">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 text-gray-500 shadow-sm">
+            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
               <i className="pi pi-user text-gray-600"></i>
               Datos del Cliente
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <span className="text-xs text-gray-500 uppercase block mb-1">
-                  Nombre Completo
-                </span>
+                <span className="mb-1 block text-xs text-gray-500 uppercase">Nombre Completo</span>
                 <p className="font-semibold text-gray-900">
                   {stay.guest?.first_name} {stay.guest?.last_name}
                 </p>
               </div>
               <div>
-                <span className="text-xs text-gray-500 uppercase block mb-1">
-                  Identificación
-                </span>
+                <span className="mb-1 block text-xs text-gray-500 uppercase">Identificación</span>
                 <p className="font-semibold text-gray-900">
                   {stay.guest?.doc_type}: {stay.guest?.doc_number}
                 </p>
               </div>
               <div>
-                <span className="text-xs text-gray-500 uppercase block mb-1">
+                <span className="mb-1 block text-xs text-gray-500 uppercase">
                   Contacto Principal
                 </span>
                 <p className="font-semibold text-gray-900">
@@ -159,7 +147,7 @@ const InvoiceDetailPage: React.FC = () => {
                 </p>
               </div>
               <div>
-                <span className="text-xs text-gray-500 uppercase block mb-1">
+                <span className="mb-1 block text-xs text-gray-500 uppercase">
                   Correo Electrónico
                 </span>
                 <p className="font-semibold text-gray-900">
@@ -167,17 +155,13 @@ const InvoiceDetailPage: React.FC = () => {
                 </p>
               </div>
               <div>
-                <span className="text-xs text-gray-500 uppercase block mb-1">
-                  Dirección
-                </span>
+                <span className="mb-1 block text-xs text-gray-500 uppercase">Dirección</span>
                 <p className="font-semibold text-gray-900">
                   {stay.guest?.address || "No especificada"}
                 </p>
               </div>
               <div>
-                <span className="text-xs text-gray-500 uppercase block mb-1">
-                  Ciudad
-                </span>
+                <span className="mb-1 block text-xs text-gray-500 uppercase">Ciudad</span>
                 <p className="font-semibold text-gray-900">
                   {stay.guest?.city || "No especificada"}
                 </p>
@@ -186,66 +170,46 @@ const InvoiceDetailPage: React.FC = () => {
           </div>
 
           {/* Detalles de Reserva */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
               <i className="pi pi-calendar text-gray-600"></i>
               Detalles de Reserva
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-3 border border-gray-100">
-                <i className="pi pi-sign-in text-emerald-600 text-xl mb-2"></i>
-                <span className="text-xs text-gray-500 uppercase block">
-                  Entrada
-                </span>
-                <p className="font-semibold text-gray-900">
-                  {stay.check_in_date}
-                </p>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <div className="border border-gray-100 p-3 text-center">
+                <i className="pi pi-sign-in mb-2 text-xl text-emerald-600"></i>
+                <span className="block text-xs text-gray-500 uppercase">Entrada</span>
+                <p className="font-semibold text-gray-900">{stay.check_in_date}</p>
               </div>
-              <div className="text-center p-3 border border-gray-100">
-                <i className="pi pi-sign-out text-emerald-600 text-xl mb-2"></i>
-                <span className="text-xs text-gray-500 uppercase block">
-                  Salida
-                </span>
-                <p className="font-semibold text-gray-900">
-                  {stay.check_out_date}
-                </p>
+              <div className="border border-gray-100 p-3 text-center">
+                <i className="pi pi-sign-out mb-2 text-xl text-emerald-600"></i>
+                <span className="block text-xs text-gray-500 uppercase">Salida</span>
+                <p className="font-semibold text-gray-900">{stay.check_out_date}</p>
               </div>
-              <div className="text-center p-3 border border-gray-100">
-                <i className="pi pi-home text-emerald-600 text-xl mb-2"></i>
-                <span className="text-xs text-gray-500 uppercase block">
-                  Habitación
-                </span>
-                <p className="font-semibold text-gray-900">
-                  {stay.room?.room_number}
-                </p>
+              <div className="border border-gray-100 p-3 text-center">
+                <i className="pi pi-home mb-2 text-xl text-emerald-600"></i>
+                <span className="block text-xs text-gray-500 uppercase">Habitación</span>
+                <p className="font-semibold text-gray-900">{stay.room?.room_number}</p>
               </div>
-              <div className="text-center p-3 border border-gray-100">
-                <i className="pi pi-clock text-emerald-600 text-xl mb-2"></i>
-                <span className="text-xs text-gray-500 uppercase block">
-                  Noches
-                </span>
+              <div className="border border-gray-100 p-3 text-center">
+                <i className="pi pi-clock mb-2 text-xl text-emerald-600"></i>
+                <span className="block text-xs text-gray-500 uppercase">Noches</span>
                 <p className="font-semibold text-gray-900">{nights}</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-4">
-              <div className="text-center p-3 border border-gray-100">
-                <i className="pi pi-users text-emerald-600 text-xl mb-2"></i>
-                <span className="text-xs text-gray-500 uppercase block">
-                  Personas
-                </span>
+            <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-2">
+              <div className="border border-gray-100 p-3 text-center">
+                <i className="pi pi-users mb-2 text-xl text-emerald-600"></i>
+                <span className="block text-xs text-gray-500 uppercase">Personas</span>
                 <p className="font-semibold text-gray-900">
                   {stay.person_count || "No especificado"}
                 </p>
               </div>
               {stay.extra_mattress_count > 0 && (
-                <div className="text-center p-3 border border-gray-100">
-                  <i className="pi pi-th-large text-emerald-600 text-xl mb-2"></i>
-                  <span className="text-xs text-gray-500 uppercase block">
-                    Colchonetas
-                  </span>
-                  <p className="font-semibold text-gray-900">
-                    {stay.extra_mattress_count}
-                  </p>
+                <div className="border border-gray-100 p-3 text-center">
+                  <i className="pi pi-th-large mb-2 text-xl text-emerald-600"></i>
+                  <span className="block text-xs text-gray-500 uppercase">Colchonetas</span>
+                  <p className="font-semibold text-gray-900">{stay.extra_mattress_count}</p>
                 </div>
               )}
             </div>
@@ -254,44 +218,42 @@ const InvoiceDetailPage: React.FC = () => {
 
         {/* Columna Derecha - Resumen Financiero */}
         <div className="space-y-6">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-6">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+          <div className="sticky top-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
               <i className="pi pi-money-bill text-gray-600"></i>
               Resumen Financiero
             </h3>
             <div className="space-y-3">
               {stay.price_override && stay.price_override.length > 0 && (
                 <>
-                  <div className="flex justify-between items-center text-gray-500">
+                  <div className="flex items-center justify-between text-gray-500">
                     <span className="text-sm">Precio Estándar</span>
                     <span className="text-sm font-medium line-through">
                       $ {stay.price_override[0].original_price.toLocaleString()}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-green-600">
-                    <span className="text-sm flex items-center gap-1 font-medium">
+                  <div className="flex items-center justify-between text-green-600">
+                    <span className="flex items-center gap-1 text-sm font-medium">
                       <i className="pi pi-tag text-xs" /> Descuento
                     </span>
                     <span className="text-sm font-bold">
-                      - ${" "}
-                      {stay.price_override[0].discount_amount.toLocaleString()}
+                      - $ {stay.price_override[0].discount_amount.toLocaleString()}
                     </span>
                   </div>
-                  <div className="text-[10px] text-right text-gray-400 italic border-b border-gray-100 pb-2">
-                    Autorizado por:{" "}
-                    {stay.price_override[0].employee?.first_name}{" "}
+                  <div className="border-b border-gray-100 pb-2 text-right text-[10px] text-gray-400 italic">
+                    Autorizado por: {stay.price_override[0].employee?.first_name}{" "}
                     {stay.price_override[0].employee?.last_name}
                   </div>
                 </>
               )}
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Subtotal</span>
                 <span className="text-sm font-medium text-gray-900">
                   $ {(stay.total_price - stay.iva_amount).toLocaleString()}
                 </span>
               </div>
               {stay.extra_mattress_count > 0 && (
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">
                     Colchonetas ({stay.extra_mattress_count})
                   </span>
@@ -301,7 +263,7 @@ const InvoiceDetailPage: React.FC = () => {
                 </div>
               )}
               {stay.is_invoice_requested && (
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">IVA (19%)</span>
                   <span className="text-sm font-medium text-gray-900">
                     $ {stay.iva_amount.toLocaleString()}
@@ -309,27 +271,23 @@ const InvoiceDetailPage: React.FC = () => {
                 </div>
               )}
               <div className="border-t border-gray-300 pt-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-semibold text-gray-900 uppercase">
-                    Total Orden
-                  </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-gray-900 uppercase">Total Orden</span>
                   <span className="text-lg font-bold text-gray-900">
                     $ {stay.total_price.toLocaleString()}
                   </span>
                 </div>
               </div>
               <div className="border-t border-gray-300 pt-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">
-                    Pagos Realizados
-                  </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Pagos Realizados</span>
                   <span className="text-sm font-medium text-red-600">
                     - $ {totalPaymentsVerified.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex justify-between items-center mt-3">
+                <div className="mt-3 flex items-center justify-between">
                   <span
-                    className={`text-sm font-medium uppercase flex items-center gap-2 ${pendingAmount > 0 ? "text-red-600" : "text-green-600"}`}
+                    className={`flex items-center gap-2 text-sm font-medium uppercase ${pendingAmount > 0 ? "text-red-600" : "text-green-600"}`}
                   >
                     <i
                       className={`pi ${pendingAmount > 0 ? "pi-exclamation-circle" : "pi-check-circle"}`}
@@ -348,14 +306,12 @@ const InvoiceDetailPage: React.FC = () => {
             {stay.is_invoice_requested && (
               <div className="mt-4 flex items-center gap-2 text-xs">
                 <i className="pi pi-file-text text-blue-600"></i>
-                <p className="text-blue-600 font-medium">
-                  Se requiere factura electrónica
-                </p>
+                <p className="font-medium text-blue-600">Se requiere factura electrónica</p>
               </div>
             )}
 
             {stay.payment_method && (
-              <p className="text-xs text-gray-500 text-right mt-3 uppercase">
+              <p className="mt-3 text-right text-xs text-gray-500 uppercase">
                 Método de pago: {stay.payment_method.name}
               </p>
             )}
@@ -364,67 +320,56 @@ const InvoiceDetailPage: React.FC = () => {
       </div>
 
       {/* Tabla de Conceptos Detallada */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-gray-500 mt-[24px]">
-        <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+      <div className="mt-[24px] rounded-2xl border border-gray-100 bg-white p-6 text-gray-500 shadow-sm">
+        <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
           <i className="pi pi-file-text text-gray-600"></i>
           Detalle de Servicios
         </h3>
-        <div className="border border-gray-200 rounded overflow-hidden">
+        <div className="overflow-hidden rounded border border-gray-200">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="py-2 px-3 text-left text-xs font-medium text-gray-600 uppercase">
+                <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase">
                   Concepto
                 </th>
-                <th className="py-2 px-3 text-center text-xs font-medium text-gray-600 uppercase">
+                <th className="px-3 py-2 text-center text-xs font-medium text-gray-600 uppercase">
                   Cant.
                 </th>
-                <th className="py-2 px-3 text-right text-xs font-medium text-gray-600 uppercase">
+                <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 uppercase">
                   Unit.
                 </th>
-                <th className="py-2 px-3 text-right text-xs font-medium text-gray-600 uppercase">
+                <th className="px-3 py-2 text-right text-xs font-medium text-gray-600 uppercase">
                   Subtotal
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               <tr>
-                <td className="py-2 px-3">
-                  <p className="font-medium text-sm text-gray-900">
-                    Servicio de Hospedaje
-                  </p>
+                <td className="px-3 py-2">
+                  <p className="text-sm font-medium text-gray-900">Servicio de Hospedaje</p>
                   <p className="text-xs text-gray-500">{stay.room?.category}</p>
                 </td>
-                <td className="py-2 px-3 text-center text-sm text-gray-700">
-                  {nights}
-                </td>
-                <td className="py-2 px-3 text-right text-sm text-gray-700">
+                <td className="px-3 py-2 text-center text-sm text-gray-700">{nights}</td>
+                <td className="px-3 py-2 text-right text-sm text-gray-700">
                   ${calculatePricePerNight().toLocaleString()}
                 </td>
-                <td className="py-2 px-3 text-right font-medium text-sm text-gray-900">
+                <td className="px-3 py-2 text-right text-sm font-medium text-gray-900">
                   ${(calculatePricePerNight() * nights).toLocaleString()}
                 </td>
               </tr>
               {stay.has_extra_mattress && stay.extra_mattress_count > 0 && (
                 <tr>
-                  <td className="py-2 px-3">
-                    <p className="font-medium text-sm text-gray-900">
-                      Colchoneta Adicional
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Servicio extra por noche
-                    </p>
+                  <td className="px-3 py-2">
+                    <p className="text-sm font-medium text-gray-900">Colchoneta Adicional</p>
+                    <p className="text-xs text-gray-500">Servicio extra por noche</p>
                   </td>
-                  <td className="py-2 px-3 text-center text-sm text-gray-700">
+                  <td className="px-3 py-2 text-center text-sm text-gray-700">
                     {stay.extra_mattress_count}
                   </td>
-                  <td className="py-2 px-3 text-right text-sm text-gray-700">
-                    $
-                    {(
-                      stay.extra_mattress_price / stay.extra_mattress_count
-                    ).toLocaleString()}
+                  <td className="px-3 py-2 text-right text-sm text-gray-700">
+                    ${(stay.extra_mattress_price / stay.extra_mattress_count).toLocaleString()}
                   </td>
-                  <td className="py-2 px-3 text-right font-medium text-sm text-gray-900">
+                  <td className="px-3 py-2 text-right text-sm font-medium text-gray-900">
                     ${stay.extra_mattress_price.toLocaleString()}
                   </td>
                 </tr>
@@ -435,12 +380,12 @@ const InvoiceDetailPage: React.FC = () => {
       </div>
 
       {/* Sección Inferior - Detalle de Servicios y Pagos */}
-      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 mt-6">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-1">
         {/* Pagos y Observaciones */}
         <div className="space-y-6">
           {/* Tabla de Pagos/Abonos */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-4">
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
               <i className="pi pi-history text-gray-600"></i>
               Historial de Pagos
             </h3>
@@ -449,26 +394,20 @@ const InvoiceDetailPage: React.FC = () => {
 
           {/* Información Adicional */}
           {stay && stay.person_count > 1 && (
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-3">
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700">
                 <i className="pi pi-users text-gray-600"></i>
                 Resumen Ocupación
               </h3>
               <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-3 border border-gray-100">
-                  <i className="pi pi-user text-emerald-600 text-2xl mb-2"></i>
-                  <span className="text-xs text-gray-500 uppercase block">
-                    Personas
-                  </span>
-                  <p className="text-xl font-bold text-gray-900">
-                    {stay.person_count}
-                  </p>
+                <div className="border border-gray-100 p-3 text-center">
+                  <i className="pi pi-user mb-2 text-2xl text-emerald-600"></i>
+                  <span className="block text-xs text-gray-500 uppercase">Personas</span>
+                  <p className="text-xl font-bold text-gray-900">{stay.person_count}</p>
                 </div>
-                <div className="text-center p-3 border border-gray-100">
-                  <i className="pi pi-calendar text-emerald-600 text-2xl mb-2"></i>
-                  <span className="text-xs text-gray-500 uppercase block">
-                    Noches
-                  </span>
+                <div className="border border-gray-100 p-3 text-center">
+                  <i className="pi pi-calendar mb-2 text-2xl text-emerald-600"></i>
+                  <span className="block text-xs text-gray-500 uppercase">Noches</span>
                   <p className="text-xl font-bold text-gray-900">{nights}</p>
                 </div>
               </div>
@@ -477,16 +416,14 @@ const InvoiceDetailPage: React.FC = () => {
 
           {/* Observaciones */}
           {stay && stay.observation && (
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-3">
+            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700">
                 <i className="pi pi-comment text-gray-600"></i>
                 Observaciones
               </h3>
               <div className="flex items-start gap-3">
-                <i className="pi pi-info-circle text-amber-600 mt-1"></i>
-                <p className="text-sm text-gray-700 italic">
-                  "{stay.observation}"
-                </p>
+                <i className="pi pi-info-circle mt-1 text-amber-600"></i>
+                <p className="text-sm text-gray-700 italic">"{stay.observation}"</p>
               </div>
             </div>
           )}
@@ -494,16 +431,15 @@ const InvoiceDetailPage: React.FC = () => {
       </div>
 
       {/* Footer de Factura */}
-      <div className="mt-8 bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center">
-        <div className="flex items-center justify-center gap-2 mb-2">
+      <div className="mt-8 rounded-2xl border border-gray-100 bg-white p-6 text-center shadow-sm">
+        <div className="mb-2 flex items-center justify-center gap-2">
           <i className="pi pi-heart-fill text-red-500"></i>
-          <p className="text-sm text-gray-600 font-medium">
+          <p className="text-sm font-medium text-gray-600">
             Gracias por elegir Hotel Colina Campestre
           </p>
         </div>
         <p className="text-xs text-gray-500">
-          Documento de control interno. Generado el{" "}
-          {new Date().toLocaleString()}
+          Documento de control interno. Generado el {new Date().toLocaleString()}
         </p>
       </div>
     </div>

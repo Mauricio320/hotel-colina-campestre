@@ -38,10 +38,12 @@ npm run preview
 ## Environment Variables
 
 Required in `.env`:
+
 - `VITE_SUPABASE_URL` - Supabase project URL
 - `VITE_SUPABASE_ANON_KEY` - Supabase anonymous key
 
 Optional:
+
 - `GEMINI_API_KEY` - For AI features (mapped to `process.env.GEMINI_API_KEY` in vite.config.ts)
 
 ## Project Structure
@@ -131,6 +133,7 @@ export const cancelStay = async (params: CancelStayParams): Promise<void> => {
 ```
 
 **Naming conventions:**
+
 - Folder: `src/services/{table-name}/` (e.g., `stays/`, `rooms/`, `guests/`)
 - File: Same as table name (e.g., `staysApi.ts`, `roomsApi.ts`)
 - Functions: Descriptive action names (e.g., `createStay`, `updateRoom`, `fetchGuestById`)
@@ -166,7 +169,7 @@ export const useStays = () => {
 
   // Write operations use useMutation
   const cancelStayMutation = useMutation({
-    mutationFn: cancelStay,  // Calls service function
+    mutationFn: cancelStay, // Calls service function
     onSuccess: () => {
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ["stays"] });
@@ -182,6 +185,7 @@ export const useStays = () => {
 ```
 
 **Naming conventions:**
+
 - File: `use{TableName}.ts` for queries, `use{Action}{Table}` for specific actions
 - Examples: `useStays.ts`, `useMoveStay.ts`, `useCancelStay.ts`
 - Returns: Object with `{table}Query` for reads, mutation functions for writes
@@ -225,6 +229,7 @@ const SomePage = () => {
 **Scenario:** Moving a reservation to another room
 
 1. **Service** (`src/services/stays/stayMovesApi.ts`):
+
 ```typescript
 export const moveStay = async (params: MoveStayParams): Promise<void> => {
   // Direct Supabase operations
@@ -238,6 +243,7 @@ export const moveStay = async (params: MoveStayParams): Promise<void> => {
 ```
 
 2. **Hook** (`src/hooks/useMoveStay.ts`):
+
 ```typescript
 export const useMoveStay = () => {
   const queryClient = useQueryClient();
@@ -253,6 +259,7 @@ export const useMoveStay = () => {
 ```
 
 3. **Component** (`src/pages/stays/MoveReservationPage.tsx`):
+
 ```typescript
 const MoveReservationPage = () => {
   const moveStay = useMoveStay();
@@ -266,6 +273,7 @@ const MoveReservationPage = () => {
 ### Authentication
 
 Auth is handled via `useAuth` hook which combines:
+
 - Supabase Auth for authentication state
 - React Query for employee data fetching
 - Role-based access control (Admin, Recepcionista, Limpieza, Mantenimiento)
@@ -273,6 +281,7 @@ Auth is handled via `useAuth` hook which combines:
 ### Routing
 
 Routes are defined in `App.tsx` with role-based protection:
+
 - Public: `/login`, `/register-admin`
 - Protected: All other routes wrapped in Layout component
 - Role checks use `employee?.role?.name` from auth context
@@ -367,7 +376,7 @@ const MyForm = () => {
       </div>
 
       {/* Submit button - no disabled state needed */}
-      <Button
+      <Button   unstyled
         type="submit"
         label="Guardar"
         className="bg-amber-500 hover:bg-amber-600 border-none text-white w-full py-4 text-lg font-black rounded-2xl"
@@ -378,6 +387,7 @@ const MyForm = () => {
 ```
 
 **Key patterns:**
+
 - Use `Controller` for PrimeReact components (Dropdown, Calendar, InputText, etc.)
 - Set `mode: "onChange"` for real-time validation
 - Use `watch()` to react to field changes
@@ -417,17 +427,18 @@ const parsedDate = dayjs(isoString);
 ```
 
 **NEVER use native Date methods:**
+
 ```typescript
 // ❌ BAD - Never use native Date
 new Date().toLocaleDateString("es-CO");
 new Date().toLocaleTimeString("es-CO");
 new Date().toISOString();
-new Date(dateString)
+new Date(dateString);
 
 // ❌ BAD - Don't use Date.parse or toLocaleString
-Date.parse(dateString)
-date.toLocaleDateString()
-date.toLocaleTimeString()
+Date.parse(dateString);
+date.toLocaleDateString();
+date.toLocaleTimeString();
 ```
 
 **Day.js is already configured** with Spanish locale in `src/config/locale.ts`. All dates should be formatted using dayjs.
@@ -435,10 +446,12 @@ date.toLocaleTimeString()
 ## Key Domain Concepts
 
 ### Stay Lifecycle
+
 - `Reserved` → `Active` (on check-in) → `Completed` (on check-out)
 - Can be `Cancelled` at any point before completion
 
 ### Room Statuses
+
 - `Disponible` (Available)
 - `Ocupado` (Occupied)
 - `Reservado` (Reserved)
@@ -446,9 +459,11 @@ date.toLocaleTimeString()
 - `Mantenimiento` (Maintenance)
 
 ### Accommodation Types
+
 Room types are defined in `accommodation_types` table, replacing the legacy `category` field on rooms.
 
 ### Payment Types
+
 - `ABONO_RESERVA` - Partial reservation payment
 - `PAGO_COMPLETO_RESERVA` - Full reservation payment
 - `PAGO_CHECKIN_DIRECTO` - Direct check-in payment
@@ -457,6 +472,7 @@ Room types are defined in `accommodation_types` table, replacing the legacy `cat
 ## Path Aliases
 
 `@/` maps to `./src/` (configured in vite.config.ts and tsconfig.json):
+
 ```typescript
 import { supabase } from "@/config/supabase";
 import { useAuth } from "@/hooks/useAuth";
@@ -469,19 +485,19 @@ import { useAuth } from "@/hooks/useAuth";
 Variables and function names must be descriptive enough to eliminate the need for comments.
 
 **Variable names:**
+
 ```typescript
 // ❌ Bad - needs comment
 const t = dayjs().format("YYYY-MM-DD"); // today's date
-const hc = room.stays?.some(s => s.check_out_date === t); // has checkout
+const hc = room.stays?.some((s) => s.check_out_date === t); // has checkout
 
 // ✅ Good - self-explanatory
 const todayFormatted = dayjs().format("YYYY-MM-DD");
-const hasCheckoutToday = room.stays?.some(
-  stay => stay.check_out_date === todayFormatted
-);
+const hasCheckoutToday = room.stays?.some((stay) => stay.check_out_date === todayFormatted);
 ```
 
 **Function names:**
+
 ```typescript
 // ❌ Bad - needs comment
 function process(data: Room[]) {
@@ -496,9 +512,10 @@ function filterRoomsRequiringCleaningToday(rooms: Room[]) {
 ```
 
 **Boolean variables:** Use prefixes like `is`, `has`, `should`, `can`:
+
 ```typescript
 const isLoading = true;
-const hasActiveStay = room.stays?.some(stay => stay.active);
+const hasActiveStay = room.stays?.some((stay) => stay.active);
 const shouldShowCleaningIndicator = hasCheckoutToday || hasCheckInToday;
 ```
 

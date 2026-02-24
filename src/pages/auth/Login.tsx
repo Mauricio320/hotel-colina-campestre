@@ -36,11 +36,11 @@ const Login: React.FC = () => {
 
       if (err.message === "Invalid login credentials") {
         setErrorMsg(
-          "Correo o contraseña incorrectos. Si aún no tienes cuenta, regístrate como administrador.",
+          "Correo o contraseña incorrectos. Si aún no tienes cuenta, regístrate como administrador."
         );
       } else if (err.message?.includes("Email not confirmed")) {
         setErrorMsg(
-          "Tu correo no ha sido confirmado. Revisa tu bandeja de entrada o desactiva la confirmación en Supabase.",
+          "Tu correo no ha sido confirmado. Revisa tu bandeja de entrada o desactiva la confirmación en Supabase."
         );
       } else {
         setErrorMsg("Error al intentar acceder: " + err.message);
@@ -51,55 +51,51 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] flex">
+    <div className="flex min-h-screen bg-[#faf8f5]">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-emerald-600 flex-col justify-center items-center p-12 relative overflow-hidden">
+      <div className="relative hidden flex-col items-center justify-center overflow-hidden bg-emerald-600 p-12 lg:flex lg:w-1/2">
         {/* Decorative circles */}
-        <div className="absolute top-0 left-0 w-64 h-64 bg-emerald-500 rounded-full -translate-x-1/2 -translate-y-1/2 opacity-50"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-emerald-700 rounded-full translate-x-1/3 translate-y-1/3 opacity-30"></div>
-        <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-emerald-400 rounded-full -translate-x-1/2 -translate-y-1/2 opacity-20"></div>
+        <div className="absolute top-0 left-0 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500 opacity-50"></div>
+        <div className="absolute right-0 bottom-0 h-96 w-96 translate-x-1/3 translate-y-1/3 rounded-full bg-emerald-700 opacity-30"></div>
+        <div className="absolute top-1/2 left-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-400 opacity-20"></div>
 
-        <div className="relative z-10 text-center max-w-md">
+        <div className="relative z-10 max-w-md text-center">
           <img
             src="/images/img-name-hotel-log.png"
             alt="Hotel Colina Campestre"
-            className="w-48 h-auto mb-8 mx-auto brightness-0 invert"
+            className="mx-auto mb-8 h-auto w-48 brightness-0 invert"
           />
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Bienvenido
-          </h1>
-          <p className="text-emerald-100 text-lg leading-relaxed">
+          <h1 className="mb-4 text-4xl font-bold text-white">Bienvenido</h1>
+          <p className="text-lg leading-relaxed text-emerald-100">
             Sistema de gestión hotelera para el control de reservas, habitaciones y pagos.
           </p>
         </div>
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 md:p-12">
+      <div className="flex w-full flex-col items-center justify-center p-6 md:p-12 lg:w-1/2">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
+          <div className="mb-8 text-center lg:hidden">
             <img
               src="/images/img-name-hotel-log.png"
               alt="Hotel Colina Campestre"
-              className="w-32 h-auto mx-auto"
+              className="mx-auto h-auto w-32"
             />
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+          <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-lg">
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                Iniciar Sesión
-              </h2>
-              <p className="text-gray-500 text-sm">
+              <h2 className="mb-2 text-2xl font-bold text-gray-800">Iniciar Sesión</h2>
+              <p className="text-sm text-gray-500">
                 Ingresa tus credenciales para acceder al sistema
               </p>
             </div>
 
             {errorMsg && (
-              <div className="mb-6 animate-shake">
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-start gap-3">
-                  <i className="pi pi-exclamation-circle text-red-500 mt-0.5"></i>
+              <div className="animate-shake mb-6">
+                <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+                  <i className="pi pi-exclamation-circle mt-0.5 text-red-500"></i>
                   <span className="text-sm">{errorMsg}</span>
                 </div>
               </div>
@@ -107,14 +103,17 @@ const Login: React.FC = () => {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                <label
+                  htmlFor="email"
+                  className="flex items-center gap-2 text-sm font-bold text-gray-700"
+                >
                   <i className="pi pi-envelope text-emerald-600"></i>
                   Correo Electrónico
                 </label>
                 <InputText
                   id="email"
                   {...register("email", { required: "El correo es obligatorio" })}
-                  className={`w-full px-4 py-3 border rounded-xl transition-all ${
+                  className={`w-full rounded-xl border px-4 py-3 transition-all ${
                     errors.email
                       ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200"
                       : "border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
@@ -123,14 +122,12 @@ const Login: React.FC = () => {
                   autoComplete="off"
                 />
                 {errors.email && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.email.message}
-                  </p>
+                  <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-700">
                   <i className="pi pi-lock text-emerald-600"></i>
                   Contraseña
                 </label>
@@ -144,7 +141,7 @@ const Login: React.FC = () => {
                         <input
                           type={showPassword ? "text" : "password"}
                           {...field}
-                          className={`w-full px-4 py-3 pr-12 border rounded-xl transition-all outline-none ${
+                          className={`w-full rounded-xl border px-4 py-3 pr-12 transition-all outline-none ${
                             errors.password
                               ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200"
                               : "border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
@@ -153,7 +150,7 @@ const Login: React.FC = () => {
                         />
                         <button
                           type="button"
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors"
+                          className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-400 transition-colors hover:text-emerald-600"
                           onClick={() => setShowPassword(!showPassword)}
                         >
                           <i className={`pi ${showPassword ? "pi-eye-slash" : "pi-eye"}`}></i>
@@ -163,22 +160,21 @@ const Login: React.FC = () => {
                   />
                 </div>
                 {errors.password && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.password.message}
-                  </p>
+                  <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
                 )}
               </div>
 
               <Button
+                unstyled
                 type="submit"
                 label="Iniciar Sesión"
                 icon="pi pi-arrow-right"
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl border-0 shadow-md hover:shadow-lg transition-all duration-200"
+                className="w-full rounded-xl border-0 bg-emerald-600 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:bg-emerald-700 hover:shadow-lg"
                 loading={loading}
               />
             </form>
 
-            <div className="mt-6 pt-6 border-t border-gray-100">
+            <div className="mt-6 border-t border-gray-100 pt-6">
               <div className="flex items-center justify-center gap-4 text-xs text-gray-400">
                 <span>© Hotel Colina Campestre</span>
                 <span>•</span>

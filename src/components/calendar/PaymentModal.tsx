@@ -40,24 +40,21 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       className="w-full max-w-md rounded-2xl"
     >
       <div className="flex flex-col gap-5 py-2">
-        <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
-          <p className="text-emerald-800 text-sm font-medium">
+        <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
+          <p className="text-sm font-medium text-emerald-800">
             <i className="pi pi-info-circle mr-2"></i>
-            Para proceder con el check-in de una reserva, el saldo pendiente
-            debe ser cero.
+            Para proceder con el check-in de una reserva, el saldo pendiente debe ser cero.
           </p>
         </div>
         <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-center text-sm font-bold text-gray-500">
+          <div className="flex items-center justify-between text-sm font-bold text-gray-500">
             <span>SALDO PENDIENTE:</span>
-            <span className="text-red-600 font-black text-xl">
+            <span className="text-xl font-black text-red-600">
               $ {pendingAmount.toLocaleString()}
             </span>
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-black text-gray-700">
-              Método de Pago
-            </label>
+            <label className="text-sm font-black text-gray-700">Método de Pago</label>
             <Dropdown
               value={paymentMethodId}
               options={paymentMethods}
@@ -69,9 +66,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             />
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-black text-gray-700">
-              Monto a Abonar
-            </label>
+            <label className="text-sm font-black text-gray-700">Monto a Abonar</label>
             <InputNumber
               value={newPaymentAmount}
               onValueChange={(e) => onNewPaymentAmountChange(e.value || 0)}
@@ -85,21 +80,21 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="mt-4 grid grid-cols-2 gap-4">
           <Button
+            unstyled
             label="Volver"
             className="p-button-text p-button-plain font-bold"
             onClick={onHide}
           />
           <Button
+            unstyled
             label="Confirmar Abono"
             icon="pi pi-money-bill"
-            className="bg-green-600 border-none text-white font-black py-4 rounded-xl shadow-lg"
+            className="rounded-xl border-none bg-green-600 py-4 font-black text-white shadow-lg"
             onClick={onConfirmNewPayment}
             loading={isProcessingPayment}
-            disabled={
-              newPaymentAmount <= 0 || !paymentMethodId || !isPaymentMethodValid
-            }
+            disabled={newPaymentAmount <= 0 || !paymentMethodId || !isPaymentMethodValid}
           />
         </div>
       </div>

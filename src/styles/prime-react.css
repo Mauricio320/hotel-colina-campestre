@@ -1,6 +1,6 @@
-@import "primereact/resources/themes/lara-light-indigo/theme.css";
+@import "primereact/resources/themes/tailwind-light/theme.css";
 @import "primeicons/primeicons.css";
-@import "tailwindcss";
+
 /* ============ Variables de Colores del Hotel ============ */
 :root {
   /* Colores principales del sistema */
@@ -22,6 +22,37 @@
   /* Espaciado y bordes */
   --hotel-border-radius: 0.75rem;
   --hotel-spacing: 0.75rem;
+}
+
+.p-sidebar-header {
+  display: none !important;
+}
+
+.p-sidebar-content {
+  padding: 0 !important;
+}
+
+.p-button.p-button-text {
+  background-color: transparent;
+  color: var(--color-gray-400);
+  border-color: transparent;
+}
+
+.p-button:focus {
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 4px var(--color-gray-200),
+    0 1px 2px 0 rgba(0, 0, 0, 0);
+}
+
+[data-pc-name="button"] {
+  cursor: pointer !important;
+}
+
+.p-button {
+  background: var(--gray-100) !important;
+  color: var(--color-gray-500) !important;
+  border: 1px solid var(--hotel-border) !important;
 }
 
 .p-accordion-content {

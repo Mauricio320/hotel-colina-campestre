@@ -43,11 +43,7 @@ const CleaningTaskPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { showBlockUI, hideBlockUI } = useBlockUI();
-  const {
-    data: room,
-    isLoading: roomLoading,
-    error: roomError,
-  } = useRoomById(room_id || null);
+  const { data: room, isLoading: roomLoading, error: roomError } = useRoomById(room_id || null);
   const {
     data: receptionistEmployees,
     isLoading: employeesLoading,
@@ -62,8 +58,7 @@ const CleaningTaskPage: React.FC = () => {
   const tabParam = searchParams.get("tab");
   const displayDate = dayjs().format("YYYY-MM-DD");
 
-  const [selectedCleaningType, setSelectedCleaningType] =
-    useState<CleaningType | null>(null);
+  const [selectedCleaningType, setSelectedCleaningType] = useState<CleaningType | null>(null);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
 
   const [observation, setObservation] = useState<string>("");
@@ -128,7 +123,7 @@ const CleaningTaskPage: React.FC = () => {
 
   if (roomLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
         <ProgressSpinner />
         <p className="text-gray-500">Cargando habitación...</p>
       </div>
@@ -137,25 +132,21 @@ const CleaningTaskPage: React.FC = () => {
 
   if (roomError || !room) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-4">
         <i className="pi pi-exclamation-circle text-5xl text-red-500"></i>
-        <h3 className="text-xl font-bold text-gray-800 text-center">
-          Habitación no encontrada
-        </h3>
-        <p className="text-gray-500 text-center">
+        <h3 className="text-center text-xl font-bold text-gray-800">Habitación no encontrada</h3>
+        <p className="text-center text-gray-500">
           No se pudo cargar la habitación. Verifica la URL.
         </p>
         {roomError && (
-          <p className="text-xs text-red-400 text-center max-w-xs">
-            Error: {roomError.message}
-          </p>
+          <p className="max-w-xs text-center text-xs text-red-400">Error: {roomError.message}</p>
         )}
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto pb-12 animate-fade-in">
+    <div className="animate-fade-in mx-auto max-w-4xl pb-12">
       <PageHeader
         title={`Hab ${room.room_number} · ${accommodationTypeName}`}
         subtitle={displayDate}
@@ -166,10 +157,10 @@ const CleaningTaskPage: React.FC = () => {
         backTooltip="Volver al calendario"
       />
 
-      <Card className="shadow-md border-0">
+      <Card className="border-0 shadow-md">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">
-            <p className="text-sm font-black text-gray-500 uppercase tracking-wide">
+            <p className="text-sm font-black tracking-wide text-gray-500 uppercase">
               Tipo de limpieza
             </p>
             <div className="grid grid-cols-2 gap-3">
@@ -177,13 +168,13 @@ const CleaningTaskPage: React.FC = () => {
                 <button
                   key={type.value}
                   onClick={() => handleCleaningTypeSelect(type.value)}
-                  className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
+                  className={`flex flex-col items-center justify-center rounded-xl border-2 p-4 transition-all ${
                     selectedCleaningType === type.value
                       ? `${type.color} border-transparent text-white shadow-lg`
-                      : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                      : "border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100"
                   }`}
                 >
-                  <i className={`${type.icon} text-3xl mb-2`}></i>
+                  <i className={`${type.icon} mb-2 text-3xl`}></i>
                   <span className="font-bold">{type.label}</span>
                 </button>
               ))}
@@ -191,26 +182,22 @@ const CleaningTaskPage: React.FC = () => {
           </div>
 
           <div className="flex flex-col gap-3">
-            <p className="text-sm font-black text-gray-500 uppercase tracking-wide">
-              Encargado
-            </p>
+            <p className="text-sm font-black tracking-wide text-gray-500 uppercase">Encargado</p>
 
             {employeesLoading ? (
               <div className="flex items-center justify-center p-4">
                 <ProgressSpinner style={{ width: "2rem", height: "2rem" }} />
               </div>
             ) : employeesError ? (
-              <div className="text-center p-4 text-red-500">
-                <i className="pi pi-exclamation-circle text-2xl mb-2"></i>
+              <div className="p-4 text-center text-red-500">
+                <i className="pi pi-exclamation-circle mb-2 text-2xl"></i>
                 <p className="text-sm">Error al cargar empleados</p>
               </div>
             ) : employees.length === 0 ? (
-              <div className="text-center p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-                <i className="pi pi-users text-3xl text-gray-400 mb-2"></i>
-                <p className="text-gray-500 text-sm">
-                  No hay empleados con rol "Recepcionista"
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
+              <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-6 text-center">
+                <i className="pi pi-users mb-2 text-3xl text-gray-400"></i>
+                <p className="text-sm text-gray-500">No hay empleados con rol "Recepcionista"</p>
+                <p className="mt-1 text-xs text-gray-400">
                   Contacta al administrador para crear empleados con este rol
                 </p>
               </div>
@@ -220,14 +207,14 @@ const CleaningTaskPage: React.FC = () => {
                   <button
                     key={emp.id}
                     onClick={() => handleEmployeeSelect(emp.id)}
-                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${
+                    className={`flex items-center gap-3 rounded-xl border-2 p-4 text-left transition-all ${
                       selectedEmployeeId === emp.id
                         ? "border-emerald-500 bg-emerald-50 shadow-sm"
                         : "border-gray-200 bg-white hover:bg-gray-50"
                     }`}
                   >
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                      className={`flex h-10 w-10 items-center justify-center rounded-full font-bold ${
                         selectedEmployeeId === emp.id
                           ? "bg-emerald-500 text-white"
                           : "bg-gray-200 text-gray-600"
@@ -243,7 +230,7 @@ const CleaningTaskPage: React.FC = () => {
                       <p className="text-xs text-gray-500">Recepcionista</p>
                     </div>
                     {selectedEmployeeId === emp.id && (
-                      <i className="pi pi-check-circle text-emerald-500 text-xl ml-auto"></i>
+                      <i className="pi pi-check-circle ml-auto text-xl text-emerald-500"></i>
                     )}
                   </button>
                 ))}
@@ -252,7 +239,7 @@ const CleaningTaskPage: React.FC = () => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <p className="text-sm font-black text-gray-500 uppercase tracking-wide">
+            <p className="text-sm font-black tracking-wide text-gray-500 uppercase">
               Observación (opcional)
             </p>
             <InputTextarea
@@ -260,20 +247,17 @@ const CleaningTaskPage: React.FC = () => {
               onChange={(e) => setObservation(e.target.value)}
               placeholder="¿Algo para reportar?"
               rows={3}
-              className="w-full border-gray-200 rounded-xl"
+              className="w-full rounded-xl border-gray-200"
             />
           </div>
 
           <Button
+            unstyled
             label="Guardar Registro"
             icon="pi pi-check"
-            className="bg-emerald-600 hover:bg-emerald-700 border-none text-white w-full py-4 text-lg font-black rounded-2xl shadow-lg mt-2"
+            className="mt-2 w-full rounded-2xl border-none bg-emerald-600 py-4 text-lg font-black text-white shadow-lg hover:bg-emerald-700"
             onClick={handleSubmit}
-            disabled={
-              !isFormValid ||
-              createCleaningLog.isPending ||
-              employees.length === 0
-            }
+            disabled={!isFormValid || createCleaningLog.isPending || employees.length === 0}
             loading={createCleaningLog.isPending}
           />
         </div>

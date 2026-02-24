@@ -1,8 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  fetchPaymentsByCategory,
-  PaymentWithRelations,
-} from "@/services/payments/paymentsApi";
+import { fetchPaymentsByCategory, PaymentWithRelations } from "@/services/payments/paymentsApi";
 
 export const usePaymentsByCategory = (categoryId: string | null) => {
   return useQuery<PaymentWithRelations[]>({

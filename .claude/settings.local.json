@@ -1,0 +1,25 @@
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "sk-kimi-zk3ni7KLTRnlUXzOMnr0bl8rM9TX1fSw2oXtVd5ZePJG0Vze4BY5sbQNvqhiEJIj",
+    "ANTHROPIC_BASE_URL": "https://api.kimi.com/coding/",
+    "ANTHROPIC_MODEL": "kimi-k2.5",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "kimi-k2.5",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "kimi-k2.5",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "kimi-k2.5",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "kimi-k2.5"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "Bash(git log:*)",
+      "Bash(git remote set-head:*)",
+      "Bash(gh repo view:*)",
+      "Bash(pnpm uninstall:*)",
+      "Bash(pnpm add:*)",
+      "Bash(head:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)"
+    ]
+  }
+}

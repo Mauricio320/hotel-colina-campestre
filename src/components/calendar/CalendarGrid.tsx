@@ -68,16 +68,10 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
 
   const getActiveStay = (room: Room, date: Date) => {
     const dateStr = dayjs(date).format("YYYY-MM-DD");
-    return room.stays?.find(
-      (s) => dateStr >= s.check_in_date && dateStr <= s.check_out_date,
-    );
+    return room.stays?.find((s) => dateStr >= s.check_in_date && dateStr <= s.check_out_date);
   };
 
-  const handleRoomClick = async (
-    roomC: Room,
-    date: Date,
-    stay: Stay | null,
-  ) => {
+  const handleRoomClick = async (roomC: Room, date: Date, stay: Stay | null) => {
     setRoom(roomC);
     setSelectedDate(date);
     setActiveStay(stay);
@@ -180,9 +174,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
         <div className="flex flex-col gap-5 py-2">
           <RoomActionModalHeaderInfo
             accommodationTypeEnum={
-              room
-                ? AccommodationTypeEnum.HABITACION
-                : AccommodationTypeEnum.APARTAMENTO
+              room ? AccommodationTypeEnum.HABITACION : AccommodationTypeEnum.APARTAMENTO
             }
             date={selectedDate}
             room={room}

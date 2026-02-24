@@ -91,9 +91,7 @@ const RoomFormPage: React.FC = () => {
 
   const onSave = async (data: any) => {
     try {
-      const defaultStatusId = roomStatuses?.find(
-        (s) => s.name === "Disponible",
-      )?.id;
+      const defaultStatusId = roomStatuses?.find((s) => s.name === "Disponible")?.id;
 
       await upsertRoom.mutateAsync({
         room: {
@@ -120,16 +118,14 @@ const RoomFormPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-full p-12">
+      <div className="flex h-full items-center justify-center p-12">
         <ProgressSpinner />
       </div>
     );
   }
 
   const getPageTitle = () => {
-    return isEditMode
-      ? `Editar Habitación ${selectedRoom?.room_number || ""}`
-      : "Nueva Habitación";
+    return isEditMode ? `Editar Habitación ${selectedRoom?.room_number || ""}` : "Nueva Habitación";
   };
 
   const getPageSubtitle = () => {
@@ -139,7 +135,7 @@ const RoomFormPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto flex flex-col gap-2 animate-fade-in pb-12">
+    <div className="animate-fade-in mx-auto flex max-w-4xl flex-col gap-2 pb-12">
       <PageHeader
         title={getPageTitle()}
         subtitle={getPageSubtitle()}
@@ -148,29 +144,25 @@ const RoomFormPage: React.FC = () => {
         onBack={handleBack}
       />
 
-      <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+      <div className="rounded-3xl border border-gray-100 bg-white p-8 shadow-xl">
         <form onSubmit={handleSubmit(onSave)} className="flex flex-col gap-8">
           {/* Información General */}
           <section>
-            <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <h3 className="mb-6 flex items-center gap-2 text-xl font-bold text-gray-800">
               <i className="pi pi-info-circle text-emerald-500"></i>
               Información General
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-bold text-gray-700">
-                  Número de Habitación
-                </label>
+                <label className="text-sm font-bold text-gray-700">Número de Habitación</label>
                 <InputText
                   {...register("room_number", { required: true })}
-                  className={`w-full p-3 rounded-xl border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 ${errors.room_number ? "p-invalid" : ""}`}
+                  className={`w-full rounded-xl border-gray-200 p-3 focus:border-emerald-500 focus:ring-emerald-500 ${errors.room_number ? "p-invalid" : ""}`}
                   placeholder="Ej: 101, Cabaña 1"
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-bold text-gray-700">
-                  Categoría
-                </label>
+                <label className="text-sm font-bold text-gray-700">Categoría</label>
                 <Controller
                   name="category"
                   control={control}
@@ -185,9 +177,7 @@ const RoomFormPage: React.FC = () => {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-bold text-gray-700">
-                  Camas Dobles
-                </label>
+                <label className="text-sm font-bold text-gray-700">Camas Dobles</label>
                 <Controller
                   name="beds_double"
                   control={control}
@@ -204,9 +194,7 @@ const RoomFormPage: React.FC = () => {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-bold text-gray-700">
-                  Camas Sencillas
-                </label>
+                <label className="text-sm font-bold text-gray-700">Camas Sencillas</label>
                 <Controller
                   name="beds_single"
                   control={control}
@@ -232,7 +220,7 @@ const RoomFormPage: React.FC = () => {
                   render={({ field }) => (
                     <InputTextarea
                       {...field}
-                      className="w-full p-3 h-[50px] rounded-xl border-gray-200 focus:border-emerald-500 min-h-[50px]"
+                      className="h-[50px] min-h-[50px] w-full rounded-xl border-gray-200 p-3 focus:border-emerald-500"
                       placeholder="Detalles de la habitación, equipamiento, etc."
                     />
                   )}
@@ -245,27 +233,26 @@ const RoomFormPage: React.FC = () => {
 
           {/* Configuración de Tarifas */}
           <section>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="flex items-center gap-2 text-xl font-bold text-gray-800">
                 <i className="pi pi-money-bill text-emerald-500"></i>
                 Configuración de Tarifas
               </h3>
               <Button
+                unstyled
                 type="button"
                 label="Nueva Tarifa"
-                className="bg-emerald-600 w-[150px] hover:bg-emerald-700 text-white border-none rounded-xl font-bold "
-                onClick={() =>
-                  append({ person_count: fields.length + 1, rate: 80000 })
-                }
+                className="w-[150px] rounded-xl border-none bg-emerald-600 font-bold text-white hover:bg-emerald-700"
+                onClick={() => append({ person_count: fields.length + 1, rate: 80000 })}
               />
             </div>
-            <div className="border border-gray-100 rounded-xl overflow-hidden shadow-sm">
-              <div className="grid grid-cols-[1fr_auto_1fr_auto] gap-4 bg-primary-h p-4 items-center border-b border-gray-100">
-                <div className="text-xs font-bold text-gray-500 uppercase tracking-wider text-center">
+            <div className="overflow-hidden rounded-xl border border-gray-100 shadow-sm">
+              <div className="bg-primary-h grid grid-cols-[1fr_auto_1fr_auto] items-center gap-4 border-b border-gray-100 p-4">
+                <div className="text-center text-xs font-bold tracking-wider text-gray-500 uppercase">
                   Personas
                 </div>
                 <div className="w-8"></div>
-                <div className="text-xs font-bold text-gray-500 uppercase tracking-wider text-center">
+                <div className="text-center text-xs font-bold tracking-wider text-gray-500 uppercase">
                   Precio Noche (COP)
                 </div>
                 <div className="w-10"></div>
@@ -275,7 +262,7 @@ const RoomFormPage: React.FC = () => {
                 {fields.map((field, index) => (
                   <div
                     key={field.id}
-                    className="grid grid-cols-[1fr_auto_1fr_auto] gap-4 p-4 items-center hover:bg-gray-50 transition-colors"
+                    className="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-4 p-4 transition-colors hover:bg-gray-50"
                   >
                     <div>
                       <Controller
@@ -321,9 +308,10 @@ const RoomFormPage: React.FC = () => {
                     </div>
 
                     <Button
+                      unstyled
                       type="button"
                       icon="pi pi-trash"
-                      className="p-button-text text-white p-button-rounded p-button-danger hover:bg-red-50 w-10 h-10"
+                      className="p-button-text p-button-rounded p-button-danger h-10 w-10 text-white hover:bg-red-50"
                       onClick={() => remove(index)}
                       tooltip="Eliminar tarifa"
                     />
@@ -332,7 +320,7 @@ const RoomFormPage: React.FC = () => {
               </div>
             </div>
             {fields.length === 0 && (
-              <div className="text-center py-8 text-gray-400 font-medium">
+              <div className="py-8 text-center font-medium text-gray-400">
                 No hay tarifas configuradas. Agregue al menos una.
               </div>
             )}
@@ -340,10 +328,11 @@ const RoomFormPage: React.FC = () => {
 
           <div className="flex justify-end pt-4">
             <Button
+              unstyled
               type="submit"
               label="Guardar Cambios"
               icon="pi pi-check"
-              className="bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-xl px-8 py-3 font-bold transition-all hover:-translate-y-1"
+              className="rounded-xl border-none bg-emerald-600 px-8 py-3 font-bold text-white transition-all hover:-translate-y-1 hover:bg-emerald-700"
               loading={upsertRoom.isPending}
             />
           </div>

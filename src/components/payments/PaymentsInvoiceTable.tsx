@@ -59,7 +59,7 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
   };
 
   const header = (
-    <div className="flex flex-wrap gap-4 justify-between items-center p-2">
+    <div className="flex flex-wrap items-center justify-between gap-4 p-2">
       <InputText
         type="search"
         value={globalFilter}
@@ -70,7 +70,7 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
     </div>
   );
 
-  if (isLoading) return <ProgressSpinner className="w-8 h-8" strokeWidth="4" />;
+  if (isLoading) return <ProgressSpinner className="h-8 w-8" strokeWidth="4" />;
 
   return (
     <DataTable
@@ -85,9 +85,7 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
       <Column
         header="N° Orden"
         body={(row: PaymentWithRelations) => (
-          <span className="font-black text-emerald-600">
-            #{row.stay.order_number}
-          </span>
+          <span className="font-black text-emerald-600">#{row.stay.order_number}</span>
         )}
       />
       <Column
@@ -95,9 +93,7 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
         className="hidden sm:table-cell"
         headerClassName="hidden sm:table-cell"
         body={(row: PaymentWithRelations) => (
-          <span className="font-bold text-emerald-600">
-            {row.stay.room.room_number}
-          </span>
+          <span className="font-bold text-emerald-600">{row.stay.room.room_number}</span>
         )}
       />
       <Column
@@ -105,9 +101,7 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
         body={(row: PaymentWithRelations) => (
           <div className="flex flex-col">
             <span className="font-bold text-gray-800">
-              {row.stay.guest
-                ? `${row.stay.guest.first_name} ${row.stay.guest.last_name}`
-                : "N/A"}
+              {row.stay.guest ? `${row.stay.guest.first_name} ${row.stay.guest.last_name}` : "N/A"}
             </span>
           </div>
         )}
@@ -162,9 +156,7 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
         headerClassName="hidden sm:table-cell"
         body={(row: PaymentWithRelations) => (
           <span className="text-sm text-gray-600">
-            {row.employee
-              ? `${row.employee.first_name} ${row.employee.last_name}`
-              : "N/A"}
+            {row.employee ? `${row.employee.first_name} ${row.employee.last_name}` : "N/A"}
           </span>
         )}
       />
@@ -172,9 +164,10 @@ const PaymentsInvoiceTable: React.FC<PaymentsInvoiceTableProps> = ({
         header="Acciones"
         body={(row: PaymentWithRelations) => (
           <Button
+            unstyled
             label="Ver Factura"
             icon="pi pi-file-pdf"
-            className="p-button-sm w-full sm:w-auto bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg px-3 py-1.5 font-semibold transition-all shadow-sm hover:shadow justify-center"
+            className="p-button-sm w-full justify-center rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 font-semibold text-red-700 shadow-sm transition-all hover:bg-red-100 hover:shadow sm:w-auto"
             onClick={() =>
               navigate(`/invoice/${row.stay_id}`, {
                 state: {

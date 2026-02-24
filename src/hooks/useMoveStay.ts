@@ -1,12 +1,5 @@
-import {
-  checkRoomAvailability,
-  moveStay,
-  MoveStayParams
-} from "@/services/stays/stayMovesApi";
-import {
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { checkRoomAvailability, moveStay, MoveStayParams } from "@/services/stays/stayMovesApi";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface CheckAvailabilityParams {
   roomId: string;

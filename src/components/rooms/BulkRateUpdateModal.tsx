@@ -23,19 +23,14 @@ interface RateConfig {
   affected_rooms_count: number;
 }
 
-const BulkRateUpdateModal: React.FC<BulkRateUpdateModalProps> = ({
-  visible,
-  onHide,
-}) => {
+const BulkRateUpdateModal: React.FC<BulkRateUpdateModalProps> = ({ visible, onHide }) => {
   const { employee } = useAuth();
   const { showBlockUI, hideBlockUI } = useBlockUI();
   const [activeTab, setActiveTab] = useState(0);
   const [rateConfigs, setRateConfigs] = useState<RateConfig[]>([]);
 
   const category = CATEGORIES[activeTab];
-  const { data: rooms, isLoading } = useRoomRatesByCategory(
-    visible ? category : null
-  );
+  const { data: rooms, isLoading } = useRoomRatesByCategory(visible ? category : null);
   const bulkUpdate = useBulkUpdateRoomRates();
 
   // Calculate unique person counts and their rates when rooms data changes
@@ -75,9 +70,7 @@ const BulkRateUpdateModal: React.FC<BulkRateUpdateModalProps> = ({
   const handleRateChange = (personCount: number, newRate: number) => {
     setRateConfigs((prev) =>
       prev.map((config) =>
-        config.person_count === personCount
-          ? { ...config, new_rate: newRate }
-          : config
+        config.person_count === personCount ? { ...config, new_rate: newRate } : config
       )
     );
   };
@@ -92,9 +85,7 @@ const BulkRateUpdateModal: React.FC<BulkRateUpdateModalProps> = ({
       if (config.new_rate !== config.current_rate) {
         // Find all rooms that have this person_count rate
         rooms.forEach((room) => {
-          const rate = room.rates?.find(
-            (r) => r.person_count === config.person_count
-          );
+          const rate = room.rates?.find((r) => r.person_count === config.person_count);
           if (rate) {
             updates.push({
               room_id: room.id,
@@ -127,26 +118,26 @@ const BulkRateUpdateModal: React.FC<BulkRateUpdateModalProps> = ({
     }
   };
 
-  const hasChanges = rateConfigs.some(
-    (config) => config.new_rate !== config.current_rate
-  );
+  const hasChanges = rateConfigs.some((config) => config.new_rate !== config.current_rate);
 
   const footer = (
     <div className="flex justify-end gap-3">
       <Button
+        unstyled
         label="Cancelar"
         icon="pi pi-times"
         onClick={onHide}
         disabled={bulkUpdate.isPending}
-        className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 border-none rounded-lg font-semibold transition-colors"
+        className="rounded-lg border-none bg-gray-100 px-4 py-2 font-semibold text-gray-700 transition-colors hover:bg-gray-200"
       />
       <Button
+        unstyled
         label="Guardar Cambios"
         icon="pi pi-check"
         onClick={handleSave}
         loading={bulkUpdate.isPending}
         disabled={!hasChanges}
-        className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-lg font-bold shadow-lg shadow-emerald-200 transition-all"
+        className="rounded-lg border-none bg-emerald-600 px-6 py-2 font-bold text-white shadow-lg shadow-emerald-200 transition-all hover:bg-emerald-700"
       />
     </div>
   );
@@ -161,16 +152,12 @@ const BulkRateUpdateModal: React.FC<BulkRateUpdateModalProps> = ({
       className="rate-update-modal"
     >
       <div className="flex flex-col gap-4">
-        <p className="text-gray-600 text-sm">
-          Selecciona una categoría y modifica las tarifas. Solo se actualizarán
-          las habitaciones que ya tengan configurada la tarifa para esa cantidad
-          de personas.
+        <p className="text-sm text-gray-600">
+          Selecciona una categoría y modifica las tarifas. Solo se actualizarán las habitaciones que
+          ya tengan configurada la tarifa para esa cantidad de personas.
         </p>
 
-        <TabView
-          activeIndex={activeTab}
-          onTabChange={(e) => setActiveTab(e.index)}
-        >
+        <TabView activeIndex={activeTab} onTabChange={(e) => setActiveTab(e.index)}>
           {CATEGORIES.map((cat) => (
             <TabPanel key={cat} header={cat}>
               {isLoading ? (
@@ -178,7 +165,7 @@ const BulkRateUpdateModal: React.FC<BulkRateUpdateModalProps> = ({
                   <ProgressSpinner />
                 </div>
               ) : rateConfigs.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="py-8 text-center text-gray-500">
                   No hay tarifas configuradas para esta categoría.
                 </div>
               ) : (
@@ -186,12 +173,11 @@ const BulkRateUpdateModal: React.FC<BulkRateUpdateModalProps> = ({
                   {rateConfigs.map((config) => (
                     <div
                       key={config.person_count}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-xl"
+                      className="flex items-center justify-between rounded-xl bg-gray-50 p-4"
                     >
                       <div className="flex flex-col">
                         <span className="font-bold text-gray-800">
-                          {config.person_count}{" "}
-                          {config.person_count === 1 ? "persona" : "personas"}
+                          {config.person_count} {config.person_count === 1 ? "persona" : "personas"}
                         </span>
                         <span className="text-xs text-gray-500">
                           Afecta {config.affected_rooms_count} habitacion
@@ -240,7 +226,7 @@ const BulkRateUpdateModal: React.FC<BulkRateUpdateModalProps> = ({
         </TabView>
 
         {hasChanges && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
             <i className="pi pi-exclamation-circle mr-2"></i>
             Se guardará un historial de todos los cambios realizados.
           </div>

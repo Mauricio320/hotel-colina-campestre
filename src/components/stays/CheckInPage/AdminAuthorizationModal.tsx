@@ -20,8 +20,7 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
   currentTotal,
   onAuthorize,
 }) => {
-  const { data: adminList = [], isLoading: employeesLoading } =
-    useEmployeesByRole("Admin");
+  const { data: adminList = [], isLoading: employeesLoading } = useEmployeesByRole("Admin");
   const [selectedAdmin, setSelectedAdmin] = useState<Employee | null>(null);
   const [discountAmount, setDiscountAmount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
@@ -66,8 +65,8 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
 
   const header = (
     <div className="flex items-center gap-2">
-      <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
-        <i className="pi pi-percentage text-orange-600 text-sm"></i>
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100">
+        <i className="pi pi-percentage text-sm text-orange-600"></i>
       </div>
       <span className="font-bold text-gray-800">Autorización de Descuento</span>
     </div>
@@ -86,10 +85,10 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
       <div className="flex flex-col gap-4">
         {error && <Message severity="error" text={error} className="w-full" />}
 
-        <div className="bg-[#f5f2eb] rounded-xl p-4">
+        <div className="rounded-xl bg-[#f5f2eb] p-4">
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">
+              <label className="text-xs font-bold tracking-wide text-gray-600 uppercase">
                 Administrador
               </label>
               <Dropdown
@@ -104,17 +103,15 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
               />
             </div>
 
-            <div className="h-px bg-gray-300 my-1"></div>
+            <div className="my-1 h-px bg-gray-300"></div>
 
-            <div className="flex justify-between items-center text-sm">
+            <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600">Valor Actual</span>
-              <span className="font-bold text-gray-800">
-                ${currentTotal.toLocaleString()}
-              </span>
+              <span className="font-bold text-gray-800">${currentTotal.toLocaleString()}</span>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wide">
+              <label className="text-xs font-bold tracking-wide text-gray-600 uppercase">
                 Valor del Descuento
               </label>
               <InputNumber
@@ -133,10 +130,10 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
               />
             </div>
 
-            <div className="h-px bg-gray-300 my-1"></div>
+            <div className="my-1 h-px bg-gray-300"></div>
 
-            <div className="flex justify-between items-center">
-              <span className="text-gray-700 font-bold">Total Final</span>
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-gray-700">Total Final</span>
               <span className="text-xl font-black text-emerald-700">
                 ${finalTotal.toLocaleString()}
               </span>
@@ -146,12 +143,14 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
 
         <div className="flex gap-2">
           <Button
+            unstyled
             label="Cancelar"
             icon="pi pi-times"
             onClick={onHide}
             className="p-button-outlined p-button-secondary flex-1"
           />
           <Button
+            unstyled
             label="Confirmar"
             icon="pi pi-check"
             onClick={handleConfirm}

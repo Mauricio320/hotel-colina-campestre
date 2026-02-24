@@ -24,7 +24,7 @@ export const paymentApi = {
         *,
         payment_method:payment_methods(name),
         employee:employees(first_name, last_name)
-      `,
+      `
       )
       .single();
 
@@ -47,7 +47,7 @@ export const paymentApi = {
         *,
         payment_method:payment_methods(name),
         employee:employees(first_name, last_name)
-      `,
+      `
       )
       .eq("stay_id", stayId)
       .order("payment_date", { ascending: true });
@@ -75,16 +75,11 @@ export const paymentApi = {
 
     if (stayError) {
       console.error("Error fetching stay for summary:", stayError);
-      throw new Error(
-        `Error al obtener datos de estancia: ${stayError.message}`,
-      );
+      throw new Error(`Error al obtener datos de estancia: ${stayError.message}`);
     }
 
     const totalAmount = stay?.total_price || 0;
-    const totalPaid = payments.reduce(
-      (sum, payment) => sum + Number(payment.amount),
-      0,
-    );
+    const totalPaid = payments.reduce((sum, payment) => sum + Number(payment.amount), 0);
     const pendingAmount = totalAmount - totalPaid;
     const isFullyPaid = pendingAmount <= 0;
 
@@ -134,7 +129,7 @@ export const paymentApi = {
    */
   updatePayment: async (
     paymentId: string,
-    updates: Partial<CreatePaymentDto>,
+    updates: Partial<CreatePaymentDto>
   ): Promise<Payment> => {
     const { data, error } = await supabase
       .from("payments")
@@ -145,7 +140,7 @@ export const paymentApi = {
         *,
         payment_method:payment_methods(name),
         employee:employees(first_name, last_name)
-      `,
+      `
       )
       .single();
 
@@ -161,10 +156,7 @@ export const paymentApi = {
    * Delete a payment record
    */
   deletePayment: async (paymentId: string): Promise<void> => {
-    const { error } = await supabase
-      .from("payments")
-      .delete()
-      .eq("id", paymentId);
+    const { error } = await supabase.from("payments").delete().eq("id", paymentId);
 
     if (error) {
       console.error("Error deleting payment:", error);
@@ -175,10 +167,7 @@ export const paymentApi = {
   /**
    * Get payment history for a date range
    */
-  getPaymentsByDateRange: async (
-    startDate: string,
-    endDate: string,
-  ): Promise<Payment[]> => {
+  getPaymentsByDateRange: async (startDate: string, endDate: string): Promise<Payment[]> => {
     const { data, error } = await supabase
       .from("payments")
       .select(
@@ -187,7 +176,7 @@ export const paymentApi = {
         payment_method:payment_methods(name),
         employee:employees(first_name, last_name),
         stay:stays(id, order_number, check_in_date, check_out_date, guest:guests(first_name, last_name))
-      `,
+      `
       )
       .gte("payment_date", startDate)
       .lte("payment_date", endDate)
@@ -195,9 +184,7 @@ export const paymentApi = {
 
     if (error) {
       console.error("Error fetching payments by date range:", error);
-      throw new Error(
-        `Error al obtener pagos por rango de fechas: ${error.message}`,
-      );
+      throw new Error(`Error al obtener pagos por rango de fechas: ${error.message}`);
     }
 
     return data || [];
@@ -215,7 +202,7 @@ export const paymentHelpers = {
     paidAmount: number,
     totalPrice: number,
     context: "reservation" | "checkin_direct" | "calendar_payment",
-    checkInDate?: Date,
+    checkInDate?: Date
   ): PaymentType => {
     // Check-in direct is always complete payment
     if (context === "checkin_direct") {
@@ -239,7 +226,7 @@ export const paymentHelpers = {
   generateObservation: (
     paymentType: PaymentType,
     paidAmount: number,
-    totalPrice: number,
+    totalPrice: number
   ): string => {
     switch (paymentType) {
       case PaymentType.ABONO_RESERVA:
@@ -261,9 +248,5 @@ export const paymentHelpers = {
 };
 
 export const CreatePayment = async (data: Payment): Promise<Payment> => {
-  return supabase
-    .from("payments")
-    .insert(data)
-    .select()
-    .single() as unknown as Promise<Payment>;
+  return supabase.from("payments").insert(data).select().single() as unknown as Promise<Payment>;
 };

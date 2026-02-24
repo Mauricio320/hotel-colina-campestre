@@ -41,14 +41,14 @@ export const checkRoomAvailability = async (
   roomId: string,
   checkInDate: string,
   checkOutDate: string,
-  excludeStayId?: string,
+  excludeStayId?: string
 ): Promise<AvailabilityCheckResult> => {
   let query = supabase
     .from("stays")
     .select(
       `id, order_number, check_in_date, check_out_date,
       guest:guests!stays_guest_id_fkey(first_name, last_name),
-      room:rooms(id, room_number)`,
+      room:rooms(id, room_number)`
     )
     .eq("room_id", roomId)
     .eq("cancelled", false)
@@ -71,9 +71,7 @@ export const checkRoomAvailability = async (
         order_number: stay.order_number,
         check_in_date: stay.check_in_date,
         check_out_date: stay.check_out_date,
-        guest_name: stay.guest
-          ? `${stay.guest.first_name} ${stay.guest.last_name}`
-          : "Sin huésped",
+        guest_name: stay.guest ? `${stay.guest.first_name} ${stay.guest.last_name}` : "Sin huésped",
         room: stay.room
           ? {
               id: stay.room.id,
@@ -221,9 +219,7 @@ export const moveStay = async (params: MoveStayParams): Promise<void> => {
       observation: `Cambio de fechas de la reserva. Fecha del movimiento: ${moveDate}. Nuevas fechas: ${newCheckInDate} a ${newCheckOutDate} | ${observation}`,
     };
 
-    const { error: historyError } = await supabase
-      .from("room_history")
-      .insert(historyRecord);
+    const { error: historyError } = await supabase.from("room_history").insert(historyRecord);
 
     if (historyError) throw historyError;
   }

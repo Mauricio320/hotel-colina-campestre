@@ -5,25 +5,16 @@ import { AuthErrorType, AuthResponse, LoginCredentials } from "./types";
  * Handles authentication errors and converts them to standard error types
  */
 export const handleSupabaseError = (error: any): AuthErrorType => {
-  if (
-    error.code === "PGRST116" ||
-    error.message.includes('relation "public.employees"')
-  ) {
+  if (error.code === "PGRST116" || error.message.includes('relation "public.employees"')) {
     return AuthErrorType.DATABASE_NOT_READY;
   }
-  if (
-    error.message.includes("Invalid login") ||
-    error.message.includes("Invalid credentials")
-  ) {
+  if (error.message.includes("Invalid login") || error.message.includes("Invalid credentials")) {
     return AuthErrorType.INVALID_CREDENTIALS;
   }
   if (error.message.includes("Network") || error.message.includes("fetch")) {
     return AuthErrorType.NETWORK_ERROR;
   }
-  if (
-    error.message.includes("Unauthorized") ||
-    error.message.includes("Token")
-  ) {
+  if (error.message.includes("Unauthorized") || error.message.includes("Token")) {
     return AuthErrorType.UNAUTHORIZED;
   }
   return AuthErrorType.NETWORK_ERROR;
@@ -32,9 +23,7 @@ export const handleSupabaseError = (error: any): AuthErrorType => {
 /**
  * Authenticates user with email and password
  */
-export const signIn = async (
-  credentials: LoginCredentials,
-): Promise<AuthResponse> => {
+export const signIn = async (credentials: LoginCredentials): Promise<AuthResponse> => {
   try {
     const { data, error } = await supabase.auth.signInWithPassword(credentials);
 
@@ -110,9 +99,7 @@ export const getCurrentUser = async () => {
 /**
  * Sets up authentication state change listener
  */
-export const onAuthStateChange = (
-  callback: (event: string, session: any) => void,
-) => {
+export const onAuthStateChange = (callback: (event: string, session: any) => void) => {
   const {
     data: { subscription },
   } = supabase.auth.onAuthStateChange(callback);

@@ -13,9 +13,7 @@ export const accommodationTypesApi = {
   },
 };
 
-export const fetchAccommodationTypeById = async (
-  id: string,
-): Promise<AccommodationType> => {
+export const fetchAccommodationTypeById = async (id: string): Promise<AccommodationType> => {
   const { data, error } = await supabase
     .from("accommodation_types")
     .select("*")

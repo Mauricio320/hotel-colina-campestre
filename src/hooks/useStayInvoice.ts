@@ -1,8 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  staysInvoiceApi,
-  StayInvoiceData,
-} from "@/services/stays/staysInvoiceApi";
+import { staysInvoiceApi, StayInvoiceData } from "@/services/stays/staysInvoiceApi";
 import { Payment } from "@/types";
 
 interface UseStayInvoiceResult {

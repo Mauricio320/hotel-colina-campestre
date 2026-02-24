@@ -1,21 +1,21 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { roomsApi } from '@/services/rooms/roomsApi';
-import { useRoomHistory } from '@/hooks/useRoomHistory';
-import { Room } from '@/types';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { roomsApi } from "@/services/rooms/roomsApi";
+import { useRoomHistory } from "@/hooks/useRoomHistory";
+import { Room } from "@/types";
 
 export const useRoomsActions = () => {
   const queryClient = useQueryClient();
   const { createRecord } = useRoomHistory();
 
   const updateRoomStatus = useMutation({
-    mutationFn: ({ 
-      roomId, 
-      statusId, 
-      selectedDate, 
-      employeeId, 
-      actionType, 
+    mutationFn: ({
+      roomId,
+      statusId,
+      selectedDate,
+      employeeId,
+      actionType,
       observation,
-      previousStatusId 
+      previousStatusId,
     }: {
       roomId: string;
       statusId: string;
@@ -35,7 +35,7 @@ export const useRoomsActions = () => {
         observation: variables.observation,
       });
 
-      queryClient.invalidateQueries({ queryKey: ['rooms'] });
+      queryClient.invalidateQueries({ queryKey: ["rooms"] });
     },
   });
 

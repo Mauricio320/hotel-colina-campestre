@@ -26,9 +26,7 @@ export interface StayPricingReturn {
   };
 }
 
-export const useStayPricing = (
-  params: StayPricingParams,
-): StayPricingReturn => {
+export const useStayPricing = (params: StayPricingParams): StayPricingReturn => {
   const {
     room,
     checkInDate,
@@ -88,14 +86,7 @@ export const useStayPricing = (
       iva: taxAmount,
       total: finalTotal,
     };
-  }, [
-    room,
-    personCount,
-    nights,
-    extraMattressCount,
-    invoiceRequested,
-    settings,
-  ]);
+  }, [room, personCount, nights, extraMattressCount, invoiceRequested, settings]);
 
   return { nights, priceInfo };
 };

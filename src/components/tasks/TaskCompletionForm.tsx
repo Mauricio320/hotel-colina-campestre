@@ -28,11 +28,9 @@ export const TaskCompletionForm: React.FC<TaskCompletionFormProps> = ({
   actionColor = "blue",
 }) => {
   return (
-    <div className="flex flex-col gap-4 animate-fade-in">
+    <div className="animate-fade-in flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <label className="text-xs font-black text-gray-500 uppercase">
-          Responsable
-        </label>
+        <label className="text-xs font-black text-gray-500 uppercase">Responsable</label>
         <Dropdown
           value={selectedEmployeeId}
           onChange={(e) => onEmployeeChange(e.value)}
@@ -43,14 +41,12 @@ export const TaskCompletionForm: React.FC<TaskCompletionFormProps> = ({
           optionLabel="fullName"
           optionValue="id"
           placeholder="Seleccione el encargado"
-          className="w-full p-2 border-emerald-200"
+          className="w-full border-emerald-200 p-2"
           filter
         />
       </div>
       <div className="flex flex-col gap-2">
-        <label className="text-xs font-black text-gray-500 uppercase">
-          Observación / Novedad
-        </label>
+        <label className="text-xs font-black text-gray-500 uppercase">Observación / Novedad</label>
         <InputTextarea
           value={observation}
           onChange={(e) => onObservationChange(e.target.value)}
@@ -61,9 +57,10 @@ export const TaskCompletionForm: React.FC<TaskCompletionFormProps> = ({
         />
       </div>
       <Button
+        unstyled
         label={submitLabel}
         icon="pi pi-check-circle"
-        className={`${actionColor} border-none text-white w-full py-4 text-lg font-black rounded-2xl shadow-lg`}
+        className={`${actionColor} w-full rounded-2xl border-none py-4 text-lg font-black text-white shadow-lg`}
         onClick={onSubmit}
         disabled={!selectedEmployeeId}
       />

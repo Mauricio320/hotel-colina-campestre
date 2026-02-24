@@ -2,12 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PrimeReactProvider } from "primereact/api";
 import { ProgressSpinner } from "primereact/progressspinner";
 import React from "react";
-import {
-  Navigate,
-  Route,
-  BrowserRouter as Router,
-  Routes,
-} from "react-router-dom";
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
 // Hooks
 import { AuthProvider, useAuth } from "./hooks/useAuth";
@@ -48,16 +43,10 @@ const AppContent: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-emerald-900">
+      <div className="flex min-h-screen items-center justify-center bg-emerald-900">
         <div className="flex flex-col items-center gap-4">
-          <ProgressSpinner
-            strokeWidth="4"
-            fill="transparent"
-            animationDuration=".5s"
-          />
-          <p className="text-white font-bold animate-pulse">
-            Iniciando sesión segura...
-          </p>
+          <ProgressSpinner strokeWidth="4" fill="transparent" animationDuration=".5s" />
+          <p className="animate-pulse font-bold text-white">Iniciando sesión segura...</p>
         </div>
       </div>
     );
@@ -65,19 +54,16 @@ const AppContent: React.FC = () => {
 
   if (dbError === "DATABASE_NOT_READY") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-emerald-900 p-4">
-        <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-lg w-full text-center">
-          <i className="pi pi-database text-6xl text-amber-500 mb-4"></i>
-          <h2 className="text-2xl font-black text-gray-800 mb-2">
-            Base de datos no configurada
-          </h2>
-          <p className="text-gray-600 mb-6">
-            No se encontró la tabla de empleados. Por favor, asegúrate de haber
-            ejecutado el contenido del archivo <b>database.sql</b> en el editor
-            SQL de tu proyecto Supabase.
+      <div className="flex min-h-screen items-center justify-center bg-emerald-900 p-4">
+        <div className="w-full max-w-lg rounded-2xl bg-white p-8 text-center shadow-2xl">
+          <i className="pi pi-database mb-4 text-6xl text-amber-500"></i>
+          <h2 className="mb-2 text-2xl font-black text-gray-800">Base de datos no configurada</h2>
+          <p className="mb-6 text-gray-600">
+            No se encontró la tabla de empleados. Por favor, asegúrate de haber ejecutado el
+            contenido del archivo <b>database.sql</b> en el editor SQL de tu proyecto Supabase.
           </p>
-          <div className="p-4 bg-amber-50 rounded-lg text-amber-800 text-sm border border-amber-200 mb-6 text-left">
-            <ol className="list-decimal ml-4 flex flex-col gap-2 font-medium">
+          <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-left text-sm text-amber-800">
+            <ol className="ml-4 flex list-decimal flex-col gap-2 font-medium">
               <li>
                 Ve a tu proyecto en <b>supabase.com</b>
               </li>
@@ -95,7 +81,7 @@ const AppContent: React.FC = () => {
           </div>
           <button
             onClick={() => window.location.reload()}
-            className="w-full bg-emerald-600 text-white font-bold py-3 rounded-xl hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200"
+            className="w-full rounded-xl bg-emerald-600 py-3 font-bold text-white shadow-lg shadow-emerald-200 transition-colors hover:bg-emerald-700"
           >
             Ya ejecuté el script, recargar
           </button>
@@ -108,19 +94,10 @@ const AppContent: React.FC = () => {
 
   return (
     <Routes>
-      <Route
-        path="/login"
-        element={!user ? <Login /> : <Navigate to="/calendar" />}
-      />
+      <Route path="/login" element={!user ? <Login /> : <Navigate to="/calendar" />} />
 
       <Route
-        element={
-          user ? (
-            <Layout employee={employee} onLogout={logout} />
-          ) : (
-            <Navigate to="/login" />
-          )
-        }
+        element={user ? <Layout employee={employee} onLogout={logout} /> : <Navigate to="/login" />}
       >
         <Route path="/" element={<Dashboard />} />
         <Route path="/calendar" element={<CalendarView />} />
@@ -131,42 +108,21 @@ const AppContent: React.FC = () => {
         <Route path="/rooms/new" element={<RoomFormPage />} />
         <Route path="/rooms/edit/:roomId" element={<RoomFormPage />} />
         <Route path="/rooms/history/:roomId" element={<RoomHistoryPage />} />
-        <Route
-          path="/rooms/cleaning-history/:roomId"
-          element={<RoomCleaningHistoryPage />}
-        />
-        <Route
-          path="/rooms/maintenance-history/:roomId"
-          element={<RoomMaintenanceHistoryPage />}
-        />
+        <Route path="/rooms/cleaning-history/:roomId" element={<RoomCleaningHistoryPage />} />
+        <Route path="/rooms/maintenance-history/:roomId" element={<RoomMaintenanceHistoryPage />} />
         <Route path="/rooms/rate-history" element={<RoomRateHistoryPage />} />
         <Route path="/check-in-payment/:stayId" element={<CheckInPayment />} />
         <Route path="/room-payments" element={<RoomPayments />} />
         <Route path="/payments-invoice" element={<PaymentsInvoice />} />
         <Route path="/invoice/:stayId" element={<InvoiceDetailPage />} />
-        <Route
-          path="/guests"
-          element={<GuestManagement userRole={roleName} />}
-        />
-        <Route
-          path="/employees"
-          element={<EmployeeManagement userRole={roleName} />}
-        />
+        <Route path="/guests" element={<GuestManagement userRole={roleName} />} />
+        <Route path="/employees" element={<EmployeeManagement userRole={roleName} />} />
         <Route path="/logs/cleaning" element={<CleaningLogsPage />} />
         <Route path="/logs/maintenance" element={<MaintenanceLogsPage />} />
         <Route path="/limpieza/:room_id" element={<CleaningTaskPage />} />
-        <Route
-          path="/mantenimiento/:room_id"
-          element={<MaintenanceTaskPage />}
-        />
-        <Route
-          path="/cancelar-reserva/:stayId"
-          element={<CancelReservationPage />}
-        />
-        <Route
-          path="/mover-reserva/:stayId"
-          element={<MoveReservationPage />}
-        />
+        <Route path="/mantenimiento/:room_id" element={<MaintenanceTaskPage />} />
+        <Route path="/cancelar-reserva/:stayId" element={<CancelReservationPage />} />
+        <Route path="/mover-reserva/:stayId" element={<MoveReservationPage />} />
         <Route path="/settings" element={<Settings userRole={roleName} />} />
         <Route path="/profile" element={<MyProfile />} />
         <Route path="/reports" element={<Reports userRole={roleName} />} />

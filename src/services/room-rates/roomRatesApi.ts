@@ -26,10 +26,7 @@ export const roomRatesApi = {
   },
 
   updateRate: async (rateId: string, newRate: number): Promise<void> => {
-    const { error } = await supabase
-      .from("room_rates")
-      .update({ rate: newRate })
-      .eq("id", rateId);
+    const { error } = await supabase.from("room_rates").update({ rate: newRate }).eq("id", rateId);
 
     if (error) throw new Error(error.message);
   },

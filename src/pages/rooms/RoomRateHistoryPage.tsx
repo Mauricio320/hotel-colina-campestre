@@ -33,14 +33,14 @@ const RoomRateHistoryPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-full p-12">
+      <div className="flex h-full items-center justify-center p-12">
         <ProgressSpinner />
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto flex flex-col gap-4 animate-fade-in pb-12">
+    <div className="animate-fade-in mx-auto flex max-w-6xl flex-col gap-4 pb-12">
       <PageHeader
         title="Historial de Cambios de Tarifas"
         subtitle="Registro completo de actualizaciones de precios por habitación"
@@ -49,7 +49,7 @@ const RoomRateHistoryPage: React.FC = () => {
         onBack={handleBack}
       />
 
-      <div className="bg-white rounded-3xl p-1 shadow-xl border border-gray-100 overflow-hidden">
+      <div className="overflow-hidden rounded-3xl border border-gray-100 bg-white p-1 shadow-xl">
         <DataTable
           value={history || []}
           responsiveLayout="stack"
@@ -85,7 +85,7 @@ const RoomRateHistoryPage: React.FC = () => {
             header="Habitación"
             headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
             body={(row) => (
-              <span className="font-black text-emerald-600 text-lg">
+              <span className="text-lg font-black text-emerald-600">
                 {row.room?.room_number || "N/A"}
               </span>
             )}
@@ -96,7 +96,7 @@ const RoomRateHistoryPage: React.FC = () => {
             body={(row) => (
               <Tag
                 value={`${row.person_count} ${row.person_count === 1 ? "persona" : "personas"}`}
-                className="bg-blue-50 text-blue-700 text-[10px] font-bold"
+                className="bg-blue-50 text-[10px] font-bold text-blue-700"
               />
             )}
           />
@@ -113,10 +113,7 @@ const RoomRateHistoryPage: React.FC = () => {
             header="Nueva Tarifa"
             headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
             body={(row) => {
-              const { diff, percentage } = calculateDifference(
-                row.old_rate,
-                row.new_rate
-              );
+              const { diff, percentage } = calculateDifference(row.old_rate, row.new_rate);
               const isIncrease = diff > 0;
 
               return (
@@ -124,11 +121,8 @@ const RoomRateHistoryPage: React.FC = () => {
                   <span className="font-mono font-bold text-emerald-700">
                     {formatCurrency(row.new_rate)}
                   </span>
-                  <span
-                    className={`text-xs ${isIncrease ? "text-green-600" : "text-red-500"}`}
-                  >
-                    {isIncrease ? "↑" : "↓"} {formatCurrency(Math.abs(diff))} (
-                    {percentage}%)
+                  <span className={`text-xs ${isIncrease ? "text-green-600" : "text-red-500"}`}>
+                    {isIncrease ? "↑" : "↓"} {formatCurrency(Math.abs(diff))} ({percentage}%)
                   </span>
                 </div>
               );
@@ -139,7 +133,7 @@ const RoomRateHistoryPage: React.FC = () => {
             headerClassName="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest p-4"
             body={(row) => (
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-xs">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-700">
                   {row.employee ? row.employee.first_name[0] : "S"}
                 </div>
                 <span className="font-medium text-gray-700">
