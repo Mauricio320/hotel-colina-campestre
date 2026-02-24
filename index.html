@@ -1,7 +1,11 @@
 <!doctype html>
 <html lang="es">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
     <title>Hotel Colina Campestre | San Luis de Gaceno, Boyacá</title>
+    <meta name="description" content="Hotel en San Luis de Gaceno, Boyacá ideal para familias, turistas y viajeros de negocios. Comodidad, excelente ubicación y atención de calidad." />
+    <link rel="canonical" href="https://hotel-colina-campestre.vercel.app/" />
 
     <meta
       property="og:title"
@@ -41,11 +45,103 @@
       name="twitter:image"
       content="https://hotel-colina-campestre.vercel.app/images/img-meta.png"
     />
-<!-- <script src="https://cdn.tailwindcss.com"></script> -->
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Hotel",
+      "@id": "https://hotel-colina-campestre.vercel.app/#hotel",
+      "name": "Hotel Colina Campestre",
+      "alternateName": "Colina Campestre",
+      "description": "Hotel en San Luis de Gaceno, Boyacá ideal para familias, turistas y viajeros de negocios. Comodidad, excelente ubicación y atención de calidad.",
+      "url": "https://hotel-colina-campestre.vercel.app",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://hotel-colina-campestre.vercel.app/images/img-name-hotel-log.png",
+        "width": 200,
+        "height": 60
+      },
+      "image": {
+        "@type": "ImageObject",
+        "url": "https://hotel-colina-campestre.vercel.app/images/img-meta.png",
+        "width": 1200,
+        "height": 630
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Calle 4 No 4-66, San Luis de Gaceno, Boyacá",
+        "addressLocality": "San Luis de Gaceno",
+        "addressRegion": "Boyacá",
+        "addressCountry": "CO",
+        "postalCode": "152420"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "4.820869690348576",
+        "longitude": "-73.16966182906162"
+      },
+      "telephone": ["+57-318-7168775", "+57-311-5323493"],
+      "email": "info@hotelcolinacampestre.com.co",
+      "priceRange": "$$",
+      "starRating": {
+        "@type": "Rating",
+        "ratingValue": "3",
+        "bestRating": "5"
+      },
+      "checkinTime": "15:00:00",
+      "checkoutTime": "11:00:00",
+      "inLanguage": "es-CO",
+      "areaServed": {
+        "@type": "City",
+        "name": "San Luis de Gaceno",
+        "containedInPlace": {
+          "@type": "State",
+          "name": "Boyacá",
+          "containedInPlace": {
+            "@type": "Country",
+            "name": "Colombia"
+          }
+        }
+      }
+    }
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": "https://hotel-colina-campestre.vercel.app/#website",
+      "name": "Hotel Colina Campestre",
+      "alternateName": "Colina Campestre",
+      "url": "https://hotel-colina-campestre.vercel.app",
+      "inLanguage": "es-CO",
+      "publisher": {
+        "@id": "https://hotel-colina-campestre.vercel.app/#hotel"
+      }
+    }
+    </script>
+
     <link rel="stylesheet" href="/index.css" />
   </head>
   <body class="bg-gray-50 text-gray-900">
     <div id="root"></div>
+    <noscript>
+      <div style="padding: 40px 20px; text-align: center; font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1 style="color: #059669; font-size: 28px; margin-bottom: 16px;">Hotel Colina Campestre</h1>
+        <p style="color: #374151; font-size: 16px; line-height: 1.6; margin-bottom: 12px;">
+          Hotel en San Luis de Gaceno, Boyacá ideal para familias, turistas y viajeros de negocios. Comodidad, excelente ubicación y atención de calidad.
+        </p>
+        <div style="color: #374151; font-size: 14px; line-height: 1.8; margin: 24px 0;">
+          <p><strong>Dirección:</strong> Calle 4 No 4-66, San Luis de Gaceno, Boyacá</p>
+          <p><strong>Teléfonos:</strong> +57 318 716 8775 / +57 311 532 3493</p>
+          <p><strong>Email:</strong> info@hotelcolinacampestre.com.co</p>
+        </div>
+        <p style="color: #6b7280; font-size: 14px;">
+          Para usar el sistema de gestión, por favor <strong>habilite JavaScript</strong> en su navegador.
+        </p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

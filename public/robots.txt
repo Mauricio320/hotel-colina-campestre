@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /calendar
+Disallow: /check-in/
+Disallow: /check-out/
+Disallow: /booking/
+Disallow: /cancelar-reserva/
+Disallow: /mover-reserva/
+Disallow: /rooms/
+Disallow: /limpieza/
+Disallow: /mantenimiento/
+Disallow: /employees/
+Disallow: /logs/
+Disallow: /settings
+Disallow: /profile
+Disallow: /reports
+Disallow: /guests
+Disallow: /room-payments
+Disallow: /payments-invoice
+Disallow: /invoice/
+
+Sitemap: https://hotel-colina-campestre.vercel.app/sitemap.xml
