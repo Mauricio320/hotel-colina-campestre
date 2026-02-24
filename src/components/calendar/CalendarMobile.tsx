@@ -183,7 +183,7 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
                     }
                   >();
 
-                  days.forEach((day, index) => {
+                  days.forEach((day) => {
                     const stay = getActiveStay(room, day);
                     if (stay?.id && !uniqueStays.has(stay.id)) {
                       const checkInIndex = days.findIndex(
@@ -201,8 +201,8 @@ export const CalendarMobile: React.FC<CalendarMobileProps> = ({
 
                       uniqueStays.set(stay.id, {
                         ...stay,
-                        startIndex: checkInIndex >= 0 ? checkInIndex : index,
-                        endIndex: checkOutIndex >= 0 ? checkOutIndex : index,
+                        startIndex: checkInIndex >= 0 ? checkInIndex : 0,
+                        endIndex: checkOutIndex >= 0 ? checkOutIndex : days.length - 1,
                         startOffset,
                         endOffset,
                       });
