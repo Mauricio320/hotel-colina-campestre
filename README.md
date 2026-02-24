@@ -66,6 +66,3 @@ El sistema cuenta con un control de acceso basado en roles (RBAC) gestionado a t
 - `npm run dev` o `pnpm run dev`: Inicia el servidor de desarrollo local en el puerto 3000.
 - `npm run build`: Construye la aplicación para producción.
 - `npm run preview`: Previsualiza la build de producción localmente.
-
----
-View your app in AI Studio: https://ai.studio/apps/drive/1Hudro_8XT1w2ghHoUini_iFaipeylIyn

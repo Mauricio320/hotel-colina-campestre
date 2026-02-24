@@ -9,12 +9,12 @@
     ]
   },
   "env": {
-    "ANTHROPIC_AUTH_TOKEN": "test",
-    "ANTHROPIC_BASE_URL": "http://localhost:8080",
-    "ANTHROPIC_MODEL": "gemini-3.1-pro-high",
-    "ANTHROPIC_DEFAULT_OPUS_MODEL": "gemini-3.1-pro-high",
-    "ANTHROPIC_DEFAULT_SONNET_MODEL": "gemini-3.1-pro-high",
-    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "gemini-3.1-pro-high",
-    "CLAUDE_CODE_SUBAGENT_MODEL": "gemini-3.1-pro-high"
+    "ANTHROPIC_AUTH_TOKEN": "sk-kimi-zk3ni7KLTRnlUXzOMnr0bl8rM9TX1fSw2oXtVd5ZePJG0Vze4BY5sbQNvqhiEJIj",
+    "ANTHROPIC_BASE_URL": "https://api.kimi.com/coding/",
+    "ANTHROPIC_MODEL": "kimi-k2.5",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "kimi-k2.5",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "kimi-k2.5",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "kimi-k2.5",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "kimi-k2.5"
   }
 }
