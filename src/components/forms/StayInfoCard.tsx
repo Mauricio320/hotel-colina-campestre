@@ -133,12 +133,14 @@ export const StayInfoCard: React.FC<StayInfoCardProps> = ({
         ) : (
           <>
             {paymentStatus?.canCheckIn ? (
-              <Button
-                icon="pi pi-sign-in"
-                label="Check-in"
-                className="p-3 bg-yellow-500 border-none text-white w-full font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
-                onClick={onConfirmCheckIn}
-              />
+              isToday && (
+                <Button
+                  icon="pi pi-sign-in"
+                  label="Check-in"
+                  className="p-3 bg-yellow-500 border-none text-white w-full font-bold rounded-xl shadow-sm flex flex-col items-center gap-1 h-auto"
+                  onClick={onConfirmCheckIn}
+                />
+              )
             ) : (
               <Button
                 icon="pi pi-dollar"
