@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npx tsc:*)",
       "Bash(npm run build:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(git remote set-head:*)",
+      "Bash(gh repo view:*)"
     ]
   }
 }
