@@ -115,7 +115,7 @@ const CompactGuestForm: React.FC<{
             unstyled
             type="button"
             icon={searchState.searching ? "pi pi-spin pi-spinner" : "pi pi-search"}
-            className="p-button-plain h-full w-full border bg-white text-xs"
+            className="p-button-plain h-full w-full border border-[#e7e4dd] bg-white text-xs"
             onClick={onSearch}
             disabled={searchState.searching || watchDocNumber?.length < 5}
           />

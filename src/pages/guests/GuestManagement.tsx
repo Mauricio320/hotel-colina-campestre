@@ -128,7 +128,7 @@ const GuestManagement: React.FC<GuestManagementProps> = ({ userRole }) => {
         rightContent={headerRightContent}
       />
 
-      <div className="overflow-hidden rounded-lg border bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
         <DataTable
           value={guestsQuery.data || []}
           header={header}

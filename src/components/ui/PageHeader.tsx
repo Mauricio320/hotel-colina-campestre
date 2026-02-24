@@ -151,7 +151,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   // Default variant - used for detail/form pages (CheckInPage, CheckOutPage, etc.)
   return (
     <div
-      className={`animate-fade-in sticky top-[-38px] z-40 mb-8 flex flex-col items-start gap-6 overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-sm md:flex-row md:items-center ${className}`}
+      className={`animate-fade-in sticky -top-9.5 z-40 mb-8 flex flex-col items-start gap-6 overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-sm md:flex-row md:items-center ${className}`}
     >
       <div
         className={`absolute top-0 right-0 -mt-16 -mr-16 h-32 w-32 rounded-full opacity-50 ${colors.bg}`}
@@ -163,7 +163,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
             unstyled
             icon="pi pi-arrow-left"
             onClick={onBack}
-            className="p-button-rounded p-button-text p-button-secondary border border-gray-100 bg-gray-50 text-gray-600 shadow-sm transition-all duration-300 hover:bg-blue-50 hover:text-blue-600"
+            className="p-button-rounded h-10 w-10 rounded-2xl p-button-text p-button-secondary border border-gray-100 bg-gray-50 text-gray-600 shadow-sm transition-all duration-300 hover:bg-blue-50 hover:text-blue-600"
             tooltip={backTooltip}
             tooltipOptions={{ position: "bottom" }}
           />

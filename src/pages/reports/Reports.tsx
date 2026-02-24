@@ -612,7 +612,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
             unstyled
             label="Descargar Excel de Pagos"
             icon="pi pi-file-excel"
-            className="p-button-success w-full p-3 font-bold"
+            className="bg-emerald-500 w-full p-3 font-bold text-white"
             onClick={handleRoomPaymentsReport}
             disabled={loading}
           />
@@ -620,7 +620,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
 
         <Card
           title="Reporte de Facturas por Categoría"
-          className="border-t-4 border-yellow-500 shadow-sm"
+          className="border-t-4 border-yellow-500 text-white shadow-sm"
         >
           <p className="mb-4 text-gray-600">
             Genera un archivo Excel con una hoja por cada tipo de acomodación. Muestra los pagos
@@ -654,7 +654,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
             unstyled
             label="Descargar Excel de Facturas"
             icon="pi pi-file-pdf"
-            className="p-button-warning w-full p-3 font-bold"
+            className="bg-yellow-500 text-white w-full p-3 font-bold"
             onClick={handlePaymentsInvoiceReport}
             disabled={loading}
           />
