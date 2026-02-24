@@ -21,5 +21,18 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "./src"),
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Solo librerías core de React que no tienen dependencias opcionales
+            "vendor-react": ["react", "react-dom"],
+            "vendor-router": ["react-router-dom"],
+          },
+        },
+      },
+      // Optimize chunk size warnings
+      chunkSizeWarningLimit: 600,
+    },
   };
 });

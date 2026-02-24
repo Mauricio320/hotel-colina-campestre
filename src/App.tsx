@@ -1,40 +1,53 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PrimeReactProvider } from "primereact/api";
 import { ProgressSpinner } from "primereact/progressspinner";
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
 // Hooks
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 
-// Components
+// Components - Eager loaded (critical for first paint)
 import Login from "@/pages/auth/Login";
-import RegisterAdmin from "@/pages/auth/RegisterAdmin";
-import CalendarView from "@/pages/calendar/CalendarView";
-import Dashboard from "@/pages/dashboard/Dashboard";
-import EmployeeManagement from "@/pages/employees/EmployeeManagement";
-import GuestManagement from "@/pages/guests/GuestManagement";
-import CleaningLogsPage from "@/pages/logs/CleaningLogsPage";
-import CleaningTaskPage from "@/pages/logs/CleaningTaskPage";
-import MaintenanceLogsPage from "@/pages/logs/MaintenanceLogsPage";
-import MaintenanceTaskPage from "@/pages/logs/MaintenanceTaskPage";
-import InvoiceDetailPage from "@/pages/payments/InvoiceDetailPage";
-import PaymentsInvoice from "@/pages/payments/PaymentsInvoice";
-import RoomPayments from "@/pages/payments/RoomPayments";
-import MyProfile from "@/pages/profile/MyProfile";
-import Reports from "@/pages/reports/Reports";
-import RoomCleaningHistoryPage from "@/pages/rooms/RoomCleaningHistoryPage";
-import RoomFormPage from "@/pages/rooms/RoomFormPage";
-import RoomHistoryPage from "@/pages/rooms/RoomHistoryPage";
-import RoomMaintenanceHistoryPage from "@/pages/rooms/RoomMaintenanceHistoryPage";
-import RoomManagement from "@/pages/rooms/RoomManagement";
-import RoomRateHistoryPage from "@/pages/rooms/RoomRateHistoryPage";
-import Settings from "@/pages/settings/Settings";
-import CancelReservationPage from "@/pages/stays/CancelReservationPage";
-import CheckInPage from "@/pages/stays/CheckInPage";
-import CheckOutPage from "@/pages/stays/CheckOutPage";
-import MoveReservationPage from "@/pages/stays/MoveReservationPage";
 import Layout from "./components/layout/Layout";
+
+// Pages - Lazy loaded for code splitting
+const RegisterAdmin = lazy(() => import("@/pages/auth/RegisterAdmin"));
+const CalendarView = lazy(() => import("@/pages/calendar/CalendarView"));
+const Dashboard = lazy(() => import("@/pages/dashboard/Dashboard"));
+const EmployeeManagement = lazy(() => import("@/pages/employees/EmployeeManagement"));
+const GuestManagement = lazy(() => import("@/pages/guests/GuestManagement"));
+const CleaningLogsPage = lazy(() => import("@/pages/logs/CleaningLogsPage"));
+const CleaningTaskPage = lazy(() => import("@/pages/logs/CleaningTaskPage"));
+const MaintenanceLogsPage = lazy(() => import("@/pages/logs/MaintenanceLogsPage"));
+const MaintenanceTaskPage = lazy(() => import("@/pages/logs/MaintenanceTaskPage"));
+const InvoiceDetailPage = lazy(() => import("@/pages/payments/InvoiceDetailPage"));
+const PaymentsInvoice = lazy(() => import("@/pages/payments/PaymentsInvoice"));
+const RoomPayments = lazy(() => import("@/pages/payments/RoomPayments"));
+const MyProfile = lazy(() => import("@/pages/profile/MyProfile"));
+const Reports = lazy(() => import("@/pages/reports/Reports"));
+const RoomCleaningHistoryPage = lazy(() => import("@/pages/rooms/RoomCleaningHistoryPage"));
+const RoomFormPage = lazy(() => import("@/pages/rooms/RoomFormPage"));
+const RoomHistoryPage = lazy(() => import("@/pages/rooms/RoomHistoryPage"));
+const RoomMaintenanceHistoryPage = lazy(() => import("@/pages/rooms/RoomMaintenanceHistoryPage"));
+const RoomManagement = lazy(() => import("@/pages/rooms/RoomManagement"));
+const RoomRateHistoryPage = lazy(() => import("@/pages/rooms/RoomRateHistoryPage"));
+const Settings = lazy(() => import("@/pages/settings/Settings"));
+const CancelReservationPage = lazy(() => import("@/pages/stays/CancelReservationPage"));
+const CheckInPage = lazy(() => import("@/pages/stays/CheckInPage"));
+const CheckOutPage = lazy(() => import("@/pages/stays/CheckOutPage"));
+const MoveReservationPage = lazy(() => import("@/pages/stays/MoveReservationPage"));
+const CheckInPayment = lazy(() => import("@/pages/stays/CheckInPayment"));
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="flex flex-col items-center gap-4">
+      <ProgressSpinner strokeWidth="4" fill="transparent" animationDuration=".5s" />
+      <p className="animate-pulse font-medium text-gray-600">Cargando...</p>
+    </div>
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -101,31 +114,212 @@ const AppContent: React.FC = () => {
       >
         <Route path="/" element={<Dashboard />} />
         <Route path="/calendar" element={<CalendarView />} />
-        <Route path="/check-in/:roomId" element={<CheckInPage />} />
-        <Route path="/booking/:roomId" element={<CheckInPage />} />
-        <Route path="/check-out/:stayId" element={<CheckOutPage />} />
-        <Route path="/rooms" element={<RoomManagement userRole={roleName} />} />
-        <Route path="/rooms/new" element={<RoomFormPage />} />
-        <Route path="/rooms/edit/:roomId" element={<RoomFormPage />} />
-        <Route path="/rooms/history/:roomId" element={<RoomHistoryPage />} />
-        <Route path="/rooms/cleaning-history/:roomId" element={<RoomCleaningHistoryPage />} />
-        <Route path="/rooms/maintenance-history/:roomId" element={<RoomMaintenanceHistoryPage />} />
-        <Route path="/rooms/rate-history" element={<RoomRateHistoryPage />} />
-        <Route path="/check-in-payment/:stayId" element={<CheckInPayment />} />
-        <Route path="/room-payments" element={<RoomPayments />} />
-        <Route path="/payments-invoice" element={<PaymentsInvoice />} />
-        <Route path="/invoice/:stayId" element={<InvoiceDetailPage />} />
-        <Route path="/guests" element={<GuestManagement userRole={roleName} />} />
-        <Route path="/employees" element={<EmployeeManagement userRole={roleName} />} />
-        <Route path="/logs/cleaning" element={<CleaningLogsPage />} />
-        <Route path="/logs/maintenance" element={<MaintenanceLogsPage />} />
-        <Route path="/limpieza/:room_id" element={<CleaningTaskPage />} />
-        <Route path="/mantenimiento/:room_id" element={<MaintenanceTaskPage />} />
-        <Route path="/cancelar-reserva/:stayId" element={<CancelReservationPage />} />
-        <Route path="/mover-reserva/:stayId" element={<MoveReservationPage />} />
-        <Route path="/settings" element={<Settings userRole={roleName} />} />
-        <Route path="/profile" element={<MyProfile />} />
-        <Route path="/reports" element={<Reports userRole={roleName} />} />
+      </Route>
+
+      {/* Lazy loaded routes with Suspense */}
+      <Route
+        element={user ? <Layout employee={employee} onLogout={logout} /> : <Navigate to="/login" />}
+      >
+        <Route
+          path="/check-in/:roomId"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <CheckInPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/booking/:roomId"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <CheckInPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/check-out/:stayId"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <CheckOutPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/rooms"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <RoomManagement userRole={roleName} />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/rooms/new"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <RoomFormPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/rooms/edit/:roomId"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <RoomFormPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/rooms/history/:roomId"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <RoomHistoryPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/rooms/cleaning-history/:roomId"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <RoomCleaningHistoryPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/rooms/maintenance-history/:roomId"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <RoomMaintenanceHistoryPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/rooms/rate-history"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <RoomRateHistoryPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/check-in-payment/:stayId"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <CheckInPayment />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/room-payments"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <RoomPayments />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/payments-invoice"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <PaymentsInvoice />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/invoice/:stayId"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <InvoiceDetailPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/guests"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <GuestManagement userRole={roleName} />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/employees"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <EmployeeManagement userRole={roleName} />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/logs/cleaning"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <CleaningLogsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/logs/maintenance"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <MaintenanceLogsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/limpieza/:room_id"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <CleaningTaskPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/mantenimiento/:room_id"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <MaintenanceTaskPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/cancelar-reserva/:stayId"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <CancelReservationPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/mover-reserva/:stayId"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <MoveReservationPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Settings userRole={roleName} />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <MyProfile />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <Reports userRole={roleName} />
+            </Suspense>
+          }
+        />
       </Route>
 
       <Route path="*" element={<Navigate to="/" />} />
@@ -133,7 +327,6 @@ const AppContent: React.FC = () => {
   );
 };
 
-import { CheckInPayment } from "@/pages/stays/CheckInPayment";
 import { BlockUIProvider } from "./context/BlockUIContext";
 
 const App: React.FC = () => {

@@ -47,6 +47,22 @@
 
 [data-pc-name="button"] {
   cursor: pointer !important;
+  display: flex !important;
+  padding: 0 !important;
+  align-items: center !important;
+  gap: 5px !important;
+  justify-content: center !important;
+  padding: 0.5rem 1.5rem !important;
+  border-radius: 8px !important;
+}
+
+.p-button-sm .p-component {
+  border-radius: 8px 0px 0px 8px !important;
+}
+
+.p-button-sm .p-splitbutton-menubutton {
+  padding: 0rem 0rem !important;
+  border-radius: 0px 8px 8px 0px !important;
 }
 
 .p-button {
@@ -127,9 +143,7 @@
 }
 
 /* Botones secundarios (outlined) */
-.p-button.p-button-outlined:not(.p-button-success):not(.p-button-warning):not(
-    .p-button-danger
-  ) {
+.p-button.p-button-outlined:not(.p-button-success):not(.p-button-warning):not(.p-button-danger) {
   background-color: transparent !important;
   border-color: var(--hotel-border) !important;
   color: var(--hotel-text-secondary) !important;
@@ -139,9 +153,9 @@
   transition: all 0.2s ease !important;
 }
 
-.p-button.p-button-outlined:hover:not(.p-button-success):not(
-    .p-button-warning
-  ):not(.p-button-danger) {
+.p-button.p-button-outlined:hover:not(.p-button-success):not(.p-button-warning):not(
+    .p-button-danger
+  ) {
   background-color: var(--hotel-background) !important;
   border-color: var(--hotel-text-primary) !important;
   color: var(--hotel-text-primary) !important;
@@ -336,10 +350,7 @@ html {
   align-items: center;
   box-shadow: none !important;
 }
-.p-tabview
-  .p-tabview-nav
-  li:not(.p-highlight):not(.p-disabled):hover
-  .p-tabview-nav-link {
+.p-tabview .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link {
   background: #e2e8f0;
   color: #475569;
 }
@@ -371,4 +382,108 @@ html {
   width: 100%;
   border: 1px solid var(--hotel-border) !important;
   border-radius: var(--hotel-border-radius) !important;
+}
+
+/* ============ Personalización de ConfirmDialog ============ */
+
+.p-confirm-dialog {
+  border-radius: 1.5rem !important;
+  overflow: hidden;
+}
+
+.p-confirm-dialog .p-dialog-header {
+  background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-400) 100%) !important;
+  border-bottom: none !important;
+  padding: 1rem 1.5rem !important;
+}
+
+.p-confirm-dialog .p-dialog-header-icon {
+  display: none !important;
+}
+
+.p-confirm-dialog .p-dialog-title {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: var(--gray-700) !important;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.p-confirm-dialog .p-dialog-content {
+  padding: 1.5rem !important;
+  background-color: #faf8f5 !important;
+  display: flex;
+  align-items: center !important;
+  gap: 8px;
+}
+
+.p-confirm-dialog .p-confirm-dialog-message {
+  font-size: 1rem !important;
+  color: var(--hotel-text-primary) !important;
+  line-height: 1.6 !important;
+  margin-left: 0 !important;
+}
+
+.p-confirm-dialog .p-dialog-footer {
+  background-color: #faf8f5 !important;
+  border-top: 1px solid var(--hotel-border) !important;
+  padding: 1rem 1.5rem !important;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.p-confirm-dialog .p-dialog-footer button {
+  min-height: 44px !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: var(--hotel-border-radius) !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+.p-confirm-dialog .p-confirm-dialog-reject {
+  background-color: transparent !important;
+  border: 1px solid var(--hotel-border) !important;
+  color: var(--hotel-text-secondary) !important;
+}
+
+.p-confirm-dialog .p-confirm-dialog-reject:hover {
+  background-color: var(--hotel-background) !important;
+  border-color: var(--hotel-text-primary) !important;
+  color: var(--hotel-text-primary) !important;
+}
+
+.p-confirm-dialog .p-confirm-dialog-accept {
+  background-color: var(--hotel-danger) !important;
+  border-color: var(--hotel-danger) !important;
+  color: white !important;
+}
+
+.p-confirm-dialog .p-confirm-dialog-accept:hover {
+  background-color: #dc2626 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
+}
+
+.p-confirm-dialog .p-confirm-dialog-icon {
+  font-size: 2rem !important;
+  color: #f59e0b !important;
+  margin-bottom: 1rem !important;
+}
+
+.p-confirm-popup {
+  border-radius: var(--hotel-border-radius) !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+.p-confirm-popup .p-confirm-popup-content {
+  padding: 1.25rem !important;
+  background-color: var(--hotel-surface) !important;
+}
+
+.p-confirm-popup .p-confirm-popup-footer {
+  padding: 0.75rem 1.25rem !important;
+  background-color: var(--hotel-surface) !important;
+  border-top: 1px solid var(--hotel-border) !important;
 }

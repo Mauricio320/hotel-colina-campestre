@@ -61,7 +61,7 @@ const Login: React.FC = () => {
 
         <div className="relative z-10 max-w-md text-center">
           <img
-            src="/images/img-name-hotel-log.png"
+            src="/images/img-name-hotel-log.webp"
             alt="Hotel Colina Campestre"
             className="mx-auto mb-8 h-auto w-48 brightness-0 invert"
           />
@@ -78,7 +78,7 @@ const Login: React.FC = () => {
           {/* Mobile Logo */}
           <div className="mb-8 text-center lg:hidden">
             <img
-              src="/images/img-name-hotel-log.png"
+              src="/images/img-name-hotel-log.webp"
               alt="Hotel Colina Campestre"
               className="mx-auto h-auto w-32"
             />
@@ -147,6 +147,7 @@ const Login: React.FC = () => {
                               : "border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
                           }`}
                           placeholder="••••••••"
+                          autoComplete="off"
                         />
                         <button
                           type="button"

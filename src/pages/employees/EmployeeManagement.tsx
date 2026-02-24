@@ -513,6 +513,7 @@ const EmployeeManagement: React.FC<EmployeeManagementProps> = ({ userRole }) => 
                         fieldState.invalid ? "p-invalid" : ""
                       }`}
                       placeholder="Mínimo 6 caracteres"
+                      autoComplete="off"
                     />
                   )}
                 />

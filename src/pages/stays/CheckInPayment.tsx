@@ -21,7 +21,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import PageHeader from "@/components/ui/PageHeader";
 import dayjs from "dayjs";
 
-export const CheckInPayment = () => {
+const CheckInPayment = () => {
   const { showBlockUI, hideBlockUI } = useBlockUI();
   const { data: roomStatuses } = useRoomStatuses();
   const { employee } = useAuth();
@@ -269,3 +269,4 @@ export const CheckInPayment = () => {
     </div>
   );
 };
+export default CheckInPayment;
