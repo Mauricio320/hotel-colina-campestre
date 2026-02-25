@@ -1,25 +1,25 @@
 import PaymentHistoryTable from "@/components/payments/PaymentHistoryTable";
 import { StaySummaryHeader } from "@/components/stays/StaySummaryHeader";
+import PageHeader from "@/components/ui/PageHeader";
 import { useBlockUI } from "@/context/BlockUIContext";
-import { GetPaymentSummary } from "@/hooks/usePayments";
-import { useStayById } from "@/hooks/useStaysQuery";
-import { Button } from "primereact/button";
-import { InputNumber } from "primereact/inputnumber";
-import React, { useEffect, useState, useMemo } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Controller, useForm } from "react-hook-form";
-import { usePaymentMethods, useSettings } from "@/hooks/useSettings";
-import { Dropdown } from "primereact/dropdown";
 import { useAuth } from "@/hooks/useAuth";
-import { PaymentType } from "@/types";
+import { GetPaymentSummary } from "@/hooks/usePayments";
+import { useRoomStatuses } from "@/hooks/useRoomStatuses";
+import { usePaymentMethods } from "@/hooks/useSettings";
+import { useUpdateStay } from "@/hooks/useStays";
+import { useStayById } from "@/hooks/useStaysQuery";
 import { CreatePayment } from "@/services/payment/paymentApi";
 import { CreateRoomHistory } from "@/services/room-history/roomHistoryApi";
-import { UpdateStay } from "@/hooks/useStays";
+import { PaymentType } from "@/types";
 import { RoomStatusEnum } from "@/util/enums/status-rooms.enum";
-import { useRoomStatuses } from "@/hooks/useRoomStatuses";
-import { InputTextarea } from "primereact/inputtextarea";
-import PageHeader from "@/components/ui/PageHeader";
 import dayjs from "dayjs";
+import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
+import { InputNumber } from "primereact/inputnumber";
+import { InputTextarea } from "primereact/inputtextarea";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 const CheckInPayment = () => {
   const { showBlockUI, hideBlockUI } = useBlockUI();
@@ -52,6 +52,7 @@ const CheckInPayment = () => {
     isLoading,
   } = GetPaymentSummary(stayId);
   const { paymentMethods } = usePaymentMethods();
+  const updateStay = useUpdateStay();
   const navigate = useNavigate();
 
   const pendingBalance = useMemo(() => {
@@ -60,7 +61,6 @@ const CheckInPayment = () => {
     return Math.max(0, totalPrice - totalPaid);
   }, [stay?.total_price, paymentSummary?.totalPaid]);
 
-  // Actualizar el monto por defecto cuando cambie el saldo pendiente
   useEffect(() => {
     if (pendingBalance > 0) {
       setValue("paid_amount", pendingBalance);
@@ -92,8 +92,11 @@ const CheckInPayment = () => {
       ? { accommodation_type_id: stay.accommodation_type_id }
       : { room_id: stay.room_id };
 
-    await UpdateStay(stayId, {
-      paid_amount: (paymentSummary?.totalPaid || 0) + paidAmount,
+    await updateStay.mutateAsync({
+      id: stayId,
+      updates: {
+        paid_amount: (paymentSummary?.totalPaid || 0) + paidAmount,
+      },
     });
 
     await CreatePayment({
@@ -141,8 +144,11 @@ const CheckInPayment = () => {
       ? { accommodation_type_id: stay.accommodation_type_id }
       : { room_id: stay.room_id };
 
-    await UpdateStay(stayId, {
-      room_status_id: room_status_current_id,
+    await updateStay.mutateAsync({
+      id: stayId,
+      updates: {
+        room_status_id: room_status_current_id,
+      },
     });
 
     await CreateRoomHistory({

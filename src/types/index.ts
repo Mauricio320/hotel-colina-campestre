@@ -121,6 +121,7 @@ export interface Stay {
   room_statuses?: RoomStatus;
   additional_guests?: StayGuest[];
   cancelled?: boolean;
+  created_at: string;
 }
 
 export interface PaymentMethod {

@@ -133,7 +133,7 @@ export const RoomActionModal: React.FC<RoomActionModalProps> = ({
       buttons.unshift({
         icon: "pi pi-sign-in",
         label: "Check-in",
-        className: "bg-[#ff3d47]",
+        className: "bg-emerald-500",
         onClick: navigateToCheckIn,
       });
     }

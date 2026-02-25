@@ -284,16 +284,31 @@
 
 .p-checkbox {
   margin-right: 0.5rem !important;
-  border: 1px solid var(--hotel-border) !important;
-  padding-bottom: 22px;
+  border: 2px solid var(--hotel-border) !important;
+  padding-bottom: 21px;
+  border-radius: 5px !important;
+  width: 22px !important;
+  height: 22px !important;
 }
+
 .p-highlight .p-checkbox {
   border: 0px !important;
+  width: 22px !important;
+  height: 22px !important;
 }
 
 .p-highlight .p-checkbox-box {
   background: var(--hotel-primary) !important;
   margin: -1px !important;
+  height: 22px !important;
+  border: 0px !important;
+  border-radius: 5px !important;
+  width: 22px !important;
+}
+.p-checkbox .p-checkbox-box {
+  border: none !important;
+  width: 22px !important;
+  height: 22px !important;
 }
 
 /* ============ Personalización de Layout ============ */
