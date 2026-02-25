@@ -1,62 +1,47 @@
 import { CalendarMobile } from "@/components/calendar/CalendarMobile";
-import { CalendarTable } from "@/components/calendar/CalendarTable";
-import { RoomActionModal } from "@/components/calendar/RoomActionModal";
-import { RoomOccupiedModal } from "@/components/calendar/RoomOccupiedModal";
-import { StayInactiveModal } from "@/components/calendar/StayInactiveModal";
-import { RoomActionModalHeaderInfo } from "@/components/calendar/RoomActionModalHeaderInfo";
-import { StayInfoCard } from "@/components/forms/StayInfoCard";
 import { useBlockUI } from "@/context/BlockUIContext";
 import { RoomsQueryAndStayCategory } from "@/hooks/useRooms";
 import { AccommodationType, Room, RoomStatus, Stay } from "@/types";
-import { AccommodationTypeEnum } from "@/util/enums/status-rooms.enum";
-import { GetReservationPaymentStatus } from "@/util/helper/helpers";
+import {
+  RoomActionEnum,
+  RoomStatusEnum,
+} from "@/util/enums/status-rooms.enum";
 import dayjs from "dayjs";
-import { Dialog } from "primereact/dialog";
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
 
 interface CalendarGridProps {
-  accommodationType: AccommodationType;
-  roomStatuses: RoomStatus[];
-  activeTab: number;
-  days: Date[];
-  startDate: Date;
   onStartDateChange: (date: Date) => void;
+  accommodationType: AccommodationType;
+  activeTab: number;
+  startDate: Date;
+  days: Date[];
+  onRoomClick: (
+    room: Room,
+    date: Date,
+    stay: Stay | null,
+    action: RoomActionEnum,
+    accommodationType: AccommodationType
+  ) => void;
 }
 
 export const CalendarGrid: React.FC<CalendarGridProps> = ({
   accommodationType,
-  roomStatuses,
-  activeTab,
-  days,
-  startDate,
   onStartDateChange,
+  activeTab,
+  startDate,
+  days,
+  onRoomClick,
 }) => {
   const startDateStr = dayjs(days[0]).format("YYYY-MM-DD");
   const endDateStr = dayjs(days[days.length - 1]).format("YYYY-MM-DD");
 
-  const {
-    data,
-    isLoading,
-    refetch: refectCalendar,
-  } = RoomsQueryAndStayCategory({
+  const { data, isLoading } = RoomsQueryAndStayCategory({
     id: accommodationType.id,
     startDate: startDateStr,
     endDate: endDateStr,
   });
 
   const { hideBlockUI, showBlockUI } = useBlockUI();
-
-  const navigate = useNavigate();
-
-  const [showAbonoCheckOutModal, setShowAbonoCheckOutModal] = useState(false);
-  const [showOccupiedModal, setShowOccupiedModal] = useState(false);
-  const [showInactiveModal, setShowInactiveModal] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [activeStay, setActiveStay] = useState<Stay | null>(null);
-  const [showActionModal, setShowActionModal] = useState(false);
-  const [room, setRoom] = useState<Room | null>(null);
-  const paymentStatus = GetReservationPaymentStatus(activeStay);
 
   useEffect(() => {
     if (isLoading) {
@@ -71,125 +56,30 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
     return room.stays?.find((s) => dateStr >= s.check_in_date && dateStr <= s.check_out_date);
   };
 
-  const handleRoomClick = async (roomC: Room, date: Date, stay: Stay | null) => {
-    setRoom(roomC);
-    setSelectedDate(date);
-    setActiveStay(stay);
+  const handleRoomClick = (room: Room, date: Date, stay: Stay | null) => {
+    let action = RoomActionEnum.MANAGEMENT;
 
-    // Si hay un stay inactivo (finalizado)
     if (stay?.active === false) {
-      setShowInactiveModal(true);
-      return;
+      action = RoomActionEnum.OCCUPIED;
+    } else if (stay?.room_statuses?.name === RoomStatusEnum.OCUPADO) {
+      action = RoomActionEnum.CHECK_IN;
+    } else if (stay?.origin_was_reservation) {
+      action = RoomActionEnum.BOOKING;
     }
 
-    // Si hay una estadía activa (habitación ocupada)
-    if (stay?.status === "Active") {
-      setShowOccupiedModal(true);
-      return;
-    }
-
-    // Si hay una reserva (origin_was_reservation)
-    if (stay?.origin_was_reservation) {
-      setShowAbonoCheckOutModal(true);
-      return;
-    }
-
-    return setShowActionModal(true);
-  };
-
-  const handleGoToCheckOut = () => {
-    const id = activeStay?.id;
-
-    const accommodationTypeEnum = activeStay?.room_id
-      ? AccommodationTypeEnum.HABITACION
-      : AccommodationTypeEnum.APARTAMENTO;
-
-    const params = [`tab=${activeTab}`, `action=${accommodationTypeEnum}`];
-    const url = `/check-out/${id}?${params.join("&")}`;
-    navigate(url);
-  };
-
-  const handleCheckInAction = () => {
-    const params = [`tab=${activeTab}`];
-    const url = `/check-in-payment/${activeStay?.id}?${params.join("&")}`;
-    navigate(url);
+    onRoomClick(room, date, stay, action, accommodationType);
   };
 
   return (
     <section>
-      {/* Vista mobile del calendario */}
       <CalendarMobile
-        data={data ?? []}
-        days={days}
+        onStartDateChange={onStartDateChange}
         getActiveStay={getActiveStay}
         handleRoomClick={handleRoomClick}
         startDate={startDate}
-        onStartDateChange={onStartDateChange}
+        data={data ?? []}
+        days={days}
       />
-
-      {/* Modal para habitaciones disponibles (Check-in / Reservar) */}
-      <RoomActionModal
-        roomStatuses={roomStatuses}
-        onHide={() => setShowActionModal(false)}
-        accommodationType={accommodationType}
-        visible={showActionModal}
-        refectCalendar={() => refectCalendar()}
-        activeStay={activeStay}
-        activeTab={activeTab}
-        date={selectedDate}
-        room={room}
-      />
-
-      {/* Modal para habitaciones ocupadas (Check-out) */}
-      <RoomOccupiedModal
-        visible={showOccupiedModal}
-        onHide={() => setShowOccupiedModal(false)}
-        stay={activeStay}
-        room={room}
-        accommodationType={accommodationType}
-        date={selectedDate}
-        activeTab={activeTab}
-      />
-
-      {/* Modal para stays inactivos (Ver orden / Limpieza / Mantenimiento) */}
-      <StayInactiveModal
-        visible={showInactiveModal}
-        onHide={() => setShowInactiveModal(false)}
-        stay={activeStay}
-        room={room}
-        accommodationType={accommodationType}
-        date={selectedDate}
-        activeTab={activeTab}
-      />
-
-      {/* Modal para reservas (Abonar / Check-in) */}
-      <Dialog
-        header={paymentStatus?.canCheckIn ? "Reserva" : "Abonar reserva"}
-        visible={showAbonoCheckOutModal}
-        onHide={() => setShowAbonoCheckOutModal(false)}
-        className="w-full max-w-[500px]"
-        breakpoints={{ "960px": "90vw", "641px": "95vw" }}
-        dismissableMask
-      >
-        <div className="flex flex-col gap-5 py-2">
-          <RoomActionModalHeaderInfo
-            accommodationTypeEnum={
-              room ? AccommodationTypeEnum.HABITACION : AccommodationTypeEnum.APARTAMENTO
-            }
-            date={selectedDate}
-            room={room}
-          />
-          <StayInfoCard
-            onConfirmCheckIn={handleCheckInAction}
-            onCheckInAction={handleCheckInAction}
-            onGoToCheckOut={handleGoToCheckOut}
-            activeStay={activeStay}
-            selectedDate={selectedDate}
-            activeTab={activeTab}
-            room={room}
-          />
-        </div>
-      </Dialog>
     </section>
   );
 };

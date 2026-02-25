@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/config/supabase";
+import { employeeApi, FetchEmployeesByRole } from "@/services/employees/employeeApi";
 import { Employee } from "@/types";
 
 export const useEmployees = () => {
@@ -7,37 +7,15 @@ export const useEmployees = () => {
 
   const employeesQuery = useQuery({
     queryKey: ["employees"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("employees")
-        .select("*, role:roles(*)")
-        .eq("active", true)
-        .order("last_name");
-
-      if (error) throw error;
-      return data as Employee[];
-    },
+    queryFn: () => employeeApi.fetchEmployees(),
   });
 
-  const fetchEmployeesByRole = async (roleName: string) => {
-    const { data, error } = await supabase
-      .from("employees")
-      .select("*, role:roles!inner(*)")
-      .eq("role.name", roleName);
-    if (error) throw error;
-    return data as Employee[];
+  const fetchEmployeesByRole = async (roleName: string): Promise<Employee[]> => {
+    return employeeApi.fetchEmployeesByRole(roleName);
   };
 
   const createEmployee = useMutation({
-    mutationFn: async (employeeData: any) => {
-      const { data, error } = await supabase
-        .from("employees")
-        .upsert(employeeData, { onConflict: "doc_number" })
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
-    },
+    mutationFn: (employeeData: Partial<Employee>) => employeeApi.createEmployee(employeeData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
     },
@@ -45,20 +23,13 @@ export const useEmployees = () => {
 
   return { employeesQuery, createEmployee, fetchEmployeesByRole };
 };
+
 export const useEmployeesByRole = (roleName: string) => {
   return useQuery({
     queryKey: ["employees", "role", roleName],
-    queryFn: () =>
-      import("@/services/auth/employeeApi").then((m) => m.getEmployeesByRole(roleName)),
+    queryFn: () => employeeApi.fetchEmployeesByRole(roleName),
     enabled: !!roleName,
   });
 };
 
-export const FetchEmployeesByRole = async (roleName: string) => {
-  const { data, error } = await supabase
-    .from("employees")
-    .select("*, role:roles!inner(*)")
-    .eq("role.name", roleName);
-  if (error) throw error;
-  return data as Employee[];
-};
+export { FetchEmployeesByRole };

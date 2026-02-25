@@ -28,3 +28,10 @@ export enum EmployeeRolesEnum {
   ACOM = "Limpieza",
   MANTENIMIENTO = "Mantenimiento",
 }
+
+export enum RoomActionEnum {
+  MANAGEMENT = "management",
+  CHECK_IN = "check-in",
+  BOOKING = "booking",
+  OCCUPIED = "occupied",
+}

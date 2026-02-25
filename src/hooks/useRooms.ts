@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/config/supabase";
-import { Room, RoomRate, Stay } from "@/types";
+import { roomsApi } from "@/services/rooms/roomsApi";
+import { roomHistoryApi } from "@/services/room-history/roomHistoryApi";
+import { Room, RoomRate } from "@/types";
 import dayjs from "dayjs";
 
 export const useRooms = (category?: string) => {
@@ -8,65 +9,23 @@ export const useRooms = (category?: string) => {
 
   const roomsQuery = useQuery({
     queryKey: ["rooms", category],
-    queryFn: async ({ signal }) => {
-      try {
-        let query = supabase
-          .from("rooms")
-          .select("*, status:room_statuses(*), rates:room_rates(*)")
-          .eq("is_active", true)
-          .abortSignal(signal); // Vinculamos la señal de aborto
-
-        if (category) query = query.eq("category", category);
-
-        const { data, error } = await query.order("room_number");
-
-        if (error) throw error;
-        return data as Room[];
-      } catch (e: any) {
-        // Captura silenciosa si la petición fue abortada por el sistema
-        if (e.name === "AbortError" || e.message?.includes("aborted")) {
-          console.debug("Rooms fetch aborted");
-          return [];
-        }
-        throw e;
-      }
-    },
+    queryFn: ({ signal }) => roomsApi.fetchRooms(signal, category),
     refetchOnWindowFocus: false,
-    staleTime: 0,
-    gcTime: 0,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    gcTime: 1000 * 60 * 10, // 10 minutos
     retry: 1,
   });
 
   const upsertRoom = useMutation({
-    mutationFn: async ({ room, rates }: { room: Partial<Room>; rates: Partial<RoomRate>[] }) => {
-      const { data: savedRoom, error: roomError } = await supabase
-        .from("rooms")
-        .upsert(room)
-        .select()
-        .single();
-
-      if (roomError) throw roomError;
-
-      if (rates && savedRoom.id) {
-        await supabase.from("room_rates").delete().eq("room_id", savedRoom.id);
-        const ratesToInsert = rates.map((r) => ({
-          room_id: savedRoom.id,
-          person_count: r.person_count,
-          rate: r.rate,
-        }));
-        const { error: ratesError } = await supabase.from("room_rates").insert(ratesToInsert);
-        if (ratesError) throw ratesError;
-      }
-
-      return savedRoom;
-    },
+    mutationFn: ({ room, rates }: { room: Partial<Room>; rates: Partial<RoomRate>[] }) =>
+      roomsApi.upsertRoom(room, rates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
     },
   });
 
   const updateStatus = useMutation({
-    mutationFn: async ({
+    mutationFn: ({
       roomId,
       statusId,
       observation,
@@ -82,36 +41,16 @@ export const useRooms = (category?: string) => {
       employeeId?: string;
       statusDate?: string;
       stayId?: string;
-    }) => {
-      const { data: currentRoom } = await supabase
-        .from("rooms")
-        .select("status_id, status_date")
-        .eq("id", roomId)
-        .single();
-      const targetDate = statusDate || dayjs().format("YYYY-MM-DD");
-
-      const { error: roomError } = await supabase
-        .from("rooms")
-        .update({
-          status_id: statusId,
-          status_date: targetDate,
-        })
-        .eq("id", roomId);
-
-      if (roomError) throw roomError;
-
-      const { error: logError } = await supabase.from("room_history").insert({
-        room_id: roomId,
-        stay_id: stayId || null,
-        previous_status_id: currentRoom?.status_id,
-        new_status_id: statusId,
-        action_type: actionType,
-        observation:
-          observation || `Cambio de estado manual a ${actionType} para el día ${targetDate}`,
-        employee_id: employeeId,
-      });
-      if (logError) throw logError;
-    },
+    }) =>
+      roomsApi.updateRoomStatus(
+        roomId,
+        statusId,
+        observation || `Cambio de estado manual a ${actionType} para el día ${statusDate || dayjs().format("YYYY-MM-DD")}`,
+        actionType,
+        employeeId,
+        statusDate,
+        stayId
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
       queryClient.invalidateQueries({ queryKey: ["room_history"] });
@@ -131,70 +70,10 @@ interface RoomsQueryCategoryParams {
 export const RoomsQueryAndStayCategory = ({ id, startDate, endDate }: RoomsQueryCategoryParams) => {
   return useQuery({
     queryKey: ["rooms", id, startDate, endDate],
-    queryFn: async ({ signal }) => {
-      const todayStr = dayjs().format("YYYY-MM-DD");
-
-      const { data: accommodationType } = await supabase
-        .from("stays")
-        .select(
-          `id, status, order_number, room_id, cancelled, guest_id, employee_id, check_in_date, check_out_date, total_price, paid_amount, payment_method_id, has_extra_mattress, extra_mattress_price, is_invoice_requested, iva_amount, observation, origin_was_reservation, iva_percentage, person_count, extra_mattress_count, extra_mattress_unit_price, accommodation_type_id, room_status_id, active,
-          room:rooms(*),
-          guest:guests!stays_guest_id_fkey(*),
-          room_statuses(*)`
-        )
-        .eq("accommodation_type_id", id)
-        .eq("cancelled", false)
-        // Solo cargar estadías que intersecten con el rango de fechas
-        .lte("check_in_date", endDate)
-        .gte("check_out_date", startDate)
-        .abortSignal(signal);
-
-      const { data } = await supabase
-        .from("rooms")
-        .select(
-          `
-    *,
-    status:room_statuses(*),
-    rates:room_rates(*),
-    stays!stays_room_id_fkey(
-      id, status, order_number, room_id, guest_id, employee_id, check_in_date, check_out_date, total_price, paid_amount, payment_method_id, has_extra_mattress, extra_mattress_price, is_invoice_requested, iva_amount, observation, origin_was_reservation, iva_percentage, person_count, extra_mattress_count, extra_mattress_unit_price, accommodation_type_id, room_status_id, active,
-      room:rooms(*),
-      guest:guests!stays_guest_id_fkey(*),
-      room_statuses(*)
-    ),
-    cleaning_log: cleaning_logs(id),
-    accommodation_types(*)
-  `
-        )
-        .eq("is_active", true)
-        .eq("accommodation_type_id", id)
-        .eq("stays.cancelled", false)
-        // Filtrar stays que intersecten con el rango de fechas
-        .lte("stays.check_in_date", endDate)
-        .gte("stays.check_out_date", startDate)
-        .eq("cleaning_log.date", todayStr)
-        .abortSignal(signal)
-        .order("room_number");
-
-      return (data as unknown as Room[]).map((room) => {
-        // Si no hay cleaning_log, inicializar como array vacío
-        if (!room.cleaning_log) {
-          room.cleaning_log = [];
-        }
-        // Filtrar stays del accommodationType para evitar duplicados
-        const roomStayIds = new Set(room.stays.map((s) => s.id));
-        accommodationType.forEach((stay) => {
-          if (!roomStayIds.has(stay.id)) {
-            room.stays.push(stay as unknown as Stay);
-          }
-        });
-        room.stays.sort((a, b) => a.check_in_date.localeCompare(b.check_in_date));
-        return room;
-      });
-    },
+    queryFn: ({ signal }) => roomsApi.fetchRoomsWithStays(id, startDate, endDate, signal),
     refetchOnWindowFocus: false,
-    staleTime: 0,
-    gcTime: 0,
+    staleTime: 1000 * 60 * 2, // 2 minutos
+    gcTime: 1000 * 60 * 5, // 5 minutos
     retry: 1,
   });
 };
@@ -202,22 +81,10 @@ export const RoomsQueryAndStayCategory = ({ id, startDate, endDate }: RoomsQuery
 export const RoomsQueryCategory = (id: string) => {
   return useQuery({
     queryKey: ["rooms", id],
-    queryFn: async ({ signal }) => {
-      const { data } = await supabase
-        .from("rooms")
-        .select(`*, accommodation_types(*)`)
-        .eq("is_active", true)
-        .eq("accommodation_type_id", id)
-        .abortSignal(signal)
-        .order("room_number");
-
-      return (data as unknown as Room[]).map((room) => {
-        return room;
-      });
-    },
+    queryFn: ({ signal }) => roomsApi.fetchRoomsByAccommodationType(id, signal),
     refetchOnWindowFocus: false,
-    staleTime: 0,
-    gcTime: 0,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    gcTime: 1000 * 60 * 10, // 10 minutos
     retry: 1,
   });
 };
@@ -225,17 +92,7 @@ export const RoomsQueryCategory = (id: string) => {
 export const useRoomById = (roomId: string | null) => {
   return useQuery({
     queryKey: ["room", roomId],
-    queryFn: async () => {
-      if (!roomId) return null;
-      const { data, error } = await supabase
-        .from("rooms")
-        .select("*, rates:room_rates(*), accommodation_types(name)")
-        .eq("id", roomId)
-        .single();
-
-      if (error) throw error;
-      return data as Room;
-    },
+    queryFn: () => roomsApi.fetchRoomById(roomId!),
     enabled: !!roomId,
     staleTime: 0,
   });
@@ -244,19 +101,7 @@ export const useRoomById = (roomId: string | null) => {
 export const useRoomHistory = (roomId: string | null) => {
   return useQuery({
     queryKey: ["room_history", roomId],
-    queryFn: async () => {
-      if (!roomId) return [];
-      const { data, error } = await supabase
-        .from("room_history")
-        .select(
-          "*, employee:employees(*), new_status:room_statuses!new_status_id(*), prev_status:room_statuses!previous_status_id(*), stay:stays(*)"
-        )
-        .eq("room_id", roomId)
-        .order("timestamp", { ascending: false });
-
-      if (error) throw error;
-      return data || [];
-    },
+    queryFn: () => roomHistoryApi.fetchRoomHistory(roomId!),
     enabled: !!roomId,
     staleTime: 0,
   });

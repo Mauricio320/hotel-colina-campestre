@@ -29,7 +29,15 @@ const CheckInPayment = () => {
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
 
-  const { control, getValues, setValue, watch, register } = useForm({
+  const {
+    control,
+    getValues,
+    setValue,
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    mode: "onChange",
     defaultValues: {
       payment_method_id: "",
       paid_amount: 0,
@@ -73,9 +81,10 @@ const CheckInPayment = () => {
 
   const handlePayment = async () => {
     showBlockUI("Procesando pago...");
-    const isFullPayment = getValues("paid_amount") >= stay?.total_price - paymentSummary?.totalPaid;
+    const paidAmount = getValues("paid_amount");
+    const paymentMethod = paymentMethods?.find((pm) => pm.id === getValues("payment_method_id"));
+    const isFullPayment = paidAmount >= stay?.total_price - paymentSummary?.totalPaid;
     const room_status_current_id = getStatusId(RoomStatusEnum.OCUPADO);
-
     const customObservation = isFullPayment ? "Liquidación completa de reserva" : "Abono parcial";
     const isApartmentAction = !!stay.accommodation_type_id;
 
@@ -83,24 +92,28 @@ const CheckInPayment = () => {
       ? { accommodation_type_id: stay.accommodation_type_id }
       : { room_id: stay.room_id };
 
-    await UpdateStay({
-      id: stayId,
-      paid_amount: (paymentSummary?.totalPaid || 0) + getValues("paid_amount"),
+    await UpdateStay(stayId, {
+      paid_amount: (paymentSummary?.totalPaid || 0) + paidAmount,
     });
 
     await CreatePayment({
       stay_id: stayId,
-      amount: getValues("paid_amount"),
+      amount: paidAmount,
       payment_method_id: getValues("payment_method_id"),
       employee_id: employee?.id,
       observation: customObservation,
       payment_type:
-        getValues("paid_amount") >= stay?.total_price
+        paidAmount >= stay?.total_price
           ? PaymentType.PAGO_COMPLETO_RESERVA
           : PaymentType.ABONO_RESERVA,
       payment_date: new Date().toISOString(),
       created_at: new Date().toISOString(),
     });
+
+    const pendingAfterPayment = Math.max(0, pendingBalance - paidAmount);
+    const paymentHistoryObservation = isFullPayment
+      ? `${customObservation} - $${paidAmount.toLocaleString()}  (${paymentMethod?.name || "Método desconocido"})`
+      : `${customObservation} - $${paidAmount.toLocaleString()}  (${paymentMethod?.name || "Método desconocido"}) - Saldo pendiente: $${pendingAfterPayment.toLocaleString()} COP`;
 
     await CreateRoomHistory({
       ...keyId,
@@ -109,15 +122,13 @@ const CheckInPayment = () => {
       new_status_id: pendingBalance > 0 ? stay.room_status_id : room_status_current_id,
       employee_id: employee.id,
       action_type:
-        getValues("paid_amount") >= stay?.total_price
+        paidAmount >= stay?.total_price
           ? PaymentType.PAGO_COMPLETO_RESERVA
           : PaymentType.ABONO_RESERVA,
-      observation: customObservation,
+      observation: paymentHistoryObservation,
     });
 
-    setTimeout(() => {
-      Promise.all([refetch(), refetchPaymentSummary()]).then(() => hideBlockUI());
-    }, 1000);
+    Promise.all([refetch(), refetchPaymentSummary()]).then(() => hideBlockUI());
   };
 
   const handleCheckIn = async () => {
@@ -130,8 +141,7 @@ const CheckInPayment = () => {
       ? { accommodation_type_id: stay.accommodation_type_id }
       : { room_id: stay.room_id };
 
-    await UpdateStay({
-      id: stayId,
+    await UpdateStay(stayId, {
       room_status_id: room_status_current_id,
     });
 
@@ -183,48 +193,58 @@ const CheckInPayment = () => {
         {pendingBalance > 0 && (
           <div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="rounded-2xl bg-[#eeebe4] p-4">
-                <span className="mb-2 block text-xs font-bold text-gray-400 uppercase">
-                  Método de Pago
-                </span>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold text-gray-700">
+                  Método de Pago <span className="text-amber-500">*</span>
+                </label>
                 <Controller
                   name="payment_method_id"
                   control={control}
+                  rules={{ required: "Campo requerido" }}
                   render={({ field }) => (
                     <Dropdown
                       {...field}
                       options={paymentMethods}
                       optionLabel="name"
                       optionValue="id"
-                      className="w-full border-none shadow-sm"
                       placeholder="Seleccionar..."
                       filter
+                      className={errors.payment_method_id ? "p-invalid" : ""}
                     />
                   )}
                 />
+                {errors.payment_method_id && (
+                  <p className="text-xs text-red-500">{errors.payment_method_id.message}</p>
+                )}
               </div>
 
-              <div className="rounded-2xl bg-[#eeebe4] p-4">
-                <span className="mb-2 block text-xs font-bold text-gray-400 uppercase">
-                  Monto a Abonar
-                </span>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold text-gray-700">
+                  Monto a Abonar <span className="text-amber-500">*</span>
+                </label>
                 <Controller
                   name="paid_amount"
                   control={control}
+                  rules={{
+                    required: "Campo requerido",
+                    min: { value: 1, message: "El monto debe ser mayor a 0" },
+                  }}
                   render={({ field }) => (
                     <InputNumber
                       value={field.value}
                       onValueChange={(e) => field.onChange(e.value)}
-                      className="w-full"
-                      inputClassName="w-full text-xl font-black text-gray-700 border-none shadow-sm"
                       mode="currency"
                       currency="COP"
                       locale="es-CO"
                       minFractionDigits={0}
                       maxFractionDigits={0}
+                      className={errors.paid_amount ? "p-invalid" : ""}
                     />
                   )}
                 />
+                {errors.paid_amount && (
+                  <p className="text-xs text-red-500">{errors.paid_amount.message}</p>
+                )}
               </div>
             </div>
 
@@ -233,10 +253,7 @@ const CheckInPayment = () => {
               label={pendingBalance > 0 ? "Confirmar Abono" : "Confirmar Check-In"}
               icon="pi pi-check-circle"
               className={`mt-4 w-full rounded-2xl border-none bg-emerald-500 py-3 font-black text-white shadow-lg transition-all hover:bg-emerald-600`}
-              onClick={handlePayment}
-              disabled={
-                !watch("paid_amount") || watch("paid_amount") <= 0 || !watch("payment_method_id")
-              }
+              onClick={handleSubmit(handlePayment)}
             />
           </div>
         )}
