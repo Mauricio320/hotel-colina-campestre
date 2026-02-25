@@ -258,7 +258,7 @@ const RoomFormPage: React.FC = () => {
                   render={({ field }) => (
                     <InputTextarea
                       {...field}
-                      className="h-[50px] min-h-[50px] w-full rounded-xl border-gray-200 p-3 focus:border-emerald-500"
+                      className="h-12.5 min-h-12.5 w-full rounded-xl border-gray-200 p-3 focus:border-emerald-500"
                       placeholder="Detalles de la habitación, equipamiento, etc."
                     />
                   )}
@@ -280,7 +280,7 @@ const RoomFormPage: React.FC = () => {
                 unstyled
                 type="button"
                 label="Nueva Tarifa"
-                className="w-[150px] rounded-xl border-none bg-emerald-600 font-bold text-white hover:bg-emerald-700"
+                className="w-37.5 rounded-xl border-none bg-emerald-600 font-bold text-white hover:bg-emerald-700"
                 onClick={() => append({ person_count: fields.length + 1, rate: 80000 })}
               />
             </div>

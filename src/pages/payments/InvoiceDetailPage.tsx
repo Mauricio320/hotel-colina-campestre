@@ -320,7 +320,7 @@ const InvoiceDetailPage: React.FC = () => {
       </div>
 
       {/* Tabla de Conceptos Detallada */}
-      <div className="mt-[24px] rounded-2xl border border-gray-100 bg-white p-6 text-gray-500 shadow-sm">
+      <div className="mt-6 rounded-2xl border border-gray-100 bg-white p-6 text-gray-500 shadow-sm">
         <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900">
           <i className="pi pi-file-text text-gray-600"></i>
           Detalle de Servicios
@@ -435,7 +435,7 @@ const InvoiceDetailPage: React.FC = () => {
         <div className="mb-2 flex items-center justify-center gap-2">
           <i className="pi pi-heart-fill text-red-500"></i>
           <p className="text-sm font-medium text-gray-600">
-            Gracias por elegir Hotel Colina Campestre
+            Gracias por elegir 
           </p>
         </div>
         <p className="text-xs text-gray-500">

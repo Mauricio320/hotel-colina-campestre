@@ -96,7 +96,7 @@ export interface CreateOnStayWithPaymentParams {
   room_status_current_id: string;
   new_status_id: string;
   payment: Payment;
-  stay: Stay;
+  stay: Partial<Stay>;
   keyId:
     | {
         accommodation_type_id: string;
@@ -109,6 +109,123 @@ export interface CreateOnStayWithPaymentParams {
   additionalGuestIds?: string[];
 }
 
+// Hook para crear stay con pago y actualización optimista
+export const useCreateStayWithPaymentComplex = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      room_status_current_id,
+      price_overrides,
+      new_status_id,
+      payment,
+      keyId,
+      stay,
+      additionalGuestIds = [],
+    }: CreateOnStayWithPaymentParams) => {
+      // Llamada al servicio de creación
+      const { data: stayData } = await StayCreateService({
+        ...stay,
+        ...keyId,
+        room_status_id: new_status_id,
+      } as Stay);
+
+      if (!stayData?.id) {
+        throw new Error("Error al crear la estadía");
+      }
+
+      // Crear pago
+      await CreatePayment({
+        stay_id: stayData.id,
+        ...payment,
+      });
+
+      // Crear historial
+      await CreateRoomHistory({
+        ...keyId,
+        stay_id: stayData.id,
+        previous_status_id: room_status_current_id,
+        new_status_id,
+        employee_id: payment.employee_id,
+        action_type: payment.payment_type,
+        observation: payment.observation,
+      });
+
+      // Guardar price overrides si aplica
+      if (price_overrides?.save) {
+        const { save, ...priceData } = price_overrides;
+        await CreatePriceOverrides({
+          ...priceData,
+          stay_id: stayData.id,
+        });
+      }
+
+      // Agregar huéspedes adicionales
+      if (additionalGuestIds.length > 0) {
+        const stayGuests = additionalGuestIds.map((guestId) => ({
+          guest_id: guestId,
+          is_primary_guest: false,
+        }));
+        await stayGuestsApi.addMultipleGuests(stayData.id, stayGuests);
+      }
+
+      return stayData;
+    },
+
+    onMutate: async (variables) => {
+      const { stay, keyId } = variables;
+
+      await queryClient.cancelQueries({ queryKey: ["stays"] });
+      await queryClient.cancelQueries({ queryKey: ["rooms"] });
+
+      const previousStays = queryClient.getQueryData<Stay[]>(["stays"]);
+
+      const tempStay: Stay = {
+        id: `temp-${Date.now()}`,
+        ...stay,
+        ...keyId,
+        created_at: new Date().toISOString(),
+        active: stay.status === "Active",
+        paid_amount: stay.paid_amount || 0,
+        guest: null,
+        room: null,
+      } as Stay;
+
+      queryClient.setQueryData<Stay[]>(["stays"], (old) => {
+        if (!old) return [tempStay];
+        return [tempStay, ...old];
+      });
+
+      return { previousStays, tempStayId: tempStay.id };
+    },
+
+    onSuccess: (newStay, _variables, context) => {
+      queryClient.setQueryData<Stay[]>(["stays"], (old) => {
+        if (!old) return [newStay];
+        return old.map((stay) => (stay.id === context?.tempStayId ? newStay : stay));
+      });
+    },
+
+    onError: (_err, _variables, context) => {
+      if (context?.previousStays) {
+        queryClient.setQueryData(["stays"], context.previousStays);
+      }
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["stays"] });
+      queryClient.invalidateQueries({
+        queryKey: ["rooms"],
+        exact: false,
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({ queryKey: ["room_history"] });
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+    },
+  });
+};
+
+// Función legacy (deprecada, usar useCreateStayWithPaymentComplex)
 export const useCreateOnStayWithPayment = async ({
   room_status_current_id,
   price_overrides,
@@ -118,19 +235,24 @@ export const useCreateOnStayWithPayment = async ({
   stay,
   additionalGuestIds = [],
 }: CreateOnStayWithPaymentParams) => {
-  const { data: stayData } = await createStay({
-    staySet: { ...stay, ...keyId },
-    new_status_id,
-  });
+  const { data: stayData } = await StayCreateService({
+    ...stay,
+    ...keyId,
+    room_status_id: new_status_id,
+  } as Stay);
+
+  if (!stayData?.id) {
+    throw new Error("Error al crear la estadía");
+  }
 
   await CreatePayment({
-    stay_id: stayData?.id,
+    stay_id: stayData.id,
     ...payment,
   });
 
   await CreateRoomHistory({
     ...keyId,
-    stay_id: stayData?.id,
+    stay_id: stayData.id,
     previous_status_id: room_status_current_id,
     new_status_id,
     employee_id: payment.employee_id,
@@ -143,11 +265,11 @@ export const useCreateOnStayWithPayment = async ({
 
     await CreatePriceOverrides({
       ...price_overrides,
-      stay_id: stayData?.id,
+      stay_id: stayData.id,
     });
   }
 
-  if (additionalGuestIds.length > 0 && stayData?.id) {
+  if (additionalGuestIds.length > 0) {
     const stayGuests = additionalGuestIds.map((guestId) => ({
       guest_id: guestId,
       is_primary_guest: false,
@@ -160,6 +282,65 @@ export const useCreateOnStayWithPayment = async ({
 
 // Re-export desde servicios para mantener compatibilidad
 export const CheckAvailability = staysApi.checkAvailability;
+
+// Hook para actualizar stay con actualización optimista
+export const useUpdateStay = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Stay> }) =>
+      staysActionsApi.updateStay(id, updates),
+
+    // Actualización optimista: actualiza la cache inmediatamente
+    onMutate: async ({ id, updates }) => {
+      // Cancelar queries en curso
+      await queryClient.cancelQueries({ queryKey: ["stays"] });
+      await queryClient.cancelQueries({ queryKey: ["stay", id] });
+
+      // Guardar estado anterior
+      const previousStays = queryClient.getQueryData<Stay[]>(["stays"]);
+      const previousStay = queryClient.getQueryData<Stay>(["stay", id]);
+
+      // Actualizar lista de stays
+      queryClient.setQueryData<Stay[]>(["stays"], (old) => {
+        if (!old) return old;
+        return old.map((stay) => (stay.id === id ? { ...stay, ...updates } : stay));
+      });
+
+      // Actualizar stay individual
+      queryClient.setQueryData<Stay>(["stay", id], (old) => {
+        if (!old) return old;
+        return { ...old, ...updates };
+      });
+
+      return { previousStays, previousStay };
+    },
+
+    // Revertir en caso de error
+    onError: (_err, variables, context) => {
+      if (context?.previousStays) {
+        queryClient.setQueryData(["stays"], context.previousStays);
+      }
+      if (context?.previousStay) {
+        queryClient.setQueryData(["stay", variables.id], context.previousStay);
+      }
+    },
+
+    // Refetch al finalizar para consistencia
+    onSettled: (_data, _error, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["stays"] });
+      queryClient.invalidateQueries({ queryKey: ["stay", variables.id] });
+      // Invalidar todas las queries de rooms (incluyendo las del calendario con fechas)
+      queryClient.invalidateQueries({
+        queryKey: ["rooms"],
+        exact: false,
+        refetchType: "active",
+      });
+    },
+  });
+};
+
+// Re-export legado para compatibilidad (usar useUpdateStay en su lugar)
 export const UpdateStay = staysActionsApi.updateStay;
 
 export const useStaysByAccommodationType = ({

@@ -28,7 +28,7 @@ import { usePaymentMethods, useSettings } from "@/hooks/useSettings";
 import { useStayPricing } from "@/hooks/useStayPricing";
 import {
   CheckAvailability,
-  useCreateOnStayWithPayment,
+  useCreateStayWithPaymentComplex,
 } from "@/hooks/useStays";
 import { Employee, PaymentType, Stay } from "@/types";
 import {
@@ -54,6 +54,7 @@ const CheckInPage: React.FC = () => {
   const { settings } = useSettings();
   const { paymentMethods } = usePaymentMethods();
   const checkAvailability = useCheckRoomAvailability();
+  const createStayWithPayment = useCreateStayWithPaymentComplex();
   const { employee } = useAuth();
 
   const { roomId } = useParams<{ roomId: string }>();
@@ -309,7 +310,7 @@ const CheckInPage: React.FC = () => {
         ? { accommodation_type_id: roomId }
         : { room_id: roomId };
 
-      await useCreateOnStayWithPayment({
+      await createStayWithPayment.mutateAsync({
         stay: {
           guest_id: guest.id,
           employee_id: employee?.id || null,
