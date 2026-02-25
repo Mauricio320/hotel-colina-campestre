@@ -22,12 +22,6 @@ export const RoomActionModalHeaderInfo: React.FC<RoomActionModalHeaderInfoProps>
             <i className="pi pi-calendar text-sm text-gray-500"></i>
             <span className="text-sm text-gray-600">{dayjs(date).format("DD/MM/YYYY")}</span>
           </div>
-          {accommodationTypeEnum === AccommodationTypeEnum.HABITACION && (
-            <div className="flex items-center gap-1.5">
-              <i className="pi pi-home text-xs text-gray-500"></i>
-              <span className="text-sm font-bold text-gray-800">Hab. {room?.room_number}</span>
-            </div>
-          )}
         </div>
 
         {accommodationTypeEnum === AccommodationTypeEnum.HABITACION && (

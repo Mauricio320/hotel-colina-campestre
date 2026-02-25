@@ -1,7 +1,7 @@
-import { supabase } from "@/config/supabase";
 import { useBlockUI } from "@/context/BlockUIContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useStayById } from "@/hooks/useStaysQuery";
+import { useCheckOut } from "@/hooks/useCheckOut";
 import { StaySummaryHeader } from "@/components/stays/StaySummaryHeader";
 import { Button } from "primereact/button";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -17,8 +17,8 @@ const CheckOutPage: React.FC = () => {
   const navigate = useNavigate();
 
   const { data: stay, isLoading: loadingStay } = useStayById(stayId);
-
   const { employee } = useAuth();
+  const checkOut = useCheckOut();
 
   const tabParam = searchParams.get("tab");
 
@@ -31,49 +31,17 @@ const CheckOutPage: React.FC = () => {
 
   const handleCheckOut = async () => {
     showBlockUI("Procesando check-out...");
-    const isApartmentAction = !!stay.accommodation_type_id;
 
     try {
-      const _observation = `${stay.observation ?? ""} ${!observation ? "" : "\n"} ${observation ?? ""} `;
+      const combinedObservation = `${stay.observation ?? ""}${observation ? "\n" + observation : ""}`.trim();
 
-      const { data: disponibleStatus } = await supabase
-        .from("room_statuses")
-        .select("id")
-        .eq("name", "Disponible")
-        .single();
-
-      const { error: stayError } = await supabase
-        .from("stays")
-        .update({
-          status: "Completed",
-          observation: _observation,
-          active: false,
-        })
-        .eq("id", stay.id);
-
-      if (stayError) throw stayError;
-
-      const { data: occupiedStatus } = await supabase
-        .from("room_statuses")
-        .select("id")
-        .eq("name", "Ocupado")
-        .single();
-
-      const finalObservation =
-        `Check-out realizado${finalPayment > 0 ? ". Pago final: $" + finalPayment.toLocaleString() : ""}${observation ? ". " + observation : ""}`.trim();
-
-      const keyId = isApartmentAction
-        ? { accommodation_type_id: stay.accommodation_type_id }
-        : { room_id: stay.room?.id };
-
-      await supabase.from("room_history").insert({
-        ...keyId,
-        stay_id: stay.id,
-        previous_status_id: occupiedStatus.id,
-        new_status_id: disponibleStatus.id,
-        action_type: "CHECK-OUT",
-        observation: finalObservation,
-        employee_id: employee?.id,
+      await checkOut.mutateAsync({
+        stayId: stay.id,
+        observation: combinedObservation,
+        finalPayment,
+        employeeId: employee?.id,
+        roomId: stay.room?.id,
+        accommodationTypeId: stay.accommodation_type_id,
       });
 
       showBlockUI("Check-out procesado correctamente");

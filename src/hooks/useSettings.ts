@@ -1,5 +1,5 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getSettings, getPaymentMethods } from "@/services/settings/settingsApi";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getSettings, getPaymentMethods, updateSetting } from "@/services/settings/settingsApi";
 import { settingsQueryKeys } from "@/services/queryKeys/settings.queryKeys";
 
 export const useSettings = () => {
@@ -20,10 +20,18 @@ export const useSettings = () => {
     mat: settingsData?.find((s) => s.key === "extra_mattress_price")?.value || 30000,
   };
 
+  const updateSettingMutation = useMutation({
+    mutationFn: ({ key, value }: { key: string; value: number }) => updateSetting(key, value),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: settingsQueryKeys.settings });
+    },
+  });
+
   return {
     settings,
     isLoading,
     error,
+    updateSetting: updateSettingMutation,
   };
 };
 

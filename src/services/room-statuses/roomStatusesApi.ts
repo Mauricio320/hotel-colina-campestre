@@ -8,4 +8,16 @@ export const roomStatusesApi = {
     if (error) throw new Error(error.message);
     return data || [];
   },
+
+  getStatusByName: async (name: string): Promise<RoomStatus> => {
+    const { data, error } = await supabase
+      .from("room_statuses")
+      .select("id")
+      .eq("name", name)
+      .single();
+
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error(`Status '${name}' not found`);
+    return data;
+  },
 };

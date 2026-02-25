@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Card } from "primereact/card";
 import { InputNumber } from "primereact/inputnumber";
@@ -6,30 +6,21 @@ import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
 import PageHeader from "@/components/ui/PageHeader";
 import { Role } from "@/types";
-import { supabase } from "@/config/supabase";
+import { useSettings } from "@/hooks/useSettings";
 
 interface SettingsProps {
   userRole: string | null;
 }
 
 const Settings: React.FC<SettingsProps> = ({ userRole }) => {
-  const [loading, setLoading] = useState(true);
-  const { register, handleSubmit, setValue, watch, reset } = useForm();
+  const { settings, isLoading, updateSetting } = useSettings();
+  const { handleSubmit, setValue, watch, reset } = useForm();
 
   useEffect(() => {
-    fetchSettings();
-  }, []);
-
-  const fetchSettings = async () => {
-    setLoading(true);
-    const { data } = await supabase.from("settings").select("*");
-    if (data) {
-      const iva = data.find((s) => s.key === "iva_percentage")?.value || 19;
-      const mat = data.find((s) => s.key === "extra_mattress_price")?.value || 30000;
-      reset({ iva, extra_mattress: mat });
+    if (settings) {
+      reset({ iva: settings.iva, extra_mattress: settings.mat });
     }
-    setLoading(false);
-  };
+  }, [settings, reset]);
 
   if (userRole !== Role.Admin) {
     return (
@@ -39,20 +30,17 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
     );
   }
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: { iva: number; extra_mattress: number }) => {
     try {
-      await supabase.from("settings").update({ value: data.iva }).eq("key", "iva_percentage");
-      await supabase
-        .from("settings")
-        .update({ value: data.extra_mattress })
-        .eq("key", "extra_mattress_price");
+      await updateSetting.mutateAsync({ key: "iva_percentage", value: data.iva });
+      await updateSetting.mutateAsync({ key: "extra_mattress_price", value: data.extra_mattress });
       alert("Configuración actualizada con éxito");
     } catch (e) {
       alert("Error al guardar");
     }
   };
 
-  if (loading) return <ProgressSpinner />;
+  if (isLoading) return <ProgressSpinner />;
 
   return (
     <div className="flex flex-col gap-6">
