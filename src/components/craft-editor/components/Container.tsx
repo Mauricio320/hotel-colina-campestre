@@ -8,7 +8,7 @@ const defaultProps: ContainerProps = {
   margin: 0,
   width: "100%",
   maxWidth: "1200px",
-  minHeight: "200px", // Altura mínima para que sea visible
+  minHeight: "100px",
   flexDirection: "column",
   justifyContent: "flex-start",
   alignItems: "stretch",
@@ -121,7 +121,6 @@ export const Container = (props: ContainerComponentProps) => {
   } = useNode();
 
   const mergedProps = { ...defaultProps, ...props };
-  const hasChildren = React.Children.count(mergedProps.children) > 0;
 
   return (
     <div
@@ -138,29 +137,14 @@ export const Container = (props: ContainerComponentProps) => {
         justifyContent: mergedProps.justifyContent,
         alignItems: mergedProps.alignItems,
         gap: `${mergedProps.gap}px`,
-        border: hasChildren ? "none" : "2px dashed #e5e7eb",
-        borderRadius: "8px",
       }}
     >
       {mergedProps.children}
-      {!hasChildren && (
-        <div
-          style={{
-            width: "100%",
-            padding: "40px",
-            textAlign: "center",
-            color: "#9ca3af",
-            fontSize: "14px",
-          }}
-        >
-          Arrastra componentes aquí
-        </div>
-      )}
     </div>
   );
 };
 
-// Craft.js configuration
+// Craft.js configuration - NO isCanvas here!
 Container.craft = {
   displayName: "Contenedor",
   props: defaultProps,

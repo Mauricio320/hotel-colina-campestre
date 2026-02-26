@@ -13,7 +13,10 @@ CREATE TABLE IF NOT EXISTS landing_page_state (
   landing_page_id text REFERENCES landing_pages(id) ON DELETE CASCADE,
   nodes_json jsonb NOT NULL,
   global_styles jsonb DEFAULT '{}',
-  created_at timestamptz DEFAULT now()
+  html_content text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  CONSTRAINT landing_page_state_landing_page_id_key UNIQUE (landing_page_id)
 );
 
 -- Insert default landing page

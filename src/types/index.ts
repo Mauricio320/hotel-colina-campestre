@@ -295,6 +295,7 @@ export interface LandingPageState {
   landing_page_id: string;
   nodes_json: Record<string, unknown>;
   global_styles: GlobalStyles;
+  html_content?: string;
   created_at: string;
 }
 

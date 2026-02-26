@@ -13,24 +13,24 @@ export const landingApi = {
     return data;
   },
 
-  fetchLatestState: async (): Promise<LandingPageState | null> => {
+  fetchState: async (): Promise<LandingPageState | null> => {
     const { data, error } = await supabase
       .from("landing_page_state")
       .select("*")
       .eq("landing_page_id", "default")
-      .order("created_at", { ascending: false })
-      .limit(1)
       .maybeSingle();
 
-    if (error && error.code !== "PGRST116") throw error;
+    if (error) throw error;
     return data;
   },
 
   saveLandingPageState: async (
     nodesJson: Record<string, unknown>,
+    htmlContent: string,
     globalStyles: GlobalStyles,
     employeeId: string
   ): Promise<LandingPageState> => {
+    // Update the landing_pages table to track who last edited
     const { error: updateError } = await supabase
       .from("landing_pages")
       .update({ last_edited_by: employeeId, updated_at: new Date().toISOString() })
@@ -38,13 +38,19 @@ export const landingApi = {
 
     if (updateError) throw updateError;
 
+    // Upsert: create if not exists, update if exists
     const { data, error } = await supabase
       .from("landing_page_state")
-      .insert({
-        landing_page_id: "default",
-        nodes_json: nodesJson,
-        global_styles: globalStyles,
-      })
+      .upsert(
+        {
+          landing_page_id: "default",
+          nodes_json: nodesJson,
+          global_styles: globalStyles,
+          html_content: htmlContent,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "landing_page_id" }
+      )
       .select()
       .single();
 

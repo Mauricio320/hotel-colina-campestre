@@ -41,6 +41,7 @@ const CheckInPayment = lazy(() => import("@/pages/stays/CheckInPayment"));
 const LandingPageEditor = lazy(() => import("@/pages/landing/LandingPageEditor"));
 const LandingPagePreview = lazy(() => import("@/pages/landing/LandingPagePreview"));
 const CraftTutorialPage = lazy(() => import("@/pages/craft-tutorial/CraftTutorialPage"));
+const CraftTutorialPreview = lazy(() => import("@/pages/craft-tutorial/CraftTutorialPreview"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -339,6 +340,14 @@ const AppContent: React.FC = () => {
           element={
             <Suspense fallback={<PageLoader />}>
               <CraftTutorialPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/craft-tutorial/preview"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <CraftTutorialPreview />
             </Suspense>
           }
         />

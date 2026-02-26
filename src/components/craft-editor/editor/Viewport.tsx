@@ -2,11 +2,7 @@ import React from "react";
 import { Frame, Element } from "@craftjs/core";
 import { Container } from "../components";
 
-interface ViewportProps {
-  initialState?: string;
-}
-
-export const Viewport = ({ initialState }: ViewportProps) => {
+export const Viewport = () => {
   return (
     <div className="flex-1 overflow-auto bg-gray-100 p-8">
       <div className="mx-auto min-h-[800px] max-w-6xl bg-white shadow-lg">

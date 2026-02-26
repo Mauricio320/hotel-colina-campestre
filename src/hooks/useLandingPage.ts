@@ -19,7 +19,7 @@ export const useLandingPage = () => {
 export const useLandingPageState = () => {
   return useQuery({
     queryKey: LANDING_PAGE_KEYS.state(),
-    queryFn: () => landingApi.fetchLatestState(),
+    queryFn: () => landingApi.fetchState(),
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 5,
   });
@@ -27,6 +27,7 @@ export const useLandingPageState = () => {
 
 interface SaveLandingPageParams {
   nodesJson: Record<string, unknown>;
+  htmlContent: string;
   globalStyles: GlobalStyles;
   employeeId: string;
 }
@@ -35,8 +36,8 @@ export const useSaveLandingPage = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ nodesJson, globalStyles, employeeId }: SaveLandingPageParams) =>
-      landingApi.saveLandingPageState(nodesJson, globalStyles, employeeId),
+    mutationFn: ({ nodesJson, htmlContent, globalStyles, employeeId }: SaveLandingPageParams) =>
+      landingApi.saveLandingPageState(nodesJson, htmlContent, globalStyles, employeeId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: LANDING_PAGE_KEYS.state() });
       queryClient.invalidateQueries({ queryKey: LANDING_PAGE_KEYS.page() });
