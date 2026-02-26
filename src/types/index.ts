@@ -121,6 +121,7 @@ export interface Stay {
   room_statuses?: RoomStatus;
   additional_guests?: StayGuest[];
   cancelled?: boolean;
+  created_at: string;
 }
 
 export interface PaymentMethod {
@@ -278,4 +279,164 @@ export interface CreateMaintenanceLogDto {
   subcategory_id: string;
   observation?: string;
   date: string;
+}
+
+// Landing Page Types
+export interface LandingPage {
+  id: string;
+  name: string;
+  last_edited_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LandingPageState {
+  id: string;
+  landing_page_id: string;
+  nodes_json: Record<string, unknown>;
+  global_styles: GlobalStyles;
+  created_at: string;
+}
+
+export interface CraftJsState {
+  [nodeId: string]: CraftJsNode;
+}
+
+export interface CraftJsNode {
+  id: string;
+  data: {
+    type: string | { resolvedName: string };
+    props: Record<string, unknown>;
+    displayName?: string;
+    isCanvas?: boolean;
+    parent?: string;
+    linkedNodes?: Record<string, string>;
+    nodes?: string[];
+    hidden?: boolean;
+    custom?: Record<string, unknown>;
+  };
+  rules?: {
+    canDrag?: boolean;
+    canDropIn?: boolean;
+    canMoveIn?: boolean;
+  };
+}
+
+export interface GlobalStyles {
+  primaryColor?: string;
+  secondaryColor?: string;
+  fontFamily?: string;
+  baseFontSize?: number;
+}
+
+// Component-specific prop types
+export interface ContainerProps {
+  background?: string;
+  padding?: number;
+  margin?: number;
+  width?: string;
+  maxWidth?: string;
+  minHeight?: string;
+  flexDirection?: 'row' | 'column';
+  justifyContent?: 'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around';
+  alignItems?: 'flex-start' | 'center' | 'flex-end' | 'stretch';
+  gap?: number;
+}
+
+export interface TextProps {
+  text: string;
+  tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
+  fontSize?: number;
+  fontWeight?: string;
+  color?: string;
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
+  lineHeight?: number;
+  margin?: number;
+}
+
+export interface ImageProps {
+  src: string;
+  alt: string;
+  width?: string;
+  height?: string;
+  objectFit?: 'cover' | 'contain' | 'fill' | 'none';
+  borderRadius?: number;
+}
+
+export interface HeroProps {
+  title: string;
+  subtitle?: string;
+  backgroundImage?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  ctaText?: string;
+  ctaUrl?: string;
+  ctaVariant?: 'primary' | 'secondary' | 'outline';
+  minHeight?: string;
+  textAlign?: 'left' | 'center' | 'right';
+  overlayOpacity?: number;
+}
+
+export interface CardsProps {
+  columns: 1 | 2 | 3 | 4;
+  gap?: number;
+  cards: Array<{
+    id: string;
+    icon?: string;
+    title: string;
+    description: string;
+  }>;
+}
+
+export interface GalleryProps {
+  columns: 2 | 3 | 4;
+  gap?: number;
+  images: Array<{
+    src: string;
+    alt: string;
+    caption?: string;
+  }>;
+}
+
+export interface ButtonProps {
+  text: string;
+  url?: string;
+  variant: 'primary' | 'secondary' | 'outline';
+  size?: 'small' | 'medium' | 'large';
+  fullWidth?: boolean;
+  onClickAction?: 'link' | 'scroll' | 'modal';
+}
+
+export interface SpacerProps {
+  height: number;
+}
+
+export interface VideoProps {
+  url: string;
+  type: 'youtube' | 'vimeo' | 'direct';
+  autoplay?: boolean;
+  controls?: boolean;
+  width?: string;
+  height?: string;
+}
+
+export interface FormProps {
+  title?: string;
+  fields: Array<{
+    id: string;
+    type: 'text' | 'email' | 'tel' | 'textarea';
+    label: string;
+    required?: boolean;
+    placeholder?: string;
+  }>;
+  submitText: string;
+  successMessage?: string;
+  recipientEmail?: string;
+}
+
+export interface NewsletterProps {
+  title: string;
+  description?: string;
+  buttonText: string;
+  successMessage?: string;
 }

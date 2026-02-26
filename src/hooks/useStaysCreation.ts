@@ -1,9 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/config/supabase";
-import { roomHistoryApi } from "@/services/room-history/roomHistoryApi";
-import { roomsApi } from "@/services/rooms/roomsApi";
+import { staysCreationApi } from "@/services/stays/staysCreationApi";
 import { Stay } from "@/types";
-import dayjs from "dayjs";
 
 interface CreateStayParams {
   room_id: string;
@@ -16,88 +13,68 @@ interface CreateStayParams {
   observation?: string;
 }
 
-interface StayPaymentParams {
-  stayData: CreateStayParams;
-  paymentData: {
-    amount: number;
-    payment_method_id: string;
-    employee_id?: string;
-    context?: "reservation" | "checkin_direct";
-    customObservation?: string;
-  };
-}
-
 export const useStaysCreation = () => {
   const queryClient = useQueryClient();
 
   const createStay = useMutation({
-    mutationFn: async (stayData: CreateStayParams) => {
-      const { data: availableStatus } = await supabase
-        .from("room_statuses")
-        .select("id")
-        .eq("name", "Disponible")
-        .single();
+    mutationFn: (stayData: CreateStayParams) => staysCreationApi.createStay(stayData),
 
-      const todayStr = dayjs().format("YYYY-MM-DD");
+    // Actualización optimista: agregar stay temporalmente a la cache
+    onMutate: async (stayData) => {
+      // Cancelar queries en curso
+      await queryClient.cancelQueries({ queryKey: ["stays"] });
+      await queryClient.cancelQueries({ queryKey: ["rooms"] });
 
-      const { data: currentStay } = await supabase
-        .from("stays")
-        .select("id")
-        .eq("room_id", stayData.room_id)
-        .eq("status", "Active")
-        .lte("check_in_date", todayStr)
-        .gte("check_out_date", todayStr)
-        .maybeSingle();
+      // Guardar estado anterior
+      const previousStays = queryClient.getQueryData<Stay[]>(["stays"]);
 
-      const { data: roomBefore } = await supabase
-        .from("rooms")
-        .select("status_id")
-        .eq("id", stayData.room_id)
-        .single();
+      // Crear stay temporal con ID provisional
+      const tempStay: Stay = {
+        id: `temp-${Date.now()}`,
+        ...stayData,
+        created_at: new Date().toISOString(),
+        active: stayData.status === "Active",
+        paid_amount: 0,
+        guest: null,
+        room: null,
+      };
 
-      const effectivePrevStatusId = currentStay
-        ? roomBefore?.status_id
-        : availableStatus?.id || roomBefore?.status_id;
+      // Agregar stay temporal a la lista
+      queryClient.setQueryData<Stay[]>(["stays"], (old) => {
+        if (!old) return [tempStay];
+        return [tempStay, ...old];
+      });
 
-      const { data: stay, error: stayError } = await supabase
-        .from("stays")
-        .insert(stayData)
-        .select()
-        .single();
-
-      if (stayError) throw stayError;
-
-      const statusName = stayData.status === "Active" ? "Ocupado" : "Reservado";
-      const { data: statusData } = await supabase
-        .from("room_statuses")
-        .select("id")
-        .eq("name", statusName)
-        .single();
-
-      if (statusData) {
-        const shouldUpdateRoom =
-          stayData.check_in_date === todayStr || stayData.status === "Active";
-
-        if (shouldUpdateRoom) {
-          await roomsApi.updateStatus(stayData.room_id, statusData.id, new Date());
-        }
-
-        await roomHistoryApi.createRecord({
-          room_id: stayData.room_id,
-          stay_id: stay.id,
-          previous_status_id: effectivePrevStatusId,
-          new_status_id: statusData.id,
-          employee_id: stayData.employee_id,
-          action_type: stayData.status === "Active" ? "CHECK-IN" : "RESERVA",
-          observation: stayData.observation || `Registro de ${statusName} desde Calendario`,
-        });
-      }
-
-      return stay;
+      return { previousStays, tempStayId: tempStay.id };
     },
-    onSuccess: () => {
+
+    // Reemplazar stay temporal con el real cuando llega la respuesta
+    onSuccess: (newStay, _variables, context) => {
+      queryClient.setQueryData<Stay[]>(["stays"], (old) => {
+        if (!old) return [newStay];
+        // Reemplazar el temporal con el real
+        return old.map((stay) =>
+          stay.id === context?.tempStayId ? newStay : stay
+        );
+      });
+    },
+
+    // Revertir en caso de error
+    onError: (_err, _variables, context) => {
+      if (context?.previousStays) {
+        queryClient.setQueryData(["stays"], context.previousStays);
+      }
+    },
+
+    // Refetch al finalizar para consistencia
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["stays"] });
-      queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      // Invalidar todas las queries de rooms (incluyendo las del calendario con fechas)
+      queryClient.invalidateQueries({
+        queryKey: ["rooms"],
+        exact: false,
+        refetchType: "active",
+      });
       queryClient.invalidateQueries({ queryKey: ["room_history"] });
     },
   });

@@ -1,14 +1,20 @@
-import { supabase } from "@/config/supabase";
 import { useBlockUI } from "@/context/BlockUIContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useStayById } from "@/hooks/useStaysQuery";
+import { useCheckOut } from "@/hooks/useCheckOut";
 import { StaySummaryHeader } from "@/components/stays/StaySummaryHeader";
 import { Button } from "primereact/button";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Message } from "primereact/message";
 import { ProgressSpinner } from "primereact/progressspinner";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import PageHeader from "@/components/ui/PageHeader";
+
+interface CheckOutFormData {
+  observation: string;
+}
 
 const CheckOutPage: React.FC = () => {
   const { showBlockUI, hideBlockUI } = useBlockUI();
@@ -17,63 +23,40 @@ const CheckOutPage: React.FC = () => {
   const navigate = useNavigate();
 
   const { data: stay, isLoading: loadingStay } = useStayById(stayId);
-
   const { employee } = useAuth();
+  const checkOut = useCheckOut();
 
   const tabParam = searchParams.get("tab");
 
-  const [finalPayment, setFinalPayment] = useState(0);
-  const [observation, setObservation] = useState("");
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CheckOutFormData>({
+    mode: "onChange",
+    defaultValues: {
+      observation: "",
+    },
+  });
 
-  useEffect(() => {
-    if (stay) setFinalPayment(stay.total_price - stay.paid_amount);
-  }, [stay]);
+  const finalPayment = stay ? stay.total_price - stay.paid_amount : 0;
 
-  const handleCheckOut = async () => {
+  const onSubmit = async (data: CheckOutFormData) => {
+    if (!stay) return;
+
     showBlockUI("Procesando check-out...");
-    const isApartmentAction = !!stay.accommodation_type_id;
 
     try {
-      const _observation = `${stay.observation ?? ""} ${!observation ? "" : "\n"} ${observation ?? ""} `;
+      const combinedObservation =
+        `${stay.observation ?? ""}${data.observation ? "\n" + data.observation : ""}`.trim();
 
-      const { data: disponibleStatus } = await supabase
-        .from("room_statuses")
-        .select("id")
-        .eq("name", "Disponible")
-        .single();
-
-      const { error: stayError } = await supabase
-        .from("stays")
-        .update({
-          status: "Completed",
-          observation: _observation,
-          active: false,
-        })
-        .eq("id", stay.id);
-
-      if (stayError) throw stayError;
-
-      const { data: occupiedStatus } = await supabase
-        .from("room_statuses")
-        .select("id")
-        .eq("name", "Ocupado")
-        .single();
-
-      const finalObservation =
-        `Check-out realizado${finalPayment > 0 ? ". Pago final: $" + finalPayment.toLocaleString() : ""}${observation ? ". " + observation : ""}`.trim();
-
-      const keyId = isApartmentAction
-        ? { accommodation_type_id: stay.accommodation_type_id }
-        : { room_id: stay.room?.id };
-
-      await supabase.from("room_history").insert({
-        ...keyId,
-        stay_id: stay.id,
-        previous_status_id: occupiedStatus.id,
-        new_status_id: disponibleStatus.id,
-        action_type: "CHECK-OUT",
-        observation: finalObservation,
-        employee_id: employee?.id,
+      await checkOut.mutateAsync({
+        stayId: stay.id,
+        observation: combinedObservation,
+        finalPayment,
+        employeeId: employee?.id,
+        roomId: stay.room?.id,
+        accommodationTypeId: stay.accommodation_type_id,
       });
 
       showBlockUI("Check-out procesado correctamente");
@@ -104,17 +87,19 @@ const CheckOutPage: React.FC = () => {
 
   return (
     <div className="animate-fade-in mx-auto max-w-2xl pb-12">
-      <div className="mb-8 flex items-center gap-4">
-        <Button
-          unstyled
-          icon="pi pi-arrow-left"
-          onClick={() => navigate(`/calendar?tab=${tabParam}`)}
-          className="p-button-text p-button-plain p-button-rounded"
-        />
-        <h1 className="text-3xl font-black text-gray-800">Liquidación y Check-out</h1>
-      </div>
+      <PageHeader
+        title={`Liquidación y Check-out `}
+        subtitle={`Factura #${stay?.order_number || "N/A"}`}
+        icon="pi-file-text"
+        color="emerald"
+        onBack={() => navigate(`/calendar?tab=${tabParam}`)}
+        backTooltip="Volver al calendario"
+      />
 
-      <div className="flex flex-col gap-6 rounded-3xl border border-gray-100 bg-white p-8 shadow-xl">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-6 rounded-3xl border border-gray-100 bg-white p-8 shadow-xl"
+      >
         <StaySummaryHeader stay={stay} />
 
         <div className="h-1 bg-gray-100"></div>
@@ -133,28 +118,37 @@ const CheckOutPage: React.FC = () => {
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-xs font-bold text-gray-400 uppercase">
-            Observaciones del Check-out
+          <label className="text-sm font-bold text-gray-700">
+            Observaciones del Check-out <span className="text-amber-500">*</span>
           </label>
-          <InputTextarea
-            value={observation}
-            onChange={(e) => setObservation(e.target.value)}
-            rows={3}
-            className="w-full border-gray-100 bg-[#eeebe4]"
-            placeholder="Ingrese notas adicionales o novedades aquí..."
+          <Controller
+            name="observation"
+            control={control}
+            rules={{ required: "Campo requerido" }}
+            render={({ field }) => (
+              <InputTextarea
+                {...field}
+                rows={3}
+                className={`w-full border-gray-100 bg-[#eeebe4] ${errors.observation ? "p-invalid" : ""}`}
+                placeholder="Ingrese notas adicionales o novedades aquí..."
+              />
+            )}
           />
+          {errors.observation && (
+            <p className="text-xs text-red-500">{errors.observation.message}</p>
+          )}
         </div>
 
         <div className="flex justify-end">
           <Button
             unstyled
+            type="submit"
             label="Confirmar Check-out"
             icon="pi pi-check-circle"
             className="rounded-2xl border-none bg-green-500 px-8 font-black text-white shadow-lg"
-            onClick={handleCheckOut}
           />
         </div>
-      </div>
+      </form>
     </div>
   );
 };

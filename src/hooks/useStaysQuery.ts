@@ -1,28 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/config/supabase";
+import { staysApi } from "@/services/stays/staysApi";
 import { Stay } from "@/types";
 
 export const useStaysQuery = () => {
   const staysQuery = useQuery({
     queryKey: ["stays"],
-    queryFn: async ({ signal }) => {
-      try {
-        const { data, error } = await supabase
-          .from("stays")
-          .select("*, room:rooms(*), guest:guests!stays_guest_id_fkey(*)")
-          .abortSignal(signal)
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-        return data as Stay[];
-      } catch (e: any) {
-        if (e.name === "AbortError" || e.message?.includes("aborted")) {
-          console.debug("Stays fetch aborted by system");
-          return [];
-        }
-        throw e;
-      }
-    },
+    queryFn: ({ signal }) => staysApi.fetchStays(signal),
     refetchOnWindowFocus: false,
     staleTime: 1000 * 60 * 2,
     retry: 1,
@@ -34,22 +17,9 @@ export const useStaysQuery = () => {
 };
 
 export const useStayById = (stayId: string | undefined) => {
-  return useQuery({
+  return useQuery<Stay | null>({
     queryKey: ["stay", stayId],
-    queryFn: async () => {
-      if (!stayId) return null;
-
-      const { data, error } = await supabase
-        .from("stays")
-        .select(
-          "*, guest:guests!stays_guest_id_fkey(*), room:rooms(*), accommodation_type:accommodation_types(*)"
-        )
-        .eq("id", stayId)
-        .single();
-
-      if (error) throw error;
-      return data as Stay;
-    },
+    queryFn: () => staysApi.fetchStayWithDetails(stayId!) as Promise<Stay | null>,
     enabled: !!stayId,
     staleTime: 0,
   });

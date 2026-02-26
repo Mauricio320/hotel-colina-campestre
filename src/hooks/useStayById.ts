@@ -1,22 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/config/supabase";
+import { staysApi } from "@/services/stays/staysApi";
 import { Stay } from "@/types";
 
 export const useStayById = (stayId: string | null) => {
-  return useQuery({
+  return useQuery<Stay | null>({
     queryKey: ["stay", stayId],
-    queryFn: async () => {
-      if (!stayId) return null;
-
-      const { data, error } = await supabase
-        .from("stays")
-        .select("*, room:rooms(*), guest:guests!stays_guest_id_fkey(*)")
-        .eq("id", stayId)
-        .single();
-
-      if (error) throw error;
-      return data as Stay;
-    },
+    queryFn: () => staysApi.fetchStayById(stayId!),
     enabled: !!stayId,
     refetchOnWindowFocus: false,
     staleTime: 0,

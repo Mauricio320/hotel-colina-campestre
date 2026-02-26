@@ -1,40 +1,42 @@
 import { CalendarGrid } from "@/components/calendar/CalendarGrid";
-import { SkeletonUI } from "@/components/ui/SkeletonUI";
+import { RoomActionModal } from "@/components/calendar/RoomActionModal";
 import PageHeader from "@/components/ui/PageHeader";
-import { useBlockUI } from "@/context/BlockUIContext";
+import { SkeletonUI } from "@/components/ui/SkeletonUI";
 import { useAccommodationTypes } from "@/hooks/useAccommodationTypes";
-import { useRooms } from "@/hooks/useRooms";
-import { useRoomStatuses } from "@/hooks/useRoomStatuses";
-import { useStays } from "@/hooks/useStays";
 import { useUrlParams } from "@/hooks/useUrlParams";
+import { Room, Stay } from "@/types";
+import { RoomActionEnum } from "@/util/enums/status-rooms.enum";
 import dayjs from "dayjs";
 import { TabPanel, TabView } from "primereact/tabview";
 import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+interface ModalData {
+  visible: boolean;
+  room: Room | null;
+  activeStay: Stay | null;
+  selectedDate: Date | null;
+  roomAction: RoomActionEnum | null;
+  accommodationType: any;
+}
 
 const CalendarView: React.FC = () => {
-  const { showBlockUI } = useBlockUI();
+  const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState(0);
   const [startDate, setStartDate] = useState(dayjs().toDate());
-
-  const { roomsQuery } = useRooms();
-  const { staysQuery } = useStays();
-
-  const roomStatuses = useRoomStatuses();
+  const [modalData, setModalData] = useState<ModalData>({
+    visible: false,
+    room: null,
+    activeStay: null,
+    selectedDate: null,
+    roomAction: null,
+    accommodationType: null,
+  });
 
   const { parseTabParam, scrollToTabView } = useUrlParams();
 
   const { fetchAll: accommodationTypesQuery } = useAccommodationTypes();
-
-  const isLoading =
-    roomsQuery.isLoading ||
-    staysQuery.isLoading ||
-    roomStatuses.isLoading ||
-    accommodationTypesQuery.isLoading;
-
-  useEffect(() => {
-    showBlockUI(`Cargando Calendario`);
-  }, []);
 
   useEffect(() => {
     const tabIndex = parseTabParam(accommodationTypesQuery.data?.length || 0);
@@ -50,7 +52,47 @@ const CalendarView: React.FC = () => {
     });
   }, [startDate]);
 
-  if (isLoading) return <SkeletonUI />;
+  if (accommodationTypesQuery.isLoading) return <SkeletonUI />;
+
+  const handleRoomClick = (
+    room: Room,
+    date: Date,
+    stay: Stay | null,
+    action: RoomActionEnum,
+    accommodationType: any
+  ) => {
+    setModalData({
+      selectedDate: date,
+      roomAction: action,
+      accommodationType,
+      activeStay: stay,
+      visible: true,
+      room,
+    });
+  };
+
+  const handleCloseModal = () => {
+    setModalData((prev) => ({ ...prev, visible: false }));
+  };
+
+  const handleGoToCheckOut = () => {
+    const stay = modalData.activeStay;
+    if (!stay?.id) return;
+
+    const accommodationTypeEnum = stay?.room_id ? "HABITACION" : "APARTAMENTO";
+    const params = [`tab=${activeTab}`, `action=${accommodationTypeEnum}`];
+    const url = `/check-out/${stay.id}?${params.join("&")}`;
+    navigate(url);
+  };
+
+  const handleCheckInAction = () => {
+    const stay = modalData.activeStay;
+    if (!stay?.id) return;
+
+    const params = [`tab=${activeTab}`];
+    const url = `/check-in-payment/${stay.id}?${params.join("&")}`;
+    navigate(url);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -65,16 +107,30 @@ const CalendarView: React.FC = () => {
         {accommodationTypesQuery.data?.map((type) => (
           <TabPanel key={type.id} header={type.name}>
             <CalendarGrid
-              roomStatuses={roomStatuses?.data || []}
+              onStartDateChange={setStartDate}
+              onRoomClick={handleRoomClick}
               accommodationType={type}
               activeTab={activeTab}
-              days={days}
               startDate={startDate}
-              onStartDateChange={setStartDate}
+              days={days}
             />
           </TabPanel>
         ))}
       </TabView>
+
+      <RoomActionModal
+        accommodationType={modalData.accommodationType}
+        onConfirmCheckIn={handleCheckInAction}
+        onCheckInAction={handleCheckInAction}
+        onGoToCheckOut={handleGoToCheckOut}
+        activeStay={modalData.activeStay}
+        action={modalData.roomAction}
+        date={modalData.selectedDate}
+        visible={modalData.visible}
+        onHide={handleCloseModal}
+        activeTab={activeTab}
+        room={modalData.room}
+      />
     </div>
   );
 };

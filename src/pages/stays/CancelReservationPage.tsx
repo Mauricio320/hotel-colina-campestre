@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -12,6 +12,11 @@ import { useBlockUI } from "@/context/BlockUIContext";
 import { useAuth } from "@/hooks/useAuth";
 import PageHeader from "@/components/ui/PageHeader";
 import dayjs from "dayjs";
+import { useForm, Controller } from "react-hook-form";
+
+interface CancelFormData {
+  observation: string;
+}
 
 const CancelReservationPage: React.FC = () => {
   const { stayId } = useParams<{ stayId: string }>();
@@ -28,13 +33,25 @@ const CancelReservationPage: React.FC = () => {
   const roomIdFromUrl = searchParams.get("room_id");
   const tabParam = searchParams.get("tab");
 
-  const [observation, setObservation] = useState<string>("");
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm<CancelFormData>({
+    mode: "onChange",
+    defaultValues: {
+      observation: "",
+    },
+  });
+
+  const observation = watch("observation");
 
   const navigateToCalendar = () => {
     navigate(tabParam ? `/calendar?tab=${tabParam}` : "/calendar");
   };
 
-  const handleCancel = async () => {
+  const handleCancel = async (data: CancelFormData) => {
     if (!stay || !stayId || !roomIdFromUrl || !employee?.id) return;
 
     const availableStatus = roomStatuses?.find((s) => s.name === "Disponible");
@@ -48,7 +65,7 @@ const CancelReservationPage: React.FC = () => {
       await cancelStay.mutateAsync({
         stayId: stayId,
         roomId: roomIdFromUrl,
-        observation: observation,
+        observation: data.observation,
         employeeId: employee.id,
         availableStatusId: availableStatus.id,
         previous_status_id: stay.room_status_id,
@@ -62,14 +79,10 @@ const CancelReservationPage: React.FC = () => {
     }
   };
 
-  const confirmCancel = () => {
-    if (!observation.trim()) {
-      console.log("Observacion vacia, retornando");
-      return;
-    }
-
+  const onSubmit = (data: CancelFormData) => {
     confirmDialog({
-      message: "¿Esta seguro que desea cancelar esta reserva? Esta accion no se puede deshacer.",
+      message:
+        "¿Esta seguro que desea cancelar esta reserva? Esta accion no se puede deshacer.",
       header: "Confirmar cancelacion",
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Si, cancelar",
@@ -77,11 +90,9 @@ const CancelReservationPage: React.FC = () => {
       acceptIcon: "pi pi-check",
       rejectIcon: "pi pi-times",
       acceptClassName: "p-button-danger",
-      accept: handleCancel,
+      accept: () => handleCancel(data),
     });
   };
-
-  const isFormValid = observation.trim().length > 0;
 
   if (stayLoading) {
     return (
@@ -163,33 +174,39 @@ const CancelReservationPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <p className="text-sm font-black tracking-wide text-gray-500 uppercase">
-              Motivo de cancelacion <span className="text-red-500">*</span>
-            </p>
-            <InputTextarea
-              value={observation}
-              onChange={(e) => setObservation(e.target.value)}
-              placeholder="Ingrese el motivo por el cual se cancela la reserva..."
-              rows={4}
-              className="w-full rounded-xl border-gray-200"
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
+            <label className="text-sm font-bold text-gray-700">
+              Motivo de cancelacion <span className="text-amber-500">*</span>
+            </label>
+            <Controller
+              name="observation"
+              control={control}
+              rules={{ required: "Campo requerido" }}
+              render={({ field }) => (
+                <InputTextarea
+                  {...field}
+                  placeholder="Ingrese el motivo por el cual se cancela la reserva..."
+                  rows={4}
+                  className={`w-full rounded-xl border-gray-200 ${errors.observation ? "p-invalid" : ""}`}
+                />
+              )}
             />
+            {errors.observation && (
+              <p className="text-xs text-red-500">{errors.observation.message}</p>
+            )}
             <p className="text-xs text-gray-400">
               Este campo es obligatorio. La observacion quedara registrada en el historial.
             </p>
-          </div>
 
-          <Button
-            unstyled
-            label="Cancelar Reserva"
-            icon="pi pi-times-circle"
-            className="mt-2 w-full rounded-2xl border-none bg-red-500 py-4 text-lg font-black text-white shadow-lg hover:bg-red-600"
-            onClick={() => {
-              confirmCancel();
-            }}
-            disabled={!isFormValid || cancelStay.isPending}
-            loading={cancelStay.isPending}
-          />
+            <Button
+              unstyled
+              type="submit"
+              label="Cancelar Reserva"
+              icon="pi pi-times-circle"
+              className="mt-4 w-full rounded-2xl border-none bg-red-500 py-4 text-lg font-black text-white shadow-lg hover:bg-red-600"
+              loading={cancelStay.isPending}
+            />
+          </form>
         </div>
       </Card>
     </div>

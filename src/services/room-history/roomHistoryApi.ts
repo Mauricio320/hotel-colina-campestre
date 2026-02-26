@@ -8,6 +8,25 @@ export const roomHistoryApi = {
     if (error) throw new Error(error.message);
     return data;
   },
+
+  fetchRoomHistory: async (roomId: string): Promise<RoomHistory[]> => {
+    const { data, error } = await supabase
+      .from("room_history")
+      .select(
+        `
+        *,
+        employee:employees(*),
+        new_status:room_statuses!new_status_id(*),
+        prev_status:room_statuses!previous_status_id(*),
+        stay:stays(*)
+      `
+      )
+      .eq("room_id", roomId)
+      .order("timestamp", { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return data || [];
+  },
 };
 
 export const CreateRoomHistory = async (

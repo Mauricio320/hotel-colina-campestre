@@ -1,6 +1,7 @@
-import { supabase } from "@/config/supabase";
 import { Stay } from "@/types";
+import { staysApi } from "@/services/stays/staysApi";
 import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 
 interface ConflictParams {
   accommodationTypeId?: string;
@@ -22,49 +23,16 @@ export const useStayConflict = ({
         return [];
       }
 
-      const checkInStr = checkInDate.toLocaleDateString("sv-SE");
-      const checkOutStr = checkOutDate.toLocaleDateString("sv-SE");
+      const checkInStr = dayjs(checkInDate).format("YYYY-MM-DD");
+      const checkOutStr = dayjs(checkOutDate).format("YYYY-MM-DD");
 
-      // 1. Obtener los IDs de las habitaciones que pertenecen a este tipo de alojamiento
-      const { data: rooms, error: roomsError } = await supabase
-        .from("rooms")
-        .select("id")
-        .eq("accommodation_type_id", accommodationTypeId);
-
-      if (roomsError) throw roomsError;
-
-      const roomIds = rooms?.map((r) => r.id) || [];
-
-      // 2. Buscar estancias activas que se solapen y pertenezcan al alojamiento o a sus habitaciones
-      // Lógica de solapamiento: (start1 < end2) AND (end1 > start2)
-      let query = supabase
-        .from("stays")
-        .select(
-          `
-          *,
-          guest:guests!stays_guest_id_fkey(*),
-          room:rooms(*)
-        `
-        )
-        .eq("active", true)
-        .lt("check_in_date", checkOutStr)
-        .gt("check_out_date", checkInStr);
-
-      // Filtro jerárquico: El conflicto puede ser con el alojamiento mismo o con cualquiera de sus habitaciones
-      if (roomIds.length > 0) {
-        query = query.or(
-          `accommodation_type_id.eq.${accommodationTypeId},room_id.in.(${roomIds.join(",")})`
-        );
-      } else {
-        query = query.eq("accommodation_type_id", accommodationTypeId);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      return data as (Stay & { guest: any; room: any })[];
+      return staysApi.fetchConflictingStays({
+        accommodationTypeId,
+        checkInDate: checkInStr,
+        checkOutDate: checkOutStr,
+      });
     },
     enabled: !!accommodationTypeId && !!checkInDate && !!checkOutDate && active,
-    staleTime: 0, // Queremos datos frescos para validación
+    staleTime: 0,
   });
 };
