@@ -38,6 +38,9 @@ const CheckInPage = lazy(() => import("@/pages/stays/CheckInPage"));
 const CheckOutPage = lazy(() => import("@/pages/stays/CheckOutPage"));
 const MoveReservationPage = lazy(() => import("@/pages/stays/MoveReservationPage"));
 const CheckInPayment = lazy(() => import("@/pages/stays/CheckInPayment"));
+const LandingPageEditor = lazy(() => import("@/pages/landing/LandingPageEditor"));
+const LandingPagePreview = lazy(() => import("@/pages/landing/LandingPagePreview"));
+const CraftTutorialPage = lazy(() => import("@/pages/craft-tutorial/CraftTutorialPage"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -109,10 +112,13 @@ const AppContent: React.FC = () => {
     <Routes>
       <Route path="/login" element={!user ? <Login /> : <Navigate to="/calendar" />} />
 
+      {/* Root route - redirects based on auth */}
+      <Route path="/" element={user ? <Navigate to="/calendar" /> : <Navigate to="/login" />} />
+
       <Route
         element={user ? <Layout employee={employee} onLogout={logout} /> : <Navigate to="/login" />}
       >
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/calendar" element={<CalendarView />} />
       </Route>
 
@@ -317,6 +323,22 @@ const AppContent: React.FC = () => {
           element={
             <Suspense fallback={<PageLoader />}>
               <Reports userRole={roleName} />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/landing-editor"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              {roleName === "Admin" ? <LandingPageEditor /> : <Navigate to="/" />}
+            </Suspense>
+          }
+        />
+        <Route
+          path="/craft-tutorial"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <CraftTutorialPage />
             </Suspense>
           }
         />

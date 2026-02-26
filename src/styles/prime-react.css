@@ -410,7 +410,7 @@ html {
 }
 
 .p-confirm-dialog .p-dialog-header {
-  background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-400) 100%) !important;
+  background: linear-gradient(135deg, var(--green-100) 0%, var(--gray-300) 100%) !important;
   border-bottom: none !important;
   padding: 1rem 1.5rem !important;
 }
