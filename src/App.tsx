@@ -38,10 +38,9 @@ const CheckInPage = lazy(() => import("@/pages/stays/CheckInPage"));
 const CheckOutPage = lazy(() => import("@/pages/stays/CheckOutPage"));
 const MoveReservationPage = lazy(() => import("@/pages/stays/MoveReservationPage"));
 const CheckInPayment = lazy(() => import("@/pages/stays/CheckInPayment"));
-const LandingPageEditor = lazy(() => import("@/pages/landing/LandingPageEditor"));
-const LandingPagePreview = lazy(() => import("@/pages/landing/LandingPagePreview"));
 const CraftTutorialPage = lazy(() => import("@/pages/craft-tutorial/CraftTutorialPage"));
 const CraftTutorialPreview = lazy(() => import("@/pages/craft-tutorial/CraftTutorialPreview"));
+const LandingEditPage = lazy(() => import("@/pages/landing-edit/LandingEditPage"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -327,14 +326,7 @@ const AppContent: React.FC = () => {
             </Suspense>
           }
         />
-        <Route
-          path="/landing-editor"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              {roleName === "Admin" ? <LandingPageEditor /> : <Navigate to="/" />}
-            </Suspense>
-          }
-        />
+
         <Route
           path="/craft-tutorial"
           element={
@@ -348,6 +340,14 @@ const AppContent: React.FC = () => {
           element={
             <Suspense fallback={<PageLoader />}>
               <CraftTutorialPreview />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/landing-edit"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <LandingEditPage />
             </Suspense>
           }
         />

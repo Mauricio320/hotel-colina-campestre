@@ -1,17 +1,7 @@
-import React from "react";
 import { Element, useEditor } from "@craftjs/core";
-import { Container } from "./Container";
-import { Button } from "./Button";
-import { Text } from "./Text";
-import { Image } from "./Image";
-import { Spacer } from "./Spacer";
-import { Video } from "./Video";
-import { Heading } from "./Heading";
-import { Link } from "./Link";
-import { Divider } from "./Divider";
+import React from "react";
 
-import { SplitColumns } from "./SplitColumns";
-import { Columns } from "./Columns";
+import { Button, CanvasElement, Container, Text } from "./components";
 
 interface ToolboxItemProps {
   icon: React.ReactNode;
@@ -70,17 +60,17 @@ export const Toolbox = () => {
       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
         <ToolboxItem
           icon="📝"
-          label="Título"
-          refCallback={(ref) => {
-            if (ref) connectors.create(ref, <Heading text="Título" level={1} />);
-          }}
-        />
-
-        <ToolboxItem
-          icon="📄"
           label="Texto"
           refCallback={(ref) => {
-            if (ref) connectors.create(ref, <Text text="Texto de párrafo" />);
+            if (ref)
+              connectors.create(
+                ref,
+                <Text
+                  text="Texto editable. Haz clic para editar."
+                  fontSize="16"
+                  color={{ r: "46", g: "47", b: "47", a: "1" }}
+                />
+              );
           }}
         />
 
@@ -89,35 +79,6 @@ export const Toolbox = () => {
           label="Botón"
           refCallback={(ref) => {
             if (ref) connectors.create(ref, <Button text="Click me" />);
-          }}
-        />
-
-        <ToolboxItem
-          icon="🔗"
-          label="Enlace"
-          refCallback={(ref) => {
-            if (ref) connectors.create(ref, <Link text="Enlace" url="#" />);
-          }}
-        />
-
-        <ToolboxItem
-          icon="🖼️"
-          label="Imagen"
-          refCallback={(ref) => {
-            if (ref)
-              connectors.create(
-                ref,
-                <Image src="https://placehold.co/600x400/e2e8f0/475569?text=Imagen" />
-              );
-          }}
-        />
-
-        <ToolboxItem
-          icon="🎥"
-          label="Video"
-          refCallback={(ref) => {
-            if (ref)
-              connectors.create(ref, <Video url="https://www.youtube.com/embed/dQw4w9WgXcQ" />);
           }}
         />
 
@@ -137,18 +98,23 @@ export const Toolbox = () => {
         </h3>
 
         <ToolboxItem
-          icon="🗂️"
-          label="Columna"
+          icon="📦"
+          label="Canvas"
           refCallback={(ref) => {
             if (ref)
               connectors.create(
                 ref,
-                <Element is={Container} padding={20} canvas flexDirection="column" />
+                <CanvasElement
+                  padding={["20", "20", "20", "20"]}
+                  margin={["0", "0", "0", "0"]}
+                  flexDirection="column"
+                  width="100%"
+                  height="auto"
+                />
               );
           }}
         />
 
-        {/* Icono 2 columnas */}
         <ToolboxItem
           icon={
             <div style={{ display: "flex", gap: "3px", width: "24px", height: "20px" }}>
@@ -158,70 +124,29 @@ export const Toolbox = () => {
           }
           label="2 Columnas"
           refCallback={(ref) => {
-            if (ref) connectors.create(ref, <Columns columns="2" />);
-          }}
-        />
-
-        {/* Icono 3 columnas */}
-        <ToolboxItem
-          icon={
-            <div style={{ display: "flex", gap: "3px", width: "24px", height: "20px" }}>
-              <div style={{ flex: 1, background: "#6b7280", borderRadius: "2px" }} />
-              <div style={{ flex: 1, background: "#6b7280", borderRadius: "2px" }} />
-              <div style={{ flex: 1, background: "#6b7280", borderRadius: "2px" }} />
-            </div>
-          }
-          label="3 Columnas"
-          refCallback={(ref) => {
             if (ref)
-              connectors.create(ref, <Columns columns="3" />);
-          }}
-        />
-
-        {/* Icono 4 columnas */}
-        <ToolboxItem
-          icon={
-            <div style={{ display: "flex", gap: "2px", width: "24px", height: "20px" }}>
-              <div style={{ flex: 1, background: "#6b7280", borderRadius: "2px" }} />
-              <div style={{ flex: 1, background: "#6b7280", borderRadius: "2px" }} />
-              <div style={{ flex: 1, background: "#6b7280", borderRadius: "2px" }} />
-              <div style={{ flex: 1, background: "#6b7280", borderRadius: "2px" }} />
-            </div>
-          }
-          label="4 Columnas"
-          refCallback={(ref) => {
-            if (ref)
-              connectors.create(ref, <Columns columns="4" />);
-          }}
-        />
-
-        {/* Icono 30/70 */}
-        <ToolboxItem
-          icon={
-            <div style={{ display: "flex", gap: "3px", width: "24px", height: "20px" }}>
-              <div style={{ width: "30%", background: "#6b7280", borderRadius: "2px" }} />
-              <div style={{ width: "70%", background: "#6b7280", borderRadius: "2px" }} />
-            </div>
-          }
-          label="3/7"
-          refCallback={(ref) => {
-            if (ref) connectors.create(ref, <SplitColumns leftWidth="30%" rightWidth="70%" />);
-          }}
-        />
-
-        <ToolboxItem
-          icon="⬜"
-          label="Espaciador"
-          refCallback={(ref) => {
-            if (ref) connectors.create(ref, <Spacer height={32} />);
-          }}
-        />
-
-        <ToolboxItem
-          icon="➖"
-          label="Separador"
-          refCallback={(ref) => {
-            if (ref) connectors.create(ref, <Divider />);
+              connectors.create(
+                ref,
+                <CanvasElement
+                  flexDirection="row"
+                  width="100%"
+                  height="auto"
+                  padding={["0", "0", "0", "0"]}
+                  margin={["0", "0", "20", "0"]}
+                  custom={{ displayName: "2 Columnas" }}
+                >
+                  <CanvasElement
+                    width="50%"
+                    padding={["10", "10", "10", "10"]}
+                    custom={{ displayName: "Columna Izq" }}
+                  />
+                  <CanvasElement
+                    width="50%"
+                    padding={["10", "10", "10", "10"]}
+                    custom={{ displayName: "Columna Der" }}
+                  />
+                </CanvasElement>
+              );
           }}
         />
       </div>

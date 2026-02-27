@@ -1,20 +1,10 @@
 import { Editor, Element, Frame, useEditor } from "@craftjs/core";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "./Button";
-import { Container } from "./Container";
-import { Divider } from "./Divider";
-import { Heading } from "./Heading";
-import { Image } from "./Image";
-import { Link } from "./Link";
-import { Spacer } from "./Spacer";
-import { Text } from "./Text";
-import { Video } from "./Video";
 
 import { useAuth } from "@/hooks/useAuth";
 import { useLandingPageState, useSaveLandingPage } from "@/hooks/useLandingPage";
-import { Columns } from "./Columns";
+import { Button, CanvasElement, Container, Text } from "./components";
 import { SettingsPanel } from "./SettingsPanel";
-import { SplitColumns } from "./SplitColumns";
 import { Toolbox } from "./Toolbox";
 
 /**
@@ -250,21 +240,7 @@ const CraftTutorialPage = () => {
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-      <Editor
-        resolver={{
-          Container,
-          Button,
-          Text,
-          Image,
-          Spacer,
-          Video,
-          Heading,
-          Link,
-          Divider,
-          SplitColumns,
-          Columns,
-        }}
-      >
+      <Editor resolver={{ Container, Text, Button, CanvasElement }}>
         <EditorHeader canvasRef={canvasRef} />
         <FrameLoader savedState={savedState?.nodes_json as Record<string, unknown> | undefined} />
 
@@ -283,25 +259,57 @@ const CraftTutorialPage = () => {
 
           {/* Canvas Area - Center */}
           <div style={{ flex: 1, padding: "24px", background: "#f3f4f6", overflow: "auto" }}>
-            <div
-              ref={canvasRef}
-              style={{
-                maxWidth: "900px",
-                margin: "0 auto",
-                background: "#fff",
-                minHeight: "600px",
-                borderRadius: "8px",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-              }}
-            >
+            <div ref={canvasRef}>
               <Frame>
                 <Element
-                  is={Container}
-                  padding={40}
-                  background="#ffffff"
                   canvas
-                  minHeight="600px"
-                ></Element>
+                  is={Container}
+                  width="100%"
+                  maxWidth="800px"
+                  height="auto"
+                  background={{ r: 255, g: 255, b: 255, a: 1 }}
+                  padding={["40", "40", "40", "40"]}
+                  margin={["0", "auto", "0", "auto"]}
+                  custom={{ displayName: "App" }}
+                >
+                  <Element
+                    canvas
+                    is={Container}
+                    flexDirection="row"
+                    width="100%"
+                    height="auto"
+                    padding={["0", "0", "0", "0"]}
+                    margin={["0", "0", "20", "0"]}
+                    custom={{ displayName: "Introduction" }}
+                  >
+                    <Element
+                      canvas
+                      is={Container}
+                      width="50%"
+                      padding={["0", "10", "0", "0"]}
+                      custom={{ displayName: "Heading" }}
+                    >
+                      <Text
+                        fontSize="23"
+                        fontWeight="500"
+                        text="Bienvenido al Editor de Landing Pages"
+                      />
+                    </Element>
+                    <Element
+                      canvas
+                      is={Container}
+                      width="50%"
+                      padding={["0", "0", "0", "10"]}
+                      custom={{ displayName: "Description" }}
+                    >
+                      <Text
+                        fontSize="14"
+                        fontWeight="400"
+                        text="Arrastra elementos desde la barra lateral izquierda para construir tu página. Selecciona cualquier elemento para editar sus propiedades."
+                      />
+                    </Element>
+                  </Element>
+                </Element>
               </Frame>
             </div>
           </div>
