@@ -9,8 +9,9 @@ import { Video } from "./Video";
 import { Heading } from "./Heading";
 import { Link } from "./Link";
 import { Divider } from "./Divider";
-import { Columns } from "./Columns";
+
 import { SplitColumns } from "./SplitColumns";
+import { Columns } from "./Columns";
 
 interface ToolboxItemProps {
   icon: React.ReactNode;
@@ -115,7 +116,8 @@ export const Toolbox = () => {
           icon="🎥"
           label="Video"
           refCallback={(ref) => {
-            if (ref) connectors.create(ref, <Video url="https://www.youtube.com/embed/dQw4w9WgXcQ" />);
+            if (ref)
+              connectors.create(ref, <Video url="https://www.youtube.com/embed/dQw4w9WgXcQ" />);
           }}
         />
 
@@ -139,7 +141,10 @@ export const Toolbox = () => {
           label="Columna"
           refCallback={(ref) => {
             if (ref)
-              connectors.create(ref, <Element is={Container} padding={20} canvas flexDirection="column" />);
+              connectors.create(
+                ref,
+                <Element is={Container} padding={20} canvas flexDirection="column" />
+              );
           }}
         />
 
@@ -153,8 +158,7 @@ export const Toolbox = () => {
           }
           label="2 Columnas"
           refCallback={(ref) => {
-            if (ref)
-              connectors.create(ref, <Columns count={2} />);
+            if (ref) connectors.create(ref, <Columns columns="2" />);
           }}
         />
 
@@ -170,7 +174,7 @@ export const Toolbox = () => {
           label="3 Columnas"
           refCallback={(ref) => {
             if (ref)
-              connectors.create(ref, <Columns count={3} />);
+              connectors.create(ref, <Columns columns="3" />);
           }}
         />
 
@@ -187,7 +191,7 @@ export const Toolbox = () => {
           label="4 Columnas"
           refCallback={(ref) => {
             if (ref)
-              connectors.create(ref, <Columns count={4} />);
+              connectors.create(ref, <Columns columns="4" />);
           }}
         />
 
@@ -201,8 +205,7 @@ export const Toolbox = () => {
           }
           label="3/7"
           refCallback={(ref) => {
-            if (ref)
-              connectors.create(ref, <SplitColumns leftWidth="30%" rightWidth="70%" />);
+            if (ref) connectors.create(ref, <SplitColumns leftWidth="30%" rightWidth="70%" />);
           }}
         />
 

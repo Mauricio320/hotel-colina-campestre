@@ -1,20 +1,21 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
-import { Editor, Frame, Element, useEditor } from "@craftjs/core";
-import { Container } from "./Container";
+import { Editor, Element, Frame, useEditor } from "@craftjs/core";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "./Button";
-import { Text } from "./Text";
-import { Image } from "./Image";
-import { Spacer } from "./Spacer";
-import { Video } from "./Video";
-import { Heading } from "./Heading";
-import { Link } from "./Link";
+import { Container } from "./Container";
 import { Divider } from "./Divider";
+import { Heading } from "./Heading";
+import { Image } from "./Image";
+import { Link } from "./Link";
+import { Spacer } from "./Spacer";
+import { Text } from "./Text";
+import { Video } from "./Video";
+
+import { useAuth } from "@/hooks/useAuth";
+import { useLandingPageState, useSaveLandingPage } from "@/hooks/useLandingPage";
 import { Columns } from "./Columns";
+import { SettingsPanel } from "./SettingsPanel";
 import { SplitColumns } from "./SplitColumns";
 import { Toolbox } from "./Toolbox";
-import { SettingsPanel } from "./SettingsPanel";
-import { useSaveLandingPage, useLandingPageState } from "@/hooks/useLandingPage";
-import { useAuth } from "@/hooks/useAuth";
 
 /**
  * Limpia el HTML de atributos y elementos de Craft.js
@@ -239,7 +240,9 @@ const CraftTutorialPage = () => {
 
   if (isLoading) {
     return (
-      <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div
+        style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
         <div>Cargando editor...</div>
       </div>
     );
@@ -248,9 +251,18 @@ const CraftTutorialPage = () => {
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
       <Editor
-        resolver={{ Container, Button, Text, Image, Spacer, Video, Heading, Link, Divider, Columns, SplitColumns }}
-        onNodesChange={(state) => {
-          console.log("Nodes changed:", state.serialize());
+        resolver={{
+          Container,
+          Button,
+          Text,
+          Image,
+          Spacer,
+          Video,
+          Heading,
+          Link,
+          Divider,
+          SplitColumns,
+          Columns,
         }}
       >
         <EditorHeader canvasRef={canvasRef} />
@@ -283,15 +295,13 @@ const CraftTutorialPage = () => {
               }}
             >
               <Frame>
-                <Element is={Container} padding={40} background="#ffffff" canvas minHeight="600px">
-                  <Heading text="Bienvenido a tu Landing Page" level={1} align="center" />
-                  <Text
-                    text="Comienza a arrastrar elementos aquí para construir tu página."
-                    textAlign="center"
-                  />
-                  <Spacer height={32} />
-                  <Button text="Click me" />
-                </Element>
+                <Element
+                  is={Container}
+                  padding={40}
+                  background="#ffffff"
+                  canvas
+                  minHeight="600px"
+                ></Element>
               </Frame>
             </div>
           </div>

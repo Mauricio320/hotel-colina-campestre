@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useRef, useCallback } from "react";
 import { useNode, useEditor } from "@craftjs/core";
 
 interface ContainerProps {
@@ -17,7 +17,10 @@ interface ContainerProps {
   justifyContent?: "flex-start" | "center" | "flex-end" | "space-between" | "space-around";
   alignItems?: "flex-start" | "center" | "flex-end" | "stretch";
   gap?: number;
+  flex?: number;
   children?: React.ReactNode;
+  styleContent?: React.CSSProperties ;
+  classChildren?: string;
 }
 
 type ResizeDirection = "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw" | null;
@@ -39,7 +42,9 @@ export const Container = (props: ContainerProps) => {
     justifyContent = "flex-start",
     alignItems = "stretch",
     gap,
+    flex,
     children,
+    styleContent,
   } = props;
   const {
     connectors: { connect, drag },
@@ -49,96 +54,71 @@ export const Container = (props: ContainerProps) => {
     selected: node.events.selected,
   }));
 
-  // Verificar si el editor está habilitado (modo edición vs modo preview)
+  console.log(styleContent, "prueba");
+
   const { enabled } = useEditor((state) => ({
     enabled: state.options.enabled,
   }));
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const [resizeDirection, setResizeDirection] = useState<ResizeDirection>(null);
+
   const resizeStartPos = useRef({ x: 0, y: 0 });
   const resizeStartSize = useRef({ width: 0, height: 0 });
 
-  const getCursorStyle = (direction: ResizeDirection): string => {
-    switch (direction) {
-      case "n":
-      case "s":
-        return "ns-resize";
-      case "e":
-      case "w":
-        return "ew-resize";
-      case "ne":
-      case "sw":
-        return "nesw-resize";
-      case "nw":
-      case "se":
-        return "nwse-resize";
-      default:
-        return "default";
-    }
-  };
+  const startResize = useCallback(
+    (e: React.MouseEvent, direction: ResizeDirection) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-  const startResize = useCallback((e: React.MouseEvent, direction: ResizeDirection) => {
-    e.preventDefault();
-    e.stopPropagation();
+      resizeStartPos.current = { x: e.clientX, y: e.clientY };
 
-    setResizeDirection(direction);
-    resizeStartPos.current = { x: e.clientX, y: e.clientY };
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        resizeStartSize.current = {
+          width: rect.width,
+          height: rect.height,
+        };
+      }
 
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      resizeStartSize.current = {
-        width: rect.width,
-        height: rect.height,
+      const handleMouseMove = (moveEvent: MouseEvent) => {
+        const dx = moveEvent.clientX - resizeStartPos.current.x;
+        const dy = moveEvent.clientY - resizeStartPos.current.y;
+
+        let newWidth = resizeStartSize.current.width;
+        let newHeight = resizeStartSize.current.height;
+
+        if (direction.includes("e")) {
+          newWidth = Math.max(50, resizeStartSize.current.width + dx);
+        }
+        if (direction.includes("w")) {
+          newWidth = Math.max(50, resizeStartSize.current.width - dx);
+        }
+        if (direction.includes("s")) {
+          newHeight = Math.max(50, resizeStartSize.current.height + dy);
+        }
+        if (direction.includes("n")) {
+          newHeight = Math.max(50, resizeStartSize.current.height - dy);
+        }
+
+        setProp((props: ContainerProps) => {
+          props.width = `${newWidth}px`;
+          props.height = `${newHeight}px`;
+        });
       };
-    }
 
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const dx = moveEvent.clientX - resizeStartPos.current.x;
-      const dy = moveEvent.clientY - resizeStartPos.current.y;
+      const handleMouseUp = () => {
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("mouseup", handleMouseUp);
+      };
 
-      let newWidth = resizeStartSize.current.width;
-      let newHeight = resizeStartSize.current.height;
-
-      if (direction.includes("e")) {
-        newWidth = Math.max(50, resizeStartSize.current.width + dx);
-      }
-      if (direction.includes("w")) {
-        newWidth = Math.max(50, resizeStartSize.current.width - dx);
-      }
-      if (direction.includes("s")) {
-        newHeight = Math.max(50, resizeStartSize.current.height + dy);
-      }
-      if (direction.includes("n")) {
-        newHeight = Math.max(50, resizeStartSize.current.height - dy);
-      }
-
-      setProp((props: ContainerProps) => {
-        props.width = `${newWidth}px`;
-        props.height = `${newHeight}px`;
-      });
-    };
-
-    const handleMouseUp = () => {
-      setResizeDirection(null);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-  }, [setProp]);
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+    },
+    [setProp]
+  );
 
   const style: React.CSSProperties = {
     minHeight,
-    border: borderStyle && borderStyle !== "none"
-      ? `${borderWidth || 1}px ${borderStyle} ${borderColor || "#e5e7eb"}`
-      : "1px dashed #d1d5db",
-    ...(background && { background }),
-    ...(padding !== undefined && { padding: `${padding}px` }),
-    ...(marginTop !== undefined && { marginTop: `${marginTop}px` }),
-    ...(marginBottom !== undefined && { marginBottom: `${marginBottom}px` }),
-    ...(borderRadius !== undefined && { borderRadius: `${borderRadius}px` }),
     display: "flex",
     flexDirection,
     justifyContent,
@@ -146,8 +126,10 @@ export const Container = (props: ContainerProps) => {
     gap: gap !== undefined ? `${gap}px` : "0px",
     ...(width && { width }),
     ...(height && { height }),
+    ...(flex !== undefined && { flex }),
     position: "relative",
     boxSizing: "border-box",
+    cursor: enabled ? "move" : "default",
   };
 
   const handleBaseStyle: React.CSSProperties = {
@@ -160,16 +142,18 @@ export const Container = (props: ContainerProps) => {
   const edgeSize = 6;
 
   return (
-    <div
-      ref={(ref) => {
-        containerRef.current = ref;
-        // Solo habilitar drag/connect cuando el editor está habilitado
-        if (enabled) {
-          connect(drag(ref));
-        }
-      }}
-      style={style}
-    >
+    <div style={{ position: "relative", ...styleContent }} >
+      <div
+        ref={(ref) => {
+          containerRef.current = ref;
+          // Solo habilitar drag/connect cuando el editor está habilitado
+          if (enabled) {
+            connect(drag(ref));
+          }
+        }}
+        style={style}
+        className={props?.classChildren ? props?.classChildren : ""}
+      >
         {children}
 
         {/* Resize handles overlay - only visible when selected AND editor enabled */}
@@ -284,22 +268,75 @@ export const Container = (props: ContainerProps) => {
               }}
             />
           </>
-      )}
+        )}
+      </div>
     </div>
   );
 };
 
 const ContainerSettings = () => {
   const {
+    id,
     actions: { setProp },
     props,
-  } = useNode((node) => ({ props: node.data.props as ContainerProps }));
+  } = useNode((node) => ({
+    id: node.id,
+    props: node.data.props as ContainerProps,
+    hasParent: !!node.data.parent,
+  }));
+
+  // Usar el hook useEditor sin argumento para obtener actions fuera del selector
+  const { actions: editorActions } = useEditor((state) => ({
+    actions: (state as any).actions,
+  }));
+
+  const handleDelete = () => {
+    if (!id) return;
+
+    try {
+      (editorActions as any).delete(id);
+    } catch (error) {
+      alert("No se puede eliminar este nodo");
+    }
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      {/* Botón Eliminar */}
+      <button
+        onClick={handleDelete}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          width: "100%",
+          padding: "10px",
+          background: "#ef4444",
+          color: "#fff",
+          border: "none",
+          borderRadius: "6px",
+          cursor: "pointer",
+          fontSize: "14px",
+          fontWeight: 500,
+        }}
+      >
+        🗑 Eliminar Contenedor
+      </button>
+
+      <div style={{ borderTop: "1px solid #e5e7eb", margin: "8px 0" }} />
+
       {/* Background Color */}
       <div>
-        <label style={{ display: "block", fontSize: "12px", fontWeight: 600, marginBottom: "6px", color: "#374151" }}>
+        <label
+          style={{
+            display: "block",
+            fontSize: "12px",
+            fontWeight: 600,
+            marginBottom: "6px",
+            color: "#374151",
+          }}
+        >
           Color de fondo
         </label>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -307,21 +344,43 @@ const ContainerSettings = () => {
             type="color"
             value={props.background || "#ffffff"}
             onChange={(e) => setProp((p: ContainerProps) => (p.background = e.target.value))}
-            style={{ width: "40px", height: "32px", border: "1px solid #d1d5db", borderRadius: "4px", cursor: "pointer" }}
+            style={{
+              width: "40px",
+              height: "32px",
+              border: "1px solid #d1d5db",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
           />
           <input
             type="text"
             value={props.background || ""}
-            onChange={(e) => setProp((p: ContainerProps) => (p.background = e.target.value || undefined))}
+            onChange={(e) =>
+              setProp((p: ContainerProps) => (p.background = e.target.value || undefined))
+            }
             placeholder="transparent, #fff, etc."
-            style={{ flex: 1, padding: "6px 8px", border: "1px solid #d1d5db", borderRadius: "6px", fontSize: "14px" }}
+            style={{
+              flex: 1,
+              padding: "6px 8px",
+              border: "1px solid #d1d5db",
+              borderRadius: "6px",
+              fontSize: "14px",
+            }}
           />
         </div>
       </div>
 
       {/* Width */}
       <div>
-        <label style={{ display: "block", fontSize: "12px", fontWeight: 600, marginBottom: "6px", color: "#374151" }}>
+        <label
+          style={{
+            display: "block",
+            fontSize: "12px",
+            fontWeight: 600,
+            marginBottom: "6px",
+            color: "#374151",
+          }}
+        >
           Ancho
         </label>
         <input
@@ -329,13 +388,27 @@ const ContainerSettings = () => {
           value={props.width || ""}
           onChange={(e) => setProp((p: ContainerProps) => (p.width = e.target.value || undefined))}
           placeholder="100%, 500px, auto, etc."
-          style={{ width: "100%", padding: "8px", border: "1px solid #d1d5db", borderRadius: "6px", fontSize: "14px" }}
+          style={{
+            width: "100%",
+            padding: "8px",
+            border: "1px solid #d1d5db",
+            borderRadius: "6px",
+            fontSize: "14px",
+          }}
         />
       </div>
 
       {/* Height */}
       <div>
-        <label style={{ display: "block", fontSize: "12px", fontWeight: 600, marginBottom: "6px", color: "#374151" }}>
+        <label
+          style={{
+            display: "block",
+            fontSize: "12px",
+            fontWeight: 600,
+            marginBottom: "6px",
+            color: "#374151",
+          }}
+        >
           Alto
         </label>
         <input
@@ -343,13 +416,27 @@ const ContainerSettings = () => {
           value={props.height || ""}
           onChange={(e) => setProp((p: ContainerProps) => (p.height = e.target.value || undefined))}
           placeholder="300px, auto, etc."
-          style={{ width: "100%", padding: "8px", border: "1px solid #d1d5db", borderRadius: "6px", fontSize: "14px" }}
+          style={{
+            width: "100%",
+            padding: "8px",
+            border: "1px solid #d1d5db",
+            borderRadius: "6px",
+            fontSize: "14px",
+          }}
         />
       </div>
 
       {/* Padding */}
       <div>
-        <label style={{ display: "block", fontSize: "12px", fontWeight: 600, marginBottom: "6px", color: "#374151" }}>
+        <label
+          style={{
+            display: "block",
+            fontSize: "12px",
+            fontWeight: 600,
+            marginBottom: "6px",
+            color: "#374151",
+          }}
+        >
           Padding (interior): {props.padding || 0}px
         </label>
         <input
@@ -365,46 +452,102 @@ const ContainerSettings = () => {
       {/* Margin */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
         <div>
-          <label style={{ display: "block", fontSize: "11px", fontWeight: 600, marginBottom: "4px", color: "#374151" }}>
+          <label
+            style={{
+              display: "block",
+              fontSize: "11px",
+              fontWeight: 600,
+              marginBottom: "4px",
+              color: "#374151",
+            }}
+          >
             Margen superior (px)
           </label>
           <input
             type="number"
             value={props.marginTop || 0}
-            onChange={(e) => setProp((p: ContainerProps) => (p.marginTop = parseInt(e.target.value) || 0))}
-            style={{ width: "100%", padding: "6px", border: "1px solid #d1d5db", borderRadius: "6px", fontSize: "14px" }}
+            onChange={(e) =>
+              setProp((p: ContainerProps) => (p.marginTop = parseInt(e.target.value) || 0))
+            }
+            style={{
+              width: "100%",
+              padding: "6px",
+              border: "1px solid #d1d5db",
+              borderRadius: "6px",
+              fontSize: "14px",
+            }}
           />
         </div>
         <div>
-          <label style={{ display: "block", fontSize: "11px", fontWeight: 600, marginBottom: "4px", color: "#374151" }}>
+          <label
+            style={{
+              display: "block",
+              fontSize: "11px",
+              fontWeight: 600,
+              marginBottom: "4px",
+              color: "#374151",
+            }}
+          >
             Margen inferior (px)
           </label>
           <input
             type="number"
             value={props.marginBottom || 0}
-            onChange={(e) => setProp((p: ContainerProps) => (p.marginBottom = parseInt(e.target.value) || 0))}
-            style={{ width: "100%", padding: "6px", border: "1px solid #d1d5db", borderRadius: "6px", fontSize: "14px" }}
+            onChange={(e) =>
+              setProp((p: ContainerProps) => (p.marginBottom = parseInt(e.target.value) || 0))
+            }
+            style={{
+              width: "100%",
+              padding: "6px",
+              border: "1px solid #d1d5db",
+              borderRadius: "6px",
+              fontSize: "14px",
+            }}
           />
         </div>
       </div>
 
       {/* Min Height */}
       <div>
-        <label style={{ display: "block", fontSize: "12px", fontWeight: 600, marginBottom: "6px", color: "#374151" }}>
+        <label
+          style={{
+            display: "block",
+            fontSize: "12px",
+            fontWeight: 600,
+            marginBottom: "6px",
+            color: "#374151",
+          }}
+        >
           Altura mínima
         </label>
         <input
           type="text"
           value={props.minHeight || ""}
-          onChange={(e) => setProp((p: ContainerProps) => (p.minHeight = e.target.value || undefined))}
+          onChange={(e) =>
+            setProp((p: ContainerProps) => (p.minHeight = e.target.value || undefined))
+          }
           placeholder="100px, auto, etc."
-          style={{ width: "100%", padding: "8px", border: "1px solid #d1d5db", borderRadius: "6px", fontSize: "14px" }}
+          style={{
+            width: "100%",
+            padding: "8px",
+            border: "1px solid #d1d5db",
+            borderRadius: "6px",
+            fontSize: "14px",
+          }}
         />
       </div>
 
       {/* Border Radius */}
       <div>
-        <label style={{ display: "block", fontSize: "12px", fontWeight: 600, marginBottom: "6px", color: "#374151" }}>
+        <label
+          style={{
+            display: "block",
+            fontSize: "12px",
+            fontWeight: 600,
+            marginBottom: "6px",
+            color: "#374151",
+          }}
+        >
           Radio de borde: {props.borderRadius || 0}px
         </label>
         <input
@@ -412,20 +555,41 @@ const ContainerSettings = () => {
           min={0}
           max={50}
           value={props.borderRadius || 0}
-          onChange={(e) => setProp((p: ContainerProps) => (p.borderRadius = parseInt(e.target.value)))}
+          onChange={(e) =>
+            setProp((p: ContainerProps) => (p.borderRadius = parseInt(e.target.value)))
+          }
           style={{ width: "100%" }}
         />
       </div>
 
       {/* Border Style */}
       <div>
-        <label style={{ display: "block", fontSize: "12px", fontWeight: 600, marginBottom: "6px", color: "#374151" }}>
+        <label
+          style={{
+            display: "block",
+            fontSize: "12px",
+            fontWeight: 600,
+            marginBottom: "6px",
+            color: "#374151",
+          }}
+        >
           Estilo de borde
         </label>
         <select
           value={props.borderStyle || "none"}
-          onChange={(e) => setProp((p: ContainerProps) => (p.borderStyle = e.target.value as ContainerProps["borderStyle"]))}
-          style={{ width: "100%", padding: "8px", border: "1px solid #d1d5db", borderRadius: "6px", fontSize: "14px" }}
+          onChange={(e) =>
+            setProp(
+              (p: ContainerProps) =>
+                (p.borderStyle = e.target.value as ContainerProps["borderStyle"])
+            )
+          }
+          style={{
+            width: "100%",
+            padding: "8px",
+            border: "1px solid #d1d5db",
+            borderRadius: "6px",
+            fontSize: "14px",
+          }}
         >
           <option value="none">Ninguno</option>
           <option value="solid">Sólido</option>
@@ -438,7 +602,15 @@ const ContainerSettings = () => {
         <>
           {/* Border Width */}
           <div>
-            <label style={{ display: "block", fontSize: "12px", fontWeight: 600, marginBottom: "6px", color: "#374151" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "12px",
+                fontWeight: 600,
+                marginBottom: "6px",
+                color: "#374151",
+              }}
+            >
               Grosor de borde: {props.borderWidth || 1}px
             </label>
             <input
@@ -446,14 +618,24 @@ const ContainerSettings = () => {
               min={0}
               max={10}
               value={props.borderWidth || 1}
-              onChange={(e) => setProp((p: ContainerProps) => (p.borderWidth = parseInt(e.target.value)))}
+              onChange={(e) =>
+                setProp((p: ContainerProps) => (p.borderWidth = parseInt(e.target.value)))
+              }
               style={{ width: "100%" }}
             />
           </div>
 
           {/* Border Color */}
           <div>
-            <label style={{ display: "block", fontSize: "12px", fontWeight: 600, marginBottom: "6px", color: "#374151" }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "12px",
+                fontWeight: 600,
+                marginBottom: "6px",
+                color: "#374151",
+              }}
+            >
               Color de borde
             </label>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -461,13 +643,27 @@ const ContainerSettings = () => {
                 type="color"
                 value={props.borderColor || "#e5e7eb"}
                 onChange={(e) => setProp((p: ContainerProps) => (p.borderColor = e.target.value))}
-                style={{ width: "40px", height: "32px", border: "1px solid #d1d5db", borderRadius: "4px", cursor: "pointer" }}
+                style={{
+                  width: "40px",
+                  height: "32px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                }}
               />
               <input
                 type="text"
                 value={props.borderColor || ""}
-                onChange={(e) => setProp((p: ContainerProps) => (p.borderColor = e.target.value || undefined))}
-                style={{ flex: 1, padding: "6px 8px", border: "1px solid #d1d5db", borderRadius: "6px", fontSize: "14px" }}
+                onChange={(e) =>
+                  setProp((p: ContainerProps) => (p.borderColor = e.target.value || undefined))
+                }
+                style={{
+                  flex: 1,
+                  padding: "6px 8px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                }}
               />
             </div>
           </div>
@@ -476,14 +672,26 @@ const ContainerSettings = () => {
 
       {/* Flex Direction */}
       <div>
-        <label style={{ display: "block", fontSize: "12px", fontWeight: 600, marginBottom: "6px", color: "#374151" }}>
+        <label
+          style={{
+            display: "block",
+            fontSize: "12px",
+            fontWeight: 600,
+            marginBottom: "6px",
+            color: "#374151",
+          }}
+        >
           Dirección de contenido
         </label>
         <div style={{ display: "flex", gap: "4px" }}>
           {["column", "row"].map((dir) => (
             <button
               key={dir}
-              onClick={() => setProp((p: ContainerProps) => (p.flexDirection = dir as ContainerProps["flexDirection"]))}
+              onClick={() =>
+                setProp(
+                  (p: ContainerProps) => (p.flexDirection = dir as ContainerProps["flexDirection"])
+                )
+              }
               style={{
                 flex: 1,
                 padding: "8px",
@@ -503,13 +711,32 @@ const ContainerSettings = () => {
 
       {/* Justify Content */}
       <div>
-        <label style={{ display: "block", fontSize: "12px", fontWeight: 600, marginBottom: "6px", color: "#374151" }}>
+        <label
+          style={{
+            display: "block",
+            fontSize: "12px",
+            fontWeight: 600,
+            marginBottom: "6px",
+            color: "#374151",
+          }}
+        >
           Alineación horizontal
         </label>
         <select
           value={props.justifyContent || "flex-start"}
-          onChange={(e) => setProp((p: ContainerProps) => (p.justifyContent = e.target.value as ContainerProps["justifyContent"]))}
-          style={{ width: "100%", padding: "8px", border: "1px solid #d1d5db", borderRadius: "6px", fontSize: "14px" }}
+          onChange={(e) =>
+            setProp(
+              (p: ContainerProps) =>
+                (p.justifyContent = e.target.value as ContainerProps["justifyContent"])
+            )
+          }
+          style={{
+            width: "100%",
+            padding: "8px",
+            border: "1px solid #d1d5db",
+            borderRadius: "6px",
+            fontSize: "14px",
+          }}
         >
           <option value="flex-start">Inicio</option>
           <option value="center">Centro</option>
@@ -521,13 +748,31 @@ const ContainerSettings = () => {
 
       {/* Align Items */}
       <div>
-        <label style={{ display: "block", fontSize: "12px", fontWeight: 600, marginBottom: "6px", color: "#374151" }}>
+        <label
+          style={{
+            display: "block",
+            fontSize: "12px",
+            fontWeight: 600,
+            marginBottom: "6px",
+            color: "#374151",
+          }}
+        >
           Alineación vertical
         </label>
         <select
           value={props.alignItems || "stretch"}
-          onChange={(e) => setProp((p: ContainerProps) => (p.alignItems = e.target.value as ContainerProps["alignItems"]))}
-          style={{ width: "100%", padding: "8px", border: "1px solid #d1d5db", borderRadius: "6px", fontSize: "14px" }}
+          onChange={(e) =>
+            setProp(
+              (p: ContainerProps) => (p.alignItems = e.target.value as ContainerProps["alignItems"])
+            )
+          }
+          style={{
+            width: "100%",
+            padding: "8px",
+            border: "1px solid #d1d5db",
+            borderRadius: "6px",
+            fontSize: "14px",
+          }}
         >
           <option value="flex-start">Inicio</option>
           <option value="center">Centro</option>
@@ -538,7 +783,15 @@ const ContainerSettings = () => {
 
       {/* Gap */}
       <div>
-        <label style={{ display: "block", fontSize: "12px", fontWeight: 600, marginBottom: "6px", color: "#374151" }}>
+        <label
+          style={{
+            display: "block",
+            fontSize: "12px",
+            fontWeight: 600,
+            marginBottom: "6px",
+            color: "#374151",
+          }}
+        >
           Espacio entre elementos: {props.gap || 0}px
         </label>
         <input
