@@ -22,6 +22,9 @@ export type ContainerProps = {
   shadow: number;
   children: React.ReactNode;
   radius: number;
+  x: number;
+  y: number;
+  position: 'relative' | 'absolute';
 };
 
 const defaultProps = {
@@ -37,12 +40,20 @@ const defaultProps = {
   radius: 0,
   width: '100%',
   height: 'auto',
+  x: 0,
+  y: 0,
+  position: 'relative' as const,
 };
 
-export const Container = (props: Partial<ContainerProps>) => {
-  props = {
+interface ExtendedContainerProps extends Partial<ContainerProps> {
+  resizeHandles?: string[];
+}
+
+export const Container = (props: ExtendedContainerProps) => {
+  const { resizeHandles, ...containerProps } = props;
+  const mergedProps = {
     ...defaultProps,
-    ...props,
+    ...containerProps,
   };
   const {
     flexDirection,
@@ -56,11 +67,26 @@ export const Container = (props: Partial<ContainerProps>) => {
     shadow,
     radius,
     children,
-  } = props;
+    x,
+    y,
+    position,
+  } = mergedProps;
+
+  // Usar referencia al padre para limitar redimensionamiento
+  const [bounds, setBounds] = React.useState<string | HTMLElement>('parent');
+
   return (
     <Resizer
       propKey={{ width: 'width', height: 'height' }}
+      resizeHandles={resizeHandles}
+      bounds={bounds}
+      x={x}
+      y={y}
+      position={position}
       style={{
+        position,
+        left: position === 'absolute' ? `${x}px` : undefined,
+        top: position === 'absolute' ? `${y}px` : undefined,
         justifyContent,
         flexDirection,
         alignItems,
@@ -74,6 +100,8 @@ export const Container = (props: Partial<ContainerProps>) => {
             : `0px 3px 100px ${shadow}px rgba(0, 0, 0, 0.13)`,
         borderRadius: `${radius}px`,
         flex: fillSpace === 'yes' ? 1 : 'unset',
+        border: '1px dashed #ccc',
+        cursor: position === 'absolute' ? 'move' : 'default',
       }}
     >
       {children}

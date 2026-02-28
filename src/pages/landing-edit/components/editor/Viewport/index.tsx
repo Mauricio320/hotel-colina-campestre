@@ -5,6 +5,7 @@ import React, { useEffect } from 'react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { Toolbox } from './Toolbox';
+import { ResizableCanvas } from './ResizableCanvas';
 
 export const Viewport: React.FC<{ children?: React.ReactNode }> = ({
   children,
@@ -52,9 +53,9 @@ export const Viewport: React.FC<{ children?: React.ReactNode }> = ({
             connectors.select(connectors.hover(ref, null), null);
           }}
         >
-          <div className="relative flex-col flex items-center pt-8 min-h-full">
+          <ResizableCanvas>
             {children}
-          </div>
+          </ResizableCanvas>
         </div>
       </div>
       <Sidebar />

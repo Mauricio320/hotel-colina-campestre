@@ -12,6 +12,40 @@ import {
   getElementDimensions,
 } from '../../utils/numToMeasurement';
 
+const DragHandle = styled.div`
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 28px;
+  background: #36a9e0;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  pointer-events: auto !important;
+  z-index: 99999;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  touch-action: none;
+
+  &:hover {
+    background: #2a8bc2;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    color: white;
+    pointer-events: none;
+  }
+`;
+
 const Indicators = styled.div<{ $bound?: 'row' | 'column' }>`
   position: absolute;
   top: 0;
@@ -19,6 +53,8 @@ const Indicators = styled.div<{ $bound?: 'row' | 'column' }>`
   width: 100%;
   height: 100%;
   pointer-events: none;
+  border: 2px solid #36a9e0;
+  box-shadow: 0 0 0 4px rgba(54, 169, 224, 0.2);
   span {
     position: absolute;
     width: 10px;
@@ -81,7 +117,7 @@ const Indicators = styled.div<{ $bound?: 'row' | 'column' }>`
   }
 `;
 
-export const Resizer = ({ propKey, children, ...props }: any) => {
+export const Resizer = ({ propKey, children, bounds, maxWidth, maxHeight, resizeHandles, x, y, position, ...props }: any) => {
   const {
     id,
     actions: { setProp },
@@ -89,6 +125,9 @@ export const Resizer = ({ propKey, children, ...props }: any) => {
     fillSpace,
     nodeWidth,
     nodeHeight,
+    nodeX,
+    nodeY,
+    nodePosition,
     parent,
     active,
     inNodeContext,
@@ -97,6 +136,9 @@ export const Resizer = ({ propKey, children, ...props }: any) => {
     active: node.events.selected,
     nodeWidth: node.data.props[propKey.width],
     nodeHeight: node.data.props[propKey.height],
+    nodeX: node.data.props.x ?? 0,
+    nodeY: node.data.props.y ?? 0,
+    nodePosition: node.data.props.position ?? 'relative',
     fillSpace: node.data.props.fillSpace,
   }));
 
@@ -179,31 +221,153 @@ export const Resizer = ({ propKey, children, ...props }: any) => {
     };
   }, [updateInternalDimensionsWithOriginal]);
 
+  // Sistema de arrastre manual con eventos de mouse
+  // Esto evita conflictos con Craft.js y re-resizable
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const dragStartPos = useRef({ x: 0, y: 0 });
+  const initialPos = useRef({ x: 0, y: 0 });
+  const parentDimensions = useRef({ width: 0, height: 0 });
+  const elementDimensions = useRef({ width: 0, height: 0 });
+
+  // Manejar inicio del arrastre desde el DragHandle
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    if (!active || !inNodeContext || nodePosition !== 'absolute') return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Obtener dimensiones del padre y del elemento
+    const dom = resizable.current?.resizable;
+    if (dom) {
+      elementDimensions.current = {
+        width: dom.offsetWidth,
+        height: dom.offsetHeight
+      };
+      const parent = dom.parentElement;
+      if (parent) {
+        parentDimensions.current = {
+          width: parent.offsetWidth,
+          height: parent.offsetHeight
+        };
+      }
+    }
+
+    dragStartPos.current = { x: e.clientX, y: e.clientY };
+    initialPos.current = { x: nodeX, y: nodeY };
+    setIsDragging(true);
+
+    console.log('[Drag Start]', { x: nodeX, y: nodeY, clientX: e.clientX, clientY: e.clientY });
+  }, [active, inNodeContext, nodePosition, nodeX, nodeY]);
+
+  // Manejar movimiento del mouse durante el arrastre
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      e.preventDefault();
+
+      const deltaX = e.clientX - dragStartPos.current.x;
+      const deltaY = e.clientY - dragStartPos.current.y;
+
+      // Calcular nuevas posiciones con límites del padre
+      const maxX = Math.max(0, parentDimensions.current.width - elementDimensions.current.width);
+      const maxY = Math.max(0, parentDimensions.current.height - elementDimensions.current.height);
+
+      const newX = Math.min(maxX, Math.max(0, initialPos.current.x + deltaX));
+      const newY = Math.min(maxY, Math.max(0, initialPos.current.y + deltaY));
+
+      setDragOffset({ x: newX - initialPos.current.x, y: newY - initialPos.current.y });
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      e.preventDefault();
+
+      // Calcular posición final con límites del padre
+      const deltaX = e.clientX - dragStartPos.current.x;
+      const deltaY = e.clientY - dragStartPos.current.y;
+
+      const maxX = Math.max(0, parentDimensions.current.width - elementDimensions.current.width);
+      const maxY = Math.max(0, parentDimensions.current.height - elementDimensions.current.height);
+
+      const newX = Math.min(maxX, Math.round(initialPos.current.x + deltaX));
+      const newY = Math.min(maxY, Math.round(initialPos.current.y + deltaY));
+
+      console.log('[Drag End]', { newX, newY, deltaX, deltaY, maxX, maxY });
+
+      // Actualizar posición en Craft.js
+      setProp((prop: any) => {
+        prop.x = newX;
+        prop.y = newY;
+      }, 500);
+
+      setIsDragging(false);
+      setDragOffset({ x: 0, y: 0 });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, setProp]);
+
+  // Calcular posición visual durante el arrastre
+  const finalX = isDragging ? nodeX + dragOffset.x : nodeX;
+  const finalY = isDragging ? nodeY + dragOffset.y : nodeY;
+
   return (
     <Resizable
-      enable={[
-        'top',
-        'left',
-        'bottom',
-        'right',
-        'topLeft',
-        'topRight',
-        'bottomLeft',
-        'bottomRight',
-      ].reduce((acc: any, key) => {
-        acc[key] = active && inNodeContext;
-        return acc;
-      }, {})}
+      enable={
+        nodePosition === 'absolute'
+          // Para posición absoluta: permitir redimensionamiento en todas direcciones
+          ? [
+              'top',
+              'left',
+              'bottom',
+              'right',
+              'topLeft',
+              'topRight',
+              'bottomLeft',
+              'bottomRight',
+            ].reduce((acc: any, key) => {
+              acc[key] = active && inNodeContext;
+              return acc;
+            }, {})
+          : resizeHandles
+            ? resizeHandles.reduce((acc: any, key: string) => {
+                acc[key] = active && inNodeContext;
+                return acc;
+              }, {})
+            : [
+                'top',
+                'left',
+                'bottom',
+                'right',
+                'topLeft',
+                'topRight',
+                'bottomLeft',
+                'bottomRight',
+              ].reduce((acc: any, key) => {
+                acc[key] = active && inNodeContext;
+                return acc;
+              }, {})
+      }
       className={cx([
         {
           'm-auto': isRootNode,
           flex: true,
         },
       ])}
+      bounds={bounds}
+      maxWidth={maxWidth}
+      maxHeight={maxHeight}
       ref={(ref) => {
         if (ref) {
           resizable.current = ref;
-          connect(resizable.current.resizable);
+          connect(ref.resizable);
         }
       }}
       size={internalDimensions}
@@ -211,7 +375,7 @@ export const Resizer = ({ propKey, children, ...props }: any) => {
         updateInternalDimensionsInPx();
         e.preventDefault();
         e.stopPropagation();
-        const dom = resizable.current.resizable;
+        const dom = resizable.current?.resizable;
         if (!dom) return;
         editingDimensions.current = {
           width: dom.getBoundingClientRect().width,
@@ -220,7 +384,8 @@ export const Resizer = ({ propKey, children, ...props }: any) => {
         isResizing.current = true;
       }}
       onResize={(_, __, ___, d) => {
-        const dom = resizable.current.resizable;
+        const dom = resizable.current?.resizable;
+        if (!dom) return;
         let { width, height }: any = getUpdatedDimensions(d.width, d.height);
         if (isPercentage(nodeWidth))
           width =
@@ -254,15 +419,38 @@ export const Resizer = ({ propKey, children, ...props }: any) => {
         updateInternalDimensionsWithOriginal();
       }}
       {...props}
+      style={{
+        ...props.style,
+        position: nodePosition === 'absolute' ? 'absolute' : 'relative',
+        left: nodePosition === 'absolute' ? `${finalX}px` : undefined,
+        top: nodePosition === 'absolute' ? `${finalY}px` : undefined,
+      }}
     >
       {children}
       {active && (
-        <Indicators $bound={fillSpace === 'yes' ? parentDirection : false}>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-        </Indicators>
+        <>
+          {nodePosition === 'absolute' && (
+            <DragHandle
+              title="Arrastra para mover"
+              onMouseDown={handleDragStart}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="9" cy="12" r="1.5" fill="currentColor" />
+                <circle cx="15" cy="12" r="1.5" fill="currentColor" />
+                <circle cx="9" cy="6" r="1.5" fill="currentColor" />
+                <circle cx="15" cy="6" r="1.5" fill="currentColor" />
+                <circle cx="9" cy="18" r="1.5" fill="currentColor" />
+                <circle cx="15" cy="18" r="1.5" fill="currentColor" />
+              </svg>
+            </DragHandle>
+          )}
+          <Indicators $bound={fillSpace === 'yes' ? parentDirection : false}>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </Indicators>
+        </>
       )}
     </Resizable>
   );
