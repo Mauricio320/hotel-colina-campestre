@@ -22,8 +22,8 @@ const defaultProps: Omit<TwoColumnsProps, "children"> = {
   gap: 20,
   padding: 20,
   margin: ["0", "0", "20", "0"],
-  leftWidth: "370px",
-  rightWidth: "370px",
+  leftWidth: "46%",
+  rightWidth: "46%",
   leftBackground: { r: 240, g: 240, b: 240, a: 1 },
   rightBackground: { r: 240, g: 240, b: 240, a: 1 },
   width: "100%",
@@ -45,10 +45,9 @@ export const TwoColumns = (props: Partial<TwoColumnsProps>) => {
         gap: `${gap}px`,
         padding: `${padding}px`,
         margin: `${margin[0]}px ${margin[1]}px ${margin[2]}px ${margin[3]}px`,
-        alignItems: "flex-start",
+        alignItems: "stretch",
         position: "relative",
         minHeight: "200px",
-        background: "red",
       }}
     >
       {/* Columna Izquierda */}
@@ -58,12 +57,12 @@ export const TwoColumns = (props: Partial<TwoColumnsProps>) => {
         is={Container}
         background={leftBackground}
         width={leftWidth}
-        height="250px"
+        height="90%"
         padding={["20", "20", "20", "20"]}
         flexDirection="column"
         position="absolute"
-        x={20}
-        y={20}
+        x="2%"
+        y="5%"
         bounds="parent"
         custom={{ displayName: "Left Column" }}
       />
@@ -75,12 +74,12 @@ export const TwoColumns = (props: Partial<TwoColumnsProps>) => {
         is={Container}
         background={rightBackground}
         width={rightWidth}
-        height="250px"
+        height="90%"
         padding={["20", "20", "20", "20"]}
         flexDirection="column"
         position="absolute"
-        x={410}
-        y={20}
+        x="52%"
+        y="5%"
         bounds="parent"
         custom={{ displayName: "Right Column" }}
       />

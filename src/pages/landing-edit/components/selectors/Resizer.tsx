@@ -12,6 +12,11 @@ import {
   getElementDimensions,
 } from '../../utils/numToMeasurement';
 
+const formatPosition = (value: number | string): string => {
+  if (typeof value === 'string') return value;
+  return `${value}px`;
+};
+
 const DragHandle = styled.div`
   position: absolute;
   top: -30px;
@@ -224,7 +229,7 @@ export const Resizer = ({ propKey, children, bounds, maxWidth, maxHeight, resize
   // Sistema de arrastre manual con eventos de mouse
   // Esto evita conflictos con Craft.js y re-resizable
   const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [dragPixelPos, setDragPixelPos] = useState<{ x: number; y: number } | null>(null);
   const dragStartPos = useRef({ x: 0, y: 0 });
   const initialPos = useRef({ x: 0, y: 0 });
   const parentDimensions = useRef({ width: 0, height: 0 });
@@ -254,11 +259,11 @@ export const Resizer = ({ propKey, children, bounds, maxWidth, maxHeight, resize
     }
 
     dragStartPos.current = { x: e.clientX, y: e.clientY };
-    initialPos.current = { x: nodeX, y: nodeY };
+    initialPos.current = { x: dom.offsetLeft, y: dom.offsetTop };
     setIsDragging(true);
 
-    console.log('[Drag Start]', { x: nodeX, y: nodeY, clientX: e.clientX, clientY: e.clientY });
-  }, [active, inNodeContext, nodePosition, nodeX, nodeY]);
+    console.log('[Drag Start]', { x: dom.offsetLeft, y: dom.offsetTop, clientX: e.clientX, clientY: e.clientY });
+  }, [active, inNodeContext, nodePosition]);
 
   // Manejar movimiento del mouse durante el arrastre
   useEffect(() => {
@@ -270,20 +275,18 @@ export const Resizer = ({ propKey, children, bounds, maxWidth, maxHeight, resize
       const deltaX = e.clientX - dragStartPos.current.x;
       const deltaY = e.clientY - dragStartPos.current.y;
 
-      // Calcular nuevas posiciones con límites del padre
       const maxX = Math.max(0, parentDimensions.current.width - elementDimensions.current.width);
       const maxY = Math.max(0, parentDimensions.current.height - elementDimensions.current.height);
 
       const newX = Math.min(maxX, Math.max(0, initialPos.current.x + deltaX));
       const newY = Math.min(maxY, Math.max(0, initialPos.current.y + deltaY));
 
-      setDragOffset({ x: newX - initialPos.current.x, y: newY - initialPos.current.y });
+      setDragPixelPos({ x: newX, y: newY });
     };
 
     const handleMouseUp = (e: MouseEvent) => {
       e.preventDefault();
 
-      // Calcular posición final con límites del padre
       const deltaX = e.clientX - dragStartPos.current.x;
       const deltaY = e.clientY - dragStartPos.current.y;
 
@@ -295,14 +298,24 @@ export const Resizer = ({ propKey, children, bounds, maxWidth, maxHeight, resize
 
       console.log('[Drag End]', { newX, newY, deltaX, deltaY, maxX, maxY });
 
-      // Actualizar posición en Craft.js
       setProp((prop: any) => {
-        prop.x = newX;
-        prop.y = newY;
+        const pw = parentDimensions.current.width;
+        const ph = parentDimensions.current.height;
+
+        if (typeof nodeX === 'string' && isPercentage(nodeX)) {
+          prop.x = `${((newX / pw) * 100).toFixed(1)}%`;
+        } else {
+          prop.x = newX;
+        }
+        if (typeof nodeY === 'string' && isPercentage(nodeY)) {
+          prop.y = `${((newY / ph) * 100).toFixed(1)}%`;
+        } else {
+          prop.y = newY;
+        }
       }, 500);
 
       setIsDragging(false);
-      setDragOffset({ x: 0, y: 0 });
+      setDragPixelPos(null);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -312,11 +325,8 @@ export const Resizer = ({ propKey, children, bounds, maxWidth, maxHeight, resize
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, setProp]);
+  }, [isDragging, setProp, nodeX, nodeY]);
 
-  // Calcular posición visual durante el arrastre
-  const finalX = isDragging ? nodeX + dragOffset.x : nodeX;
-  const finalY = isDragging ? nodeY + dragOffset.y : nodeY;
 
   return (
     <Resizable
@@ -422,8 +432,12 @@ export const Resizer = ({ propKey, children, bounds, maxWidth, maxHeight, resize
       style={{
         ...props.style,
         position: nodePosition === 'absolute' ? 'absolute' : 'relative',
-        left: nodePosition === 'absolute' ? `${finalX}px` : undefined,
-        top: nodePosition === 'absolute' ? `${finalY}px` : undefined,
+        left: nodePosition === 'absolute'
+          ? (dragPixelPos ? `${dragPixelPos.x}px` : formatPosition(nodeX))
+          : undefined,
+        top: nodePosition === 'absolute'
+          ? (dragPixelPos ? `${dragPixelPos.y}px` : formatPosition(nodeY))
+          : undefined,
       }}
     >
       {children}

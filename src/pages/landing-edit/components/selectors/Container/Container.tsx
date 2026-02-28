@@ -22,8 +22,8 @@ export type ContainerProps = {
   shadow: number;
   children: React.ReactNode;
   radius: number;
-  x: number;
-  y: number;
+  x: number | string;
+  y: number | string;
   position: 'relative' | 'absolute';
 };
 
@@ -85,8 +85,8 @@ export const Container = (props: ExtendedContainerProps) => {
       position={position}
       style={{
         position,
-        left: position === 'absolute' ? `${x}px` : undefined,
-        top: position === 'absolute' ? `${y}px` : undefined,
+        left: position === 'absolute' ? (typeof x === 'string' ? x : `${x}px`) : undefined,
+        top: position === 'absolute' ? (typeof y === 'string' ? y : `${y}px`) : undefined,
         justifyContent,
         flexDirection,
         alignItems,
