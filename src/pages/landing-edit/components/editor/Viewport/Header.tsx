@@ -1,7 +1,10 @@
 import { useEditor } from '@craftjs/core';
 import cx from 'classnames';
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { styled } from 'styled-components';
+import { useAuth } from '@/hooks/useAuth';
+import { useSaveLandingPage } from '@/hooks/useLandingPage';
+import { cleanHtml } from '../../../utils/cleanHtml';
 
 // SVG Icons as components
 const CheckmarkIcon = () => (
@@ -71,12 +74,48 @@ const Item = styled.a<{ disabled?: boolean }>`
   `}
 `;
 
-export const Header = () => {
-  const { enabled, canUndo, canRedo, actions } = useEditor((state, query) => ({
+export const Header = ({ canvasRef }: { canvasRef: React.RefObject<HTMLDivElement | null> }) => {
+  const { enabled, canUndo, canRedo, actions, query } = useEditor((state, query) => ({
     enabled: state.options.enabled,
     canUndo: query.history.canUndo(),
     canRedo: query.history.canRedo(),
   }));
+
+  const { employee } = useAuth();
+  const saveMutation = useSaveLandingPage();
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = useCallback(async () => {
+    if (!employee?.id) {
+      alert("Debes iniciar sesión para guardar");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const nodesJson = query.serialize() as unknown as Record<string, unknown>;
+
+      let htmlContent = "";
+      if (canvasRef.current) {
+        const rawHtml = canvasRef.current.innerHTML;
+        htmlContent = cleanHtml(rawHtml);
+      }
+
+      await saveMutation.mutateAsync({
+        nodesJson,
+        htmlContent,
+        globalStyles: {},
+        employeeId: employee.id,
+      });
+      actions.history.clear();
+      alert("Landing page guardada exitosamente");
+    } catch (error) {
+      console.error("Error al guardar:", error);
+      alert("Error al guardar la landing page");
+    } finally {
+      setIsSaving(false);
+    }
+  }, [actions, query, saveMutation, employee, canvasRef]);
 
   return (
     <HeaderDiv className="header text-white transition w-full">
@@ -100,6 +139,29 @@ export const Header = () => {
           </div>
         )}
         <div className="flex">
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className={cx([
+              'transition flex items-center px-4 py-1 mr-2 rounded-md text-[13px] text-white cursor-pointer border-none',
+              {
+                'bg-gray-400': isSaving,
+                'bg-emerald-500 hover:bg-emerald-600': !isSaving,
+              },
+            ])}
+          >
+            {isSaving ? (
+              <>
+                <span className="inline-block animate-spin mr-1">
+                  ⏳
+                </span>
+                Guardando...
+              </>
+            ) : (
+              <>💾 Guardar</>
+            )}
+          </button>
+
           <Btn
             className={cx([
               'transition',

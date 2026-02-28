@@ -1,6 +1,7 @@
-import { Editor, Frame, Element } from '@craftjs/core';
+import { Editor, Frame, Element, useEditor } from '@craftjs/core';
 import { DndContext, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useLandingPageState } from '@/hooks/useLandingPage';
 
 import { Viewport } from './components/editor/Viewport';
 import { RenderNode } from './components/editor/RenderNode';
@@ -23,7 +24,33 @@ import { TwoColumns37 } from './components/selectors/TwoColumns37/TwoColumns37';
 
 import './styles/landing-edit.css';
 
+// Componente para cargar el estado guardado
+interface FrameLoaderProps {
+  savedState: Record<string, unknown> | undefined;
+}
+
+const FrameLoader = ({ savedState }: FrameLoaderProps) => {
+  const { actions } = useEditor();
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    if (savedState && !isLoaded) {
+      try {
+        // Deserialize the saved state into the editor
+        actions.deserialize(savedState as Parameters<typeof actions.deserialize>[0]);
+        setIsLoaded(true);
+      } catch (error) {
+        console.error("Error loading saved state:", error);
+      }
+    }
+  }, [savedState, actions, isLoaded]);
+
+  return null;
+};
+
 export default function LandingEditPage() {
+  const { data: savedState, isLoading } = useLandingPageState();
+
   // Configurar sensores de @dnd-kit para drag-and-drop
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -48,6 +75,17 @@ export default function LandingEditPage() {
       // Este handler es para cualquier lógica adicional a nivel de editor
     }
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600 font-medium">Cargando editor...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen">
@@ -81,6 +119,7 @@ export default function LandingEditPage() {
           enabled={true}
           onRender={RenderNode}
         >
+          <FrameLoader savedState={savedState?.nodes_json as Record<string, unknown> | undefined} />
           <Viewport>
             <Frame>
               <Element
