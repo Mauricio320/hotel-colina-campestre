@@ -47,7 +47,7 @@ export const TwoColumns = (props: Partial<TwoColumnsProps>) => {
         margin: `${margin[0]}px ${margin[1]}px ${margin[2]}px ${margin[3]}px`,
         alignItems: "stretch",
         position: "relative",
-        minHeight: "200px",
+        minHeight: "100px",
       }}
     >
       {/* Columna Izquierda */}
@@ -63,7 +63,7 @@ export const TwoColumns = (props: Partial<TwoColumnsProps>) => {
         position="absolute"
         x="2%"
         y="5%"
-        bounds="parent"
+        // bounds="parent"
         custom={{ displayName: "Left Column" }}
       />
 
@@ -80,7 +80,7 @@ export const TwoColumns = (props: Partial<TwoColumnsProps>) => {
         position="absolute"
         x="52%"
         y="5%"
-        bounds="parent"
+        // bounds="parent"
         custom={{ displayName: "Right Column" }}
       />
     </Resizer>

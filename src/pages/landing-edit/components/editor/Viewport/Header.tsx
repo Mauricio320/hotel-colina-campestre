@@ -1,32 +1,21 @@
-import { useEditor } from '@craftjs/core';
-import cx from 'classnames';
-import React, { useState, useCallback } from 'react';
-import { styled } from 'styled-components';
-import { useAuth } from '@/hooks/useAuth';
-import { useSaveLandingPage } from '@/hooks/useLandingPage';
-import { cleanHtml } from '../../../utils/cleanHtml';
+import { useEditor } from "@craftjs/core";
+import cx from "classnames";
+import React, { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { styled } from "styled-components";
+import { useAuth } from "@/hooks/useAuth";
+import { useSaveLandingPage } from "@/hooks/useLandingPage";
+import { cleanHtml } from "../../../utils/cleanHtml";
 
 // SVG Icons as components
-const CheckmarkIcon = () => (
-  <svg viewBox="0 0 18 18" fill="currentColor" className="w-3 h-3 mr-1">
-    <path d="M15.656,3.8625l-.7275-.5665a.5.5,0,0,0-.7.0875L7.411,12.1415,4.0875,8.8355a.5.5,0,0,0-.707,0L2.718,9.5a.5.5,0,0,0,0,.707l4.463,4.45a.5.5,0,0,0,.75-.0465L15.7435,4.564A.5.5,0,0,0,15.656,3.8625Z" />
-  </svg>
-);
-
-const CustomizeIcon = () => (
-  <svg viewBox="0 0 18 18" fill="currentColor" className="w-3 h-3 mr-1">
-    <path d="M16.7835,4.1,13.9,1.216a.60751.60751,0,0,0-.433-.1765H13.45a.6855.6855,0,0,0-.4635.203L2.542,11.686a.49494.49494,0,0,0-.1255.211L1.0275,16.55c-.057.1885.2295.4255.3915.4255a.12544.12544,0,0,0,.031-.0035c.138-.0315,3.933-1.172,4.6555-1.389a.486.486,0,0,0,.207-.1245L16.7565,5.014a.686.686,0,0,0,.2-.4415A.61049.61049,0,0,0,16.7835,4.1ZM5.7,14.658c-1.0805.3245-2.431.7325-3.3645,1.011L3.34,12.304Z" />
-  </svg>
-);
-
 const UndoIcon = () => (
-  <svg viewBox="0 0 18 18" fill="currentColor" className="w-5 h-5">
+  <svg viewBox="0 0 18 18" fill="currentColor" className="h-5 w-5">
     <path d="M15.3315,6.271A5.19551,5.19551,0,0,0,11.8355,5H5.5V2.4A.4.4,0,0,0,5.1,2a.39352.39352,0,0,0-.2635.1L1.072,5.8245a.25.25,0,0,0,0,.35L4.834,9.9a.39352.39352,0,0,0,.2635.1.4.4,0,0,0,.4-.4V7h6.441A3.06949,3.06949,0,0,1,15.05,9.9a2.9445,2.9445,0,0,1-2.78274,3.09783Q12.13375,13.005,12,13H8.5a.5.5,0,0,0-.5.5v1a.5.5,0,0,0,.5.5h3.263a5.16751,5.16751,0,0,0,5.213-4.5065A4.97351,4.97351,0,0,0,15.3315,6.271Z" />
   </svg>
 );
 
 const RedoIcon = () => (
-  <svg viewBox="0 0 18 18" fill="currentColor" className="w-5 h-5">
+  <svg viewBox="0 0 18 18" fill="currentColor" className="h-5 w-5">
     <path d="M2.6685,6.271A5.19551,5.19551,0,0,1,6.1645,5H12.5V2.4a.4.4,0,0,1,.4-.4.39352.39352,0,0,1,.2635.1l3.762,3.7225a.25.25,0,0,1,0,.35L13.166,9.9a.39352.39352,0,0,1-.2635.1.4.4,0,0,1-.4-.4V7H6.0615A3.06949,3.06949,0,0,0,2.95,9.9a2.9445,2.9445,0,0,0,2.78274,3.09783Q5.86626,13.005,6,13H9.5a.5.5,0,0,1,.5.5v1a.5.5,0,0,1-.5.5H6.237a5.16751,5.16751,0,0,1-5.213-4.5065A4.97349,4.97349,0,0,1,2.6685,6.271Z" />
   </svg>
 );
@@ -39,23 +28,6 @@ const HeaderDiv = styled.div`
   padding: 0px 10px;
   background: #d4d4d4;
   display: flex;
-`;
-
-const Btn = styled.a`
-  display: flex;
-  align-items: center;
-  padding: 5px 15px;
-  border-radius: 3px;
-  color: #fff;
-  font-size: 13px;
-  cursor: pointer;
-  svg {
-    margin-right: 6px;
-    width: 12px;
-    height: 12px;
-    fill: #fff;
-    opacity: 0.9;
-  }
 `;
 
 const Item = styled.a<{ disabled?: boolean }>`
@@ -74,7 +46,21 @@ const Item = styled.a<{ disabled?: boolean }>`
   `}
 `;
 
-export const Header = ({ canvasRef }: { canvasRef: React.RefObject<HTMLDivElement | null> }) => {
+export const Header = ({
+  canvasRef,
+  isToolboxVisible,
+  setToolboxVisible,
+  isSidebarVisible,
+  setSidebarVisible,
+}: {
+  canvasRef: React.RefObject<HTMLDivElement | null>;
+  isToolboxVisible: boolean;
+  setToolboxVisible: (v: boolean) => void;
+  isSidebarVisible: boolean;
+  setSidebarVisible: (v: boolean) => void;
+}) => {
+  const navigate = useNavigate();
+
   const { enabled, canUndo, canRedo, actions, query } = useEditor((state, query) => ({
     enabled: state.options.enabled,
     canUndo: query.history.canUndo(),
@@ -118,43 +104,52 @@ export const Header = ({ canvasRef }: { canvasRef: React.RefObject<HTMLDivElemen
   }, [actions, query, saveMutation, employee, canvasRef]);
 
   return (
-    <HeaderDiv className="header text-white transition w-full">
-      <div className="items-center flex w-full px-4 justify-end">
+    <HeaderDiv className="header w-full text-white transition">
+      <div className="flex w-full items-center justify-between px-4">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setToolboxVisible(!isToolboxVisible)}
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border-none bg-gray-600 text-white transition hover:bg-gray-700"
+            title={isToolboxVisible ? "Ocultar componentes" : "Mostrar componentes"}
+          >
+            <i className={`pi ${isToolboxVisible ? "pi-align-left" : "pi-bars"} text-sm`}></i>
+          </button>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex cursor-pointer items-center rounded-md border-none bg-gray-600 px-3 py-1 text-[13px] text-white transition hover:bg-gray-700"
+            title="Volver a la aplicación"
+          >
+            <i className="pi pi-arrow-left mr-2 text-xs"></i>
+            Volver
+          </button>
+        </div>
+
         {enabled && (
-          <div className="flex-1 flex">
-            <Item
-              disabled={!canUndo}
-              onClick={() => actions.history.undo()}
-              title="Undo"
-            >
+          <div className="flex flex-1 justify-center">
+            <Item disabled={!canUndo} onClick={() => actions.history.undo()} title="Undo">
               <UndoIcon />
             </Item>
-            <Item
-              disabled={!canRedo}
-              onClick={() => actions.history.redo()}
-              title="Redo"
-            >
+            <Item disabled={!canRedo} onClick={() => actions.history.redo()} title="Redo">
               <RedoIcon />
             </Item>
           </div>
         )}
-        <div className="flex">
+
+        <div className="flex justify-end gap-2">
           <button
             onClick={handleSave}
             disabled={isSaving}
             className={cx([
-              'transition flex items-center px-4 py-1 mr-2 rounded-md text-[13px] text-white cursor-pointer border-none',
+              "flex cursor-pointer items-center rounded-md border-none px-4 py-1 text-[13px] text-white transition",
               {
-                'bg-gray-400': isSaving,
-                'bg-emerald-500 hover:bg-emerald-600': !isSaving,
+                "bg-gray-400": isSaving,
+                "bg-emerald-500 hover:bg-emerald-600": !isSaving,
               },
             ])}
           >
             {isSaving ? (
               <>
-                <span className="inline-block animate-spin mr-1">
-                  ⏳
-                </span>
+                <span className="mr-1 inline-block animate-spin">⏳</span>
                 Guardando...
               </>
             ) : (
@@ -162,21 +157,13 @@ export const Header = ({ canvasRef }: { canvasRef: React.RefObject<HTMLDivElemen
             )}
           </button>
 
-          <Btn
-            className={cx([
-              'transition',
-              {
-                'bg-green-400': enabled,
-                'bg-primary': !enabled,
-              },
-            ])}
-            onClick={() => {
-              actions.setOptions((options) => (options.enabled = !enabled));
-            }}
+          <button
+            onClick={() => setSidebarVisible(!isSidebarVisible)}
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border-none bg-gray-600 text-white transition hover:bg-gray-700"
+            title={isSidebarVisible ? "Ocultar propiedades" : "Mostrar propiedades"}
           >
-            {enabled ? <CheckmarkIcon /> : <CustomizeIcon />}
-            {enabled ? 'Finish Editing' : 'Edit'}
-          </Btn>
+            <i className={`pi ${isSidebarVisible ? "pi-align-right" : "pi-cog"} text-sm`}></i>
+          </button>
         </div>
       </div>
     </HeaderDiv>

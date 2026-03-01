@@ -119,9 +119,10 @@ const Custom3Icon = () => (
 );
 
 // ============ STYLED COMPONENTS ============
-const ToolboxDiv = styled.div<{ $enabled: boolean }>`
-  width: ${(props) => (props.$enabled ? '80px' : '0')}
-  opacity: ${(props) => (props.$enabled ? '1' : '0')};
+const ToolboxDiv = styled.div<{ $enabled: boolean; $isVisible: boolean }>`
+  width: ${(props) => (props.$enabled && props.$isVisible ? '200px' : '0')};
+  opacity: ${(props) => (props.$enabled && props.$isVisible ? '1' : '0')};
+  padding: ${(props) => (props.$enabled && props.$isVisible ? '0' : '0')};
   transition: all 0.3s ease;
   background: #1a1a2e;
   flex-shrink: 0;
@@ -192,7 +193,7 @@ const Separator = styled.div`
 `;
 
 // ============ COMPONENT ============
-export const Toolbox = () => {
+export const Toolbox = ({ isVisible = true }: { isVisible?: boolean }) => {
   const {
     enabled,
     connectors: { create },
@@ -205,7 +206,7 @@ export const Toolbox = () => {
   }
 
   return (
-    <ToolboxDiv $enabled={enabled} className="toolbox h-full">
+    <ToolboxDiv $enabled={enabled} $isVisible={isVisible} className="toolbox h-full">
       {/* LAYOUT */}
       <CategoryTitle>Layout</CategoryTitle>
       <ItemGrid>

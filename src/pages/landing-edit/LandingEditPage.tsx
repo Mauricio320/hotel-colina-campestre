@@ -92,29 +92,23 @@ export default function LandingEditPage() {
       <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
         <Editor
           resolver={{
-            // Basic
-            Container,
-            Text,
-            Button,
-            Video,
-            // Custom with Rules
-            Custom1,
-            OnlyButtons,
-            Custom2,
             Custom2VideoDrop,
-            Custom3,
             Custom3BtnDrop,
-            // New Layout Components
-            TwoColumns,
             ThreeColumns,
             TwoColumns37,
-            // New Media Components
+            OnlyButtons,
+            TwoColumns,
+            Container,
+            Custom1,
+            Custom3,
+            Custom2,
+            Button,
+            Video,
             Image,
-            Map,
-            // New Navigation
-            Link,
-            // New Content
             Quote,
+            Text,
+            Link,
+            Map,
           }}
           enabled={true}
           onRender={RenderNode}
@@ -126,7 +120,8 @@ export default function LandingEditPage() {
                 canvas
                 is={Container}
                 width="100%"
-                height="100%"
+                height="auto"
+                minHeight="100vh"
                 background={{ r: 255, g: 255, b: 255, a: 1 }}
                 padding={['40', '40', '40', '40']}
                 custom={{ displayName: 'App' }}

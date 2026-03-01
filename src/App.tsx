@@ -11,8 +11,6 @@ import { AuthProvider, useAuth } from "./hooks/useAuth";
 import Login from "@/pages/auth/Login";
 import Layout from "./components/layout/Layout";
 
-// Pages - Lazy loaded for code splitting
-const RegisterAdmin = lazy(() => import("@/pages/auth/RegisterAdmin"));
 const CalendarView = lazy(() => import("@/pages/calendar/CalendarView"));
 const Dashboard = lazy(() => import("@/pages/dashboard/Dashboard"));
 const EmployeeManagement = lazy(() => import("@/pages/employees/EmployeeManagement"));
@@ -114,6 +112,20 @@ const AppContent: React.FC = () => {
 
       {/* Root route - redirects based on auth */}
       <Route path="/" element={user ? <Navigate to="/calendar" /> : <Navigate to="/login" />} />
+
+      {/* Editor visual de Landing Page - Fuera del Layout pero protegido */}
+      <Route
+        path="/landing-edit"
+        element={
+          user ? (
+            <Suspense fallback={<PageLoader />}>
+              <LandingEditPage />
+            </Suspense>
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
 
       <Route
         element={user ? <Layout employee={employee} onLogout={logout} /> : <Navigate to="/login" />}
@@ -340,14 +352,6 @@ const AppContent: React.FC = () => {
           element={
             <Suspense fallback={<PageLoader />}>
               <CraftTutorialPreview />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/landing-edit"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              <LandingEditPage />
             </Suspense>
           }
         />

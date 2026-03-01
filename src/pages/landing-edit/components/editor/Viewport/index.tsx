@@ -1,6 +1,6 @@
 import { useEditor } from '@craftjs/core';
 import cx from 'classnames';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
@@ -10,6 +10,8 @@ import { ResizableCanvas } from './ResizableCanvas';
 export const Viewport: React.FC<{ children?: React.ReactNode }> = ({
   children,
 }) => {
+  const [isToolboxVisible, setIsToolboxVisible] = useState(true);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const canvasRef = useRef<HTMLDivElement>(null);
   const {
     enabled,
@@ -35,17 +37,23 @@ export const Viewport: React.FC<{ children?: React.ReactNode }> = ({
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
-      <Toolbox />
+      <Toolbox isVisible={isToolboxVisible} />
       <div
         className={cx([
           'page-container flex flex-col h-full overflow-hidden',
           enabled ? 'flex-1' : 'flex-1',
         ])}
       >
-        <Header canvasRef={canvasRef} />
+        <Header
+          canvasRef={canvasRef}
+          isToolboxVisible={isToolboxVisible}
+          setToolboxVisible={setIsToolboxVisible}
+          isSidebarVisible={isSidebarVisible}
+          setSidebarVisible={setIsSidebarVisible}
+        />
         <div
           className={cx([
-            'craftjs-renderer flex-1 w-full overflow-auto pb-8',
+            'craftjs-renderer flex-1 w-full overflow-auto min-h-[200px]',
             {
               'bg-gray-100': enabled,
             },
@@ -54,14 +62,16 @@ export const Viewport: React.FC<{ children?: React.ReactNode }> = ({
             connectors.select(connectors.hover(ref, null), null);
           }}
         >
-          <div ref={canvasRef} style={{ height: '100%' }}>
-            <ResizableCanvas>
+          <div ref={canvasRef} style={{ minHeight: '100%', width: '100%' }}>
+            <ResizableCanvas initialWidth="100%" initialHeight={800}>
               {children}
             </ResizableCanvas>
+            
           </div>
         </div>
       </div>
-      <Sidebar />
+      <Sidebar isVisible={isSidebarVisible} />
     </div>
   );
 };
+

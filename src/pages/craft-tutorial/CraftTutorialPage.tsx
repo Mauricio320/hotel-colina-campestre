@@ -261,17 +261,7 @@ const CraftTutorialPage = () => {
           <div style={{ flex: 1, padding: "24px", background: "#f3f4f6", overflow: "auto" }}>
             <div ref={canvasRef}>
               <Frame>
-                <Element
-                  canvas
-                  is={Container}
-                  width="100%"
-                  maxWidth="800px"
-                  height="auto"
-                  background={{ r: 255, g: 255, b: 255, a: 1 }}
-                  padding={["40", "40", "40", "40"]}
-                  margin={["0", "auto", "0", "auto"]}
-                  custom={{ displayName: "App" }}
-                >
+                <div>
                   <Element
                     canvas
                     is={Container}
@@ -309,7 +299,7 @@ const CraftTutorialPage = () => {
                       />
                     </Element>
                   </Element>
-                </Element>
+                </div>
               </Frame>
             </div>
           </div>

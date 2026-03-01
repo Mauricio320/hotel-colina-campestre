@@ -9,13 +9,14 @@ export const ContainerSettings = () => {
     <React.Fragment>
       <ToolbarSection
         title="Dimensions"
-        props={['width', 'height']}
-        summary={({ width, height }: any) => {
-          return `${width || 0} x ${height || 0}`;
+        props={['width', 'height', 'minHeight']}
+        summary={({ width, height, minHeight }: any) => {
+          return `${width || 0} x ${height || 0} (Min: ${minHeight || 'none'})`;
         }}
       >
         <ToolbarItem propKey="width" type="text" label="Width" />
         <ToolbarItem propKey="height" type="text" label="Height" />
+        <ToolbarItem propKey="minHeight" type="text" label="Min Height" />
       </ToolbarSection>
       <ToolbarSection
         title="Colors"

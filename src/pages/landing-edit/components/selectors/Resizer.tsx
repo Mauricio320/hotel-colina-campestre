@@ -293,8 +293,8 @@ export const Resizer = ({ propKey, children, bounds, maxWidth, maxHeight, resize
       const maxX = Math.max(0, parentDimensions.current.width - elementDimensions.current.width);
       const maxY = Math.max(0, parentDimensions.current.height - elementDimensions.current.height);
 
-      const newX = Math.min(maxX, Math.round(initialPos.current.x + deltaX));
-      const newY = Math.min(maxY, Math.round(initialPos.current.y + deltaY));
+      const newX = Math.min(maxX, Math.max(0, Math.round(initialPos.current.x + deltaX)));
+      const newY = Math.min(maxY, Math.max(0, Math.round(initialPos.current.y + deltaY)));
 
       console.log('[Drag End]', { newX, newY, deltaX, deltaY, maxX, maxY });
 

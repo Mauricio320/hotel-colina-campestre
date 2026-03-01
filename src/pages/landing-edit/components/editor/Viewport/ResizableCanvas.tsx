@@ -53,24 +53,23 @@ const ResizeHandle = styled.div`
 
 interface ResizableCanvasProps {
   children: React.ReactNode;
-  initialWidth?: number;
-  initialHeight?: number;
-  minWidth?: number;
-  minHeight?: number;
-  maxWidth?: number;
-  maxHeight?: number;
+  initialWidth?: number | string;
+  initialHeight?: number | string;
+  minWidth?: number | string;
+  minHeight?: number | string;
+  maxWidth?: number | string;
+  maxHeight?: number | string;
 }
 
 export const ResizableCanvas: React.FC<ResizableCanvasProps> = ({
   children,
   initialWidth = 800,
-  initialHeight = 600,
   minWidth = 320,
   minHeight = 200,
   maxWidth = 1920,
   maxHeight = 1080,
 }) => {
-  const [size, setSize] = useState({ width: initialWidth, height: initialHeight });
+  const [size, setSize] = useState<{width: number | string, height: number | string}>({ width: initialWidth, height: 'auto' });
   const [isResizing, setIsResizing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -78,13 +77,13 @@ export const ResizableCanvas: React.FC<ResizableCanvasProps> = ({
     setIsResizing(true);
   }, []);
 
-  const handleResizeStop = useCallback((e, direction, ref, d) => {
+  const handleResizeStop = useCallback((e: any, direction: any, ref: any, d: any) => {
     setIsResizing(false);
-    setSize({
-      width: size.width + d.width,
-      height: size.height + d.height,
-    });
-  }, [size]);
+    setSize(prevSize => ({
+      width: typeof prevSize.width === 'number' ? prevSize.width + d.width : ref.offsetWidth,
+      height: 'auto', // Mantener 'auto' para que crezca con el contenido
+    }));
+  }, []);
 
   return (
     <CanvasWrapper ref={containerRef}>
@@ -110,6 +109,8 @@ export const ResizableCanvas: React.FC<ResizableCanvasProps> = ({
           position: 'relative',
           background: 'white',
           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+          width:'100%',
+          minHeight: '200px'
         }}
         handleStyles={{
           bottomRight: {
@@ -134,9 +135,10 @@ export const ResizableCanvas: React.FC<ResizableCanvasProps> = ({
         }}
       >
         {children}
-        <SizeIndicator>
-          {Math.round(size.width)} × {Math.round(size.height)}
-        </SizeIndicator>
+        {/* <SizeIndicator>
+          {typeof size.width === 'number' ? Math.round(size.width) : size.width} ×{' '}
+          {typeof size.height === 'number' ? Math.round(size.height) : size.height}
+        </SizeIndicator> */}
       </Resizable>
     </CanvasWrapper>
   );

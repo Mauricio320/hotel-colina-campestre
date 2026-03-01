@@ -1,9 +1,8 @@
-import { useEditor } from '@craftjs/core';
-import { Layers } from '@craftjs/layers';
-import React, { useState } from 'react';
+import { useEditor } from "@craftjs/core";
+import { useState } from "react";
 
-import { SidebarItem } from './SidebarItem';
-import { Toolbar } from '../../Toolbar';
+import { Toolbar } from "../../Toolbar";
+import { SidebarItem } from "./SidebarItem";
 
 // Icons
 const CustomizeIcon = ({ className }: { className?: string }) => (
@@ -19,7 +18,7 @@ const LayerIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export const Sidebar = () => {
+export const Sidebar = ({ isVisible = true }: { isVisible?: boolean }) => {
   const [layersVisible, setLayerVisible] = useState(true);
   const [toolbarVisible, setToolbarVisible] = useState(true);
   const { enabled } = useEditor((state) => ({
@@ -32,11 +31,14 @@ export const Sidebar = () => {
 
   return (
     <div
-      className="sidebar bg-white h-full flex flex-col"
+      className="sidebar flex h-full flex-col bg-white"
       style={{
-        width: '280px',
+        width: isVisible ? "280px" : "0px",
+        opacity: isVisible ? 1 : 0,
         flexShrink: 0,
-        borderLeft: '1px solid #e5e5e5',
+        borderLeft: isVisible ? "1px solid #e5e5e5" : "none",
+        transition: "all 0.3s ease",
+        overflow: "hidden",
       }}
     >
       <SidebarItem
@@ -46,16 +48,6 @@ export const Sidebar = () => {
         onChange={(val) => setToolbarVisible(val)}
       >
         <Toolbar />
-      </SidebarItem>
-      <SidebarItem
-        icon={LayerIcon}
-        title="Layers"
-        visible={layersVisible}
-        onChange={(val) => setLayerVisible(val)}
-      >
-        <div className="px-2">
-          <Layers expandRootOnLoad={true} />
-        </div>
       </SidebarItem>
     </div>
   );

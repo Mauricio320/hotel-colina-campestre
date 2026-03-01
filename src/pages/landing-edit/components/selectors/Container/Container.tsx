@@ -13,6 +13,7 @@ export type ContainerProps = {
   fillSpace: string;
   width: string;
   height: string;
+  minHeight: string;
   padding: string[];
   margin: string[];
   marginTop: number;
@@ -40,6 +41,7 @@ const defaultProps = {
   radius: 0,
   width: '100%',
   height: 'auto',
+  minHeight: 'none',
   x: 0,
   y: 0,
   position: 'relative' as const,
@@ -70,6 +72,7 @@ export const Container = (props: ExtendedContainerProps) => {
     x,
     y,
     position,
+    minHeight,
   } = mergedProps;
 
   // Usar referencia al padre para limitar redimensionamiento
@@ -90,6 +93,7 @@ export const Container = (props: ExtendedContainerProps) => {
         justifyContent,
         flexDirection,
         alignItems,
+        minHeight,
         background: `rgba(${Object.values(background)})`,
         color: `rgba(${Object.values(color)})`,
         padding: `${padding[0]}px ${padding[1]}px ${padding[2]}px ${padding[3]}px`,

@@ -43,10 +43,11 @@ function App() {
                 canvas
                 is={Container}
                 width="800px"
-                height="auto"
+                // height="auto"
                 background={{ r: 255, g: 255, b: 255, a: 1 }}
                 padding={["40", "40", "40", "40"]}
                 custom={{ displayName: "App" }}
+                height="800px"
               >
                 <Element
                   canvas
