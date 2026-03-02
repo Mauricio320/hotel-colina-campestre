@@ -11,8 +11,6 @@ import { AuthProvider, useAuth } from "./hooks/useAuth";
 import Login from "@/pages/auth/Login";
 import Layout from "./components/layout/Layout";
 
-// Pages - Lazy loaded for code splitting
-const RegisterAdmin = lazy(() => import("@/pages/auth/RegisterAdmin"));
 const CalendarView = lazy(() => import("@/pages/calendar/CalendarView"));
 const Dashboard = lazy(() => import("@/pages/dashboard/Dashboard"));
 const EmployeeManagement = lazy(() => import("@/pages/employees/EmployeeManagement"));
@@ -38,9 +36,9 @@ const CheckInPage = lazy(() => import("@/pages/stays/CheckInPage"));
 const CheckOutPage = lazy(() => import("@/pages/stays/CheckOutPage"));
 const MoveReservationPage = lazy(() => import("@/pages/stays/MoveReservationPage"));
 const CheckInPayment = lazy(() => import("@/pages/stays/CheckInPayment"));
-const LandingPageEditor = lazy(() => import("@/pages/landing/LandingPageEditor"));
-const LandingPagePreview = lazy(() => import("@/pages/landing/LandingPagePreview"));
 const CraftTutorialPage = lazy(() => import("@/pages/craft-tutorial/CraftTutorialPage"));
+const CraftTutorialPreview = lazy(() => import("@/pages/craft-tutorial/CraftTutorialPreview"));
+const LandingEditPage = lazy(() => import("@/pages/landing-edit/LandingEditPage"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -114,6 +112,20 @@ const AppContent: React.FC = () => {
 
       {/* Root route - redirects based on auth */}
       <Route path="/" element={user ? <Navigate to="/calendar" /> : <Navigate to="/login" />} />
+
+      {/* Editor visual de Landing Page - Fuera del Layout pero protegido */}
+      <Route
+        path="/landing-edit"
+        element={
+          user ? (
+            <Suspense fallback={<PageLoader />}>
+              <LandingEditPage />
+            </Suspense>
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
 
       <Route
         element={user ? <Layout employee={employee} onLogout={logout} /> : <Navigate to="/login" />}
@@ -326,19 +338,20 @@ const AppContent: React.FC = () => {
             </Suspense>
           }
         />
-        <Route
-          path="/landing-editor"
-          element={
-            <Suspense fallback={<PageLoader />}>
-              {roleName === "Admin" ? <LandingPageEditor /> : <Navigate to="/" />}
-            </Suspense>
-          }
-        />
+
         <Route
           path="/craft-tutorial"
           element={
             <Suspense fallback={<PageLoader />}>
               <CraftTutorialPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/craft-tutorial/preview"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <CraftTutorialPreview />
             </Suspense>
           }
         />

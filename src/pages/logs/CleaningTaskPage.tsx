@@ -15,6 +15,7 @@ import { useBlockUI } from "@/context/BlockUIContext";
 import PageHeader from "@/components/ui/PageHeader";
 import { CleaningType } from "@/types";
 import dayjs from "dayjs";
+import { useAuth } from "@/hooks/useAuth";
 
 const CLEANING_TYPES: {
   label: string;
@@ -36,19 +37,14 @@ const CLEANING_TYPES: {
   },
 ];
 
-const LAST_EMPLOYEE_KEY = "last_cleaning_employee_id";
-
 const CleaningTaskPage: React.FC = () => {
   const { room_id } = useParams<{ room_id: string }>();
   const [searchParams] = useSearchParams();
+  const { employee } = useAuth();
   const navigate = useNavigate();
   const { showBlockUI, hideBlockUI } = useBlockUI();
   const { data: room, isLoading: roomLoading, error: roomError } = useRoomById(room_id || null);
-  const {
-    data: receptionistEmployees,
-    isLoading: employeesLoading,
-    error: employeesError,
-  } = useEmployeesByRole("Recepcionista");
+
   const createCleaningLog = useCreateCleaningLog();
   const createRoomHistory = useCreateRoomHistory();
   const { data: roomStatuses } = useRoomStatuses();
@@ -59,28 +55,13 @@ const CleaningTaskPage: React.FC = () => {
   const displayDate = dayjs().format("YYYY-MM-DD");
 
   const [selectedCleaningType, setSelectedCleaningType] = useState<CleaningType | null>(null);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
 
   const [observation, setObservation] = useState<string>("");
 
-  const employees = receptionistEmployees || [];
-
   const accommodationTypeName = room?.accommodation_types?.name || "-";
-
-  useEffect(() => {
-    const lastEmployee = localStorage.getItem(LAST_EMPLOYEE_KEY);
-    if (lastEmployee && employees.some((e) => e.id === lastEmployee)) {
-      setSelectedEmployeeId(lastEmployee);
-    }
-  }, [employees]);
 
   const handleCleaningTypeSelect = (type: CleaningType) => {
     setSelectedCleaningType(type);
-  };
-
-  const handleEmployeeSelect = (employeeId: string) => {
-    setSelectedEmployeeId(employeeId);
-    localStorage.setItem(LAST_EMPLOYEE_KEY, employeeId);
   };
 
   const navigateToCalendar = () => {
@@ -88,14 +69,14 @@ const CleaningTaskPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!room || !selectedEmployeeId || !selectedCleaningType) return;
+    if (!room || !employee.id || !selectedCleaningType) return;
 
     showBlockUI("Guardando...");
     try {
       await createCleaningLog.mutateAsync({
         room_id: room.id,
         stay_id: stayIdFromUrl || undefined,
-        employee_id: selectedEmployeeId,
+        employee_id: employee.id,
         cleaning_type: selectedCleaningType,
         date: displayDate,
         observation: observation || "Sin novedad",
@@ -108,7 +89,7 @@ const CleaningTaskPage: React.FC = () => {
         stay_id: stayIdFromUrl || undefined,
         previous_status_id: cleaningStatus?.id,
         new_status_id: stay?.room_status_id ?? room?.status_id,
-        employee_id: selectedEmployeeId,
+        employee_id: employee.id,
         action_type: "Limpieza",
         observation: observation || "Sin novedad",
       });
@@ -119,7 +100,7 @@ const CleaningTaskPage: React.FC = () => {
     }
   };
 
-  const isFormValid = room && selectedEmployeeId && selectedCleaningType;
+  const isFormValid = room && employee.id && selectedCleaningType;
 
   if (roomLoading) {
     return (
@@ -181,63 +162,6 @@ const CleaningTaskPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <p className="text-sm font-black tracking-wide text-gray-500 uppercase">Encargado</p>
-
-            {employeesLoading ? (
-              <div className="flex items-center justify-center p-4">
-                <ProgressSpinner style={{ width: "2rem", height: "2rem" }} />
-              </div>
-            ) : employeesError ? (
-              <div className="p-4 text-center text-red-500">
-                <i className="pi pi-exclamation-circle mb-2 text-2xl"></i>
-                <p className="text-sm">Error al cargar empleados</p>
-              </div>
-            ) : employees.length === 0 ? (
-              <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-6 text-center">
-                <i className="pi pi-users mb-2 text-3xl text-gray-400"></i>
-                <p className="text-sm text-gray-500">No hay empleados con rol "Recepcionista"</p>
-                <p className="mt-1 text-xs text-gray-400">
-                  Contacta al administrador para crear empleados con este rol
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {employees.map((emp) => (
-                  <button
-                    key={emp.id}
-                    onClick={() => handleEmployeeSelect(emp.id)}
-                    className={`flex items-center gap-3 rounded-xl border-2 p-4 text-left transition-all ${
-                      selectedEmployeeId === emp.id
-                        ? "border-emerald-500 bg-emerald-50 shadow-sm"
-                        : "border-gray-200 bg-white hover:bg-gray-50"
-                    }`}
-                  >
-                    <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-full font-bold ${
-                        selectedEmployeeId === emp.id
-                          ? "bg-emerald-500 text-white"
-                          : "bg-gray-200 text-gray-600"
-                      }`}
-                    >
-                      {emp.first_name[0]}
-                      {emp.last_name[0]}
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-800">
-                        {emp.first_name} {emp.last_name}
-                      </p>
-                      <p className="text-xs text-gray-500">Recepcionista</p>
-                    </div>
-                    {selectedEmployeeId === emp.id && (
-                      <i className="pi pi-check-circle ml-auto text-xl text-emerald-500"></i>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
           <div className="flex flex-col gap-2">
             <p className="text-sm font-black tracking-wide text-gray-500 uppercase">
               Observación (opcional)
@@ -257,7 +181,7 @@ const CleaningTaskPage: React.FC = () => {
             icon="pi pi-check"
             className="mt-2 w-full rounded-2xl border-none bg-emerald-600 py-4 text-lg font-black text-white shadow-lg hover:bg-emerald-700"
             onClick={handleSubmit}
-            disabled={!isFormValid || createCleaningLog.isPending || employees.length === 0}
+            disabled={!isFormValid || createCleaningLog.isPending}
             loading={createCleaningLog.isPending}
           />
         </div>
