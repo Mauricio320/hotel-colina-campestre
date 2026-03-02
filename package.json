@@ -46,10 +46,13 @@
   "devDependencies": {
     "@types/lodash.debounce": "^4.0.9",
     "@types/node": "^22.14.0",
+    "@vite-pwa/assets-generator": "^1.0.2",
     "autoprefixer": "^10.4.24",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "sass-embedded": "^1.97.3",
-    "typescript": "~5.8.2"
+    "sharp": "^0.34.5",
+    "typescript": "~5.8.2",
+    "vite-plugin-pwa": "^1.2.0"
   }
 }
