@@ -27,7 +27,7 @@ const defaultProps: Omit<TwoColumnsProps, "children"> = {
   leftBackground: { r: 240, g: 240, b: 240, a: 1 },
   rightBackground: { r: 240, g: 240, b: 240, a: 1 },
   width: "100%",
-  height: "300px",
+  height: "70px",
 };
 
 export const TwoColumns = (props: Partial<TwoColumnsProps>) => {
@@ -47,7 +47,7 @@ export const TwoColumns = (props: Partial<TwoColumnsProps>) => {
         margin: `${margin[0]}px ${margin[1]}px ${margin[2]}px ${margin[3]}px`,
         alignItems: "stretch",
         position: "relative",
-        minHeight: "100px",
+        minHeight: "20px",
       }}
     >
       {/* Columna Izquierda */}

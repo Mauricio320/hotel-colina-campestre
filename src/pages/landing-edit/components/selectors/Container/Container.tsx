@@ -1,12 +1,12 @@
-import React from 'react';
+import React from "react";
 
-import { ContainerSettings } from './ContainerSettings';
+import { ContainerSettings } from "./ContainerSettings";
 
-import { Resizer } from '../Resizer';
+import { Resizer } from "../Resizer";
 
 export type ContainerProps = {
-  background: Record<'r' | 'g' | 'b' | 'a', number>;
-  color: Record<'r' | 'g' | 'b' | 'a', number>;
+  background: Record<"r" | "g" | "b" | "a", number>;
+  color: Record<"r" | "g" | "b" | "a", number>;
   flexDirection: string;
   alignItems: string;
   justifyContent: string;
@@ -25,26 +25,26 @@ export type ContainerProps = {
   radius: number;
   x: number | string;
   y: number | string;
-  position: 'relative' | 'absolute';
+  position: "relative" | "absolute";
 };
 
 const defaultProps = {
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-  justifyContent: 'flex-start',
-  fillSpace: 'no',
-  padding: ['0', '0', '0', '0'],
-  margin: ['0', '0', '0', '0'],
+  flexDirection: "column",
+  alignItems: "flex-start",
+  justifyContent: "flex-start",
+  fillSpace: "no",
+  padding: ["0", "0", "0", "0"],
+  margin: ["0", "0", "0", "0"],
   background: { r: 255, g: 255, b: 255, a: 1 },
   color: { r: 0, g: 0, b: 0, a: 1 },
   shadow: 0,
   radius: 0,
-  width: '100%',
-  height: 'auto',
-  minHeight: 'none',
+  width: "100%",
+  height: "auto",
+  minHeight: "none",
   x: 0,
   y: 0,
-  position: 'relative' as const,
+  position: "relative" as const,
 };
 
 interface ExtendedContainerProps extends Partial<ContainerProps> {
@@ -76,11 +76,11 @@ export const Container = (props: ExtendedContainerProps) => {
   } = mergedProps;
 
   // Usar referencia al padre para limitar redimensionamiento
-  const [bounds, setBounds] = React.useState<string | HTMLElement>('parent');
+  const [bounds, setBounds] = React.useState<string | HTMLElement>("parent");
 
   return (
     <Resizer
-      propKey={{ width: 'width', height: 'height' }}
+      propKey={{ width: "width", height: "height" }}
       resizeHandles={resizeHandles}
       bounds={bounds}
       x={x}
@@ -88,8 +88,8 @@ export const Container = (props: ExtendedContainerProps) => {
       position={position}
       style={{
         position,
-        left: position === 'absolute' ? (typeof x === 'string' ? x : `${x}px`) : undefined,
-        top: position === 'absolute' ? (typeof y === 'string' ? y : `${y}px`) : undefined,
+        left: position === "absolute" ? (typeof x === "string" ? x : `${x}px`) : undefined,
+        top: position === "absolute" ? (typeof y === "string" ? y : `${y}px`) : undefined,
         justifyContent,
         flexDirection,
         alignItems,
@@ -98,14 +98,11 @@ export const Container = (props: ExtendedContainerProps) => {
         color: `rgba(${Object.values(color)})`,
         padding: `${padding[0]}px ${padding[1]}px ${padding[2]}px ${padding[3]}px`,
         margin: `${margin[0]}px ${margin[1]}px ${margin[2]}px ${margin[3]}px`,
-        boxShadow:
-          shadow === 0
-            ? 'none'
-            : `0px 3px 100px ${shadow}px rgba(0, 0, 0, 0.13)`,
+        boxShadow: shadow === 0 ? "none" : `0px 3px 100px ${shadow}px rgba(0, 0, 0, 0.13)`,
         borderRadius: `${radius}px`,
-        flex: fillSpace === 'yes' ? 1 : 'unset',
-        border: '1px dashed #ccc',
-        cursor: position === 'absolute' ? 'move' : 'default',
+        flex: fillSpace === "yes" ? 1 : "unset",
+        border: "1px dashed #ccc",
+        cursor: position === "absolute" ? "move" : "default",
       }}
     >
       {children}
@@ -114,7 +111,7 @@ export const Container = (props: ExtendedContainerProps) => {
 };
 
 Container.craft = {
-  displayName: 'Container',
+  displayName: "Container",
   props: defaultProps,
   rules: {
     canDrag: () => true,

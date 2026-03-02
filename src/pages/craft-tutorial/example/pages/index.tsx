@@ -45,8 +45,8 @@ function App() {
                 width="800px"
                 // height="auto"
                 background={{ r: 255, g: 255, b: 255, a: 1 }}
-                padding={["40", "40", "40", "40"]}
-                custom={{ displayName: "App" }}
+                padding={["0", "0", "0", "0"]}
+                custom={{ displayName: "App sassad" }}
                 height="800px"
               >
                 <Element

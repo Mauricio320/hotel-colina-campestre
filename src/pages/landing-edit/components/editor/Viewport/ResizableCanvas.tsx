@@ -65,7 +65,7 @@ export const ResizableCanvas: React.FC<ResizableCanvasProps> = ({
   children,
   initialWidth = 800,
   minWidth = 320,
-  minHeight = 200,
+  minHeight = 82,
   maxWidth = 1920,
   maxHeight = 1080,
 }) => {
@@ -86,7 +86,7 @@ export const ResizableCanvas: React.FC<ResizableCanvasProps> = ({
   }, []);
 
   return (
-    <CanvasWrapper ref={containerRef}>
+    <CanvasWrapper ref={containerRef} style={{padding: '0'}}>
       <Resizable
         size={size}
         minWidth={minWidth}
@@ -110,7 +110,7 @@ export const ResizableCanvas: React.FC<ResizableCanvasProps> = ({
           background: 'white',
           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
           width:'100%',
-          minHeight: '200px'
+          padding: '0px',
         }}
         handleStyles={{
           bottomRight: {

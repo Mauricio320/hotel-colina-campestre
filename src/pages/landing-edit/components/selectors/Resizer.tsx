@@ -374,6 +374,7 @@ export const Resizer = ({ propKey, children, bounds, maxWidth, maxHeight, resize
       bounds={bounds}
       maxWidth={maxWidth}
       maxHeight={maxHeight}
+      minHeight={props?.style?.minHeight}
       ref={(ref) => {
         if (ref) {
           resizable.current = ref;

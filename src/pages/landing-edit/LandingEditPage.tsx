@@ -1,28 +1,28 @@
-import { Editor, Frame, Element, useEditor } from '@craftjs/core';
-import { DndContext, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useLandingPageState } from '@/hooks/useLandingPage';
+import { Editor, Frame, Element, useEditor } from "@craftjs/core";
+import { DndContext, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
+import React, { useCallback, useEffect, useState } from "react";
+import { useLandingPageState } from "@/hooks/useLandingPage";
 
-import { Viewport } from './components/editor/Viewport';
-import { RenderNode } from './components/editor/RenderNode';
-import { Container } from './components/selectors/Container/Container';
-import { Text } from './components/selectors/Text/Text';
-import { Button } from './components/selectors/Button/Button';
-import { Custom1, OnlyButtons } from './components/selectors/Custom1/Custom1';
-import { Custom2, Custom2VideoDrop } from './components/selectors/Custom2/Custom2';
-import { Custom3, Custom3BtnDrop } from './components/selectors/Custom3/Custom3';
-import { Video } from './components/selectors/Video/Video';
+import { Viewport } from "./components/editor/Viewport";
+import { RenderNode } from "./components/editor/RenderNode";
+import { Container } from "./components/selectors/Container/Container";
+import { Text } from "./components/selectors/Text/Text";
+import { Button } from "./components/selectors/Button/Button";
+import { Custom1, OnlyButtons } from "./components/selectors/Custom1/Custom1";
+import { Custom2, Custom2VideoDrop } from "./components/selectors/Custom2/Custom2";
+import { Custom3, Custom3BtnDrop } from "./components/selectors/Custom3/Custom3";
+import { Video } from "./components/selectors/Video/Video";
 
 // New Components
-import { Image } from './components/selectors/Image/Image';
-import { Link } from './components/selectors/Link/Link';
-import { Map } from './components/selectors/Map/Map';
-import { Quote } from './components/selectors/Quote/Quote';
-import { TwoColumns } from './components/selectors/TwoColumns/TwoColumns';
-import { ThreeColumns } from './components/selectors/ThreeColumns/ThreeColumns';
-import { TwoColumns37 } from './components/selectors/TwoColumns37/TwoColumns37';
+import { Image } from "./components/selectors/Image/Image";
+import { Link } from "./components/selectors/Link/Link";
+import { Map } from "./components/selectors/Map/Map";
+import { Quote } from "./components/selectors/Quote/Quote";
+import { TwoColumns } from "./components/selectors/TwoColumns/TwoColumns";
+import { ThreeColumns } from "./components/selectors/ThreeColumns/ThreeColumns";
+import { TwoColumns37 } from "./components/selectors/TwoColumns37/TwoColumns37";
 
-import './styles/landing-edit.css';
+import "./styles/landing-edit.css";
 
 // Componente para cargar el estado guardado
 interface FrameLoaderProps {
@@ -64,7 +64,7 @@ export default function LandingEditPage() {
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, delta } = event;
 
-    if (active.data.current?.type === 'resizable-node') {
+    if (active.data.current?.type === "resizable-node") {
       const currentX = active.data.current.x ?? 0;
       const currentY = active.data.current.y ?? 0;
 
@@ -78,10 +78,10 @@ export default function LandingEditPage() {
 
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 font-medium">Cargando editor...</p>
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-amber-500 border-t-transparent"></div>
+          <p className="font-medium text-gray-600">Cargando editor...</p>
         </div>
       </div>
     );
@@ -121,10 +121,10 @@ export default function LandingEditPage() {
                 is={Container}
                 width="100%"
                 height="auto"
-                minHeight="100vh"
+                minHeight={200 as unknown as string}
                 background={{ r: 255, g: 255, b: 255, a: 1 }}
-                padding={['40', '40', '40', '40']}
-                custom={{ displayName: 'App' }}
+                padding={["0", "0", "0", "0"]}
+                custom={{ displayName: "App sada" }}
               >
                 {/* Canvas vacío - arrastra componentes desde el Toolbox */}
               </Element>
