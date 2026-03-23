@@ -98,7 +98,7 @@ const CompactGuestForm: React.FC<{
         <div className="col-span-7">
           <InputText
             {...register(`${fieldPrefix}doc_number`, {
-              required: true,
+              required: isPrimary,
               validate: (value: string) => {
                 if (excludeDocNumber && value === excludeDocNumber) {
                   return "Documento ya usado";
@@ -142,22 +142,22 @@ const CompactGuestForm: React.FC<{
 
         <div className="col-span-6">
           <InputText
-            {...register(`${fieldPrefix}first_name`, { required: true })}
-            placeholder="Nombres *"
+            {...register(`${fieldPrefix}first_name`, { required: isPrimary })}
+            placeholder={`Nombres ${isPrimary ? "*" : ""}`}
             className="w-full text-sm"
           />
         </div>
         <div className="col-span-6">
           <InputText
-            {...register(`${fieldPrefix}last_name`, { required: true })}
-            placeholder="Apellidos *"
+            {...register(`${fieldPrefix}last_name`, { required: isPrimary })}
+            placeholder={`Apellidos ${isPrimary ? "*" : ""}`}
             className="w-full text-sm"
           />
         </div>
         <div className="col-span-6">
           <InputText
-            {...register(`${fieldPrefix}phone`, { required: true })}
-            placeholder="Teléfono *"
+            {...register(`${fieldPrefix}phone`, { required: isPrimary })}
+            placeholder={`Teléfono ${isPrimary ? "*" : ""}`}
             className="w-full text-sm"
           />
         </div>
