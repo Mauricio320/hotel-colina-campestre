@@ -11,7 +11,7 @@ interface AdminAuthorizationModalProps {
   visible: boolean;
   onHide: () => void;
   currentTotal: number;
-  onAuthorize: (admin: Employee, discountAmount: number) => void;
+  onAuthorize: (admin: Employee, invoiceAmount: number) => void;
 }
 
 const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
@@ -22,7 +22,7 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
 }) => {
   const { data: adminList = [], isLoading: employeesLoading } = useEmployeesByRole("Admin");
   const [selectedAdmin, setSelectedAdmin] = useState<Employee | null>(null);
-  const [discountAmount, setDiscountAmount] = useState<number>(0);
+  const [invoiceAmount, setInvoiceAmount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,9 +35,6 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
     );
   }, [adminList]);
 
-  const finalTotal = useMemo(() => {
-    return Math.max(0, currentTotal - (discountAmount || 0));
-  }, [currentTotal, discountAmount]);
 
   const handleConfirm = async () => {
     if (!selectedAdmin) {
@@ -45,8 +42,8 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
       return;
     }
 
-    if (discountAmount <= 0) {
-      setError("El valor del descuento debe ser mayor a 0");
+    if (invoiceAmount <= 0) {
+      setError("Ingrese el valor de la factura");
       return;
     }
 
@@ -54,7 +51,7 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
     setError(null);
 
     try {
-      onAuthorize(selectedAdmin, discountAmount);
+      onAuthorize(selectedAdmin, invoiceAmount);
       onHide();
     } catch (err: any) {
       setError(err.message || "Error al validar la autorización");
@@ -66,9 +63,9 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
   const header = (
     <div className="flex items-center gap-2">
       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100">
-        <i className="pi pi-percentage text-sm text-orange-600"></i>
+        <i className="pi pi-file text-sm text-orange-600"></i>
       </div>
-      <span className="font-bold text-gray-800">Autorización de Descuento</span>
+      <span className="font-bold text-gray-800">Autorización de Factura</span>
     </div>
   );
 
@@ -112,20 +109,19 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
 
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-bold tracking-wide text-gray-600 uppercase">
-                Valor del Descuento
+                Valor de la Factura
               </label>
               <InputNumber
-                value={discountAmount}
-                onValueChange={(e) => setDiscountAmount(Math.round(e.value || 0))}
+                value={invoiceAmount}
+                onValueChange={(e) => setInvoiceAmount(Math.round(e.value || 0))}
                 mode="currency"
                 currency="COP"
                 minFractionDigits={0}
                 maxFractionDigits={0}
                 className="w-full"
-                inputClassName="w-full text-lg font-bold text-red-600"
+                inputClassName="w-full text-lg font-bold text-emerald-700"
                 autoFocus
                 min={0}
-                max={currentTotal}
                 placeholder="$0"
               />
             </div>
@@ -133,9 +129,9 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
             <div className="my-1 h-px bg-gray-300"></div>
 
             <div className="flex items-center justify-between">
-              <span className="font-bold text-gray-700">Total Final</span>
+              <span className="font-bold text-gray-700">Valor Final</span>
               <span className="text-xl font-black text-emerald-700">
-                ${finalTotal.toLocaleString()}
+                ${invoiceAmount.toLocaleString()}
               </span>
             </div>
           </div>

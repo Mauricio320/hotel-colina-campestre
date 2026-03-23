@@ -18,7 +18,7 @@ interface CancelFormData {
   observation: string;
 }
 
-const CancelReservationPage: React.FC = () => {
+const CancelestadíationPage: React.FC = () => {
   const { stayId } = useParams<{ stayId: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -56,11 +56,11 @@ const CancelReservationPage: React.FC = () => {
 
     const availableStatus = roomStatuses?.find((s) => s.name === "Disponible");
     if (!availableStatus) {
-      console.error("No se encontro el estado Disponible");
+      console.error("No se encontró el estado Disponible");
       return;
     }
 
-    showBlockUI("Cancelando reserva...");
+    showBlockUI("Cancelando estadía...");
     try {
       await cancelStay.mutateAsync({
         stayId: stayId,
@@ -73,7 +73,7 @@ const CancelReservationPage: React.FC = () => {
 
       navigateToCalendar();
     } catch (error) {
-      console.error("Error al cancelar reserva:", error);
+      console.error("Error al cancelar estadía:", error);
     } finally {
       hideBlockUI();
     }
@@ -82,8 +82,8 @@ const CancelReservationPage: React.FC = () => {
   const onSubmit = (data: CancelFormData) => {
     confirmDialog({
       message:
-        "¿Esta seguro que desea cancelar esta reserva? Esta accion no se puede deshacer.",
-      header: "Confirmar cancelacion",
+        "¿Esta seguro que desea cancelar esta estadía? Esta accion no se puede deshacer.",
+      header: "Confirmar cancelación",
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Si, cancelar",
       rejectLabel: "No, volver",
@@ -98,7 +98,7 @@ const CancelReservationPage: React.FC = () => {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
         <ProgressSpinner />
-        <p className="text-gray-500">Cargando reserva...</p>
+        <p className="text-gray-500">Cargando estadía...</p>
       </div>
     );
   }
@@ -107,8 +107,8 @@ const CancelReservationPage: React.FC = () => {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-4">
         <i className="pi pi-exclamation-circle text-5xl text-red-500"></i>
-        <h3 className="text-center text-xl font-bold text-gray-800">Reserva no encontrada</h3>
-        <p className="text-center text-gray-500">No se pudo cargar la reserva. Verifica la URL.</p>
+        <h3 className="text-center text-xl font-bold text-gray-800">estadía no encontrada</h3>
+        <p className="text-center text-gray-500">No se pudo cargar la estadía. Verifica la URL.</p>
         {stayError && (
           <p className="max-w-xs text-center text-xs text-red-400">Error: {stayError.message}</p>
         )}
@@ -117,7 +117,7 @@ const CancelReservationPage: React.FC = () => {
   }
 
   const displayDate = dayjs().format("DD/MM/YYYY");
-  const guestName = stay.guest ? `${stay.guest.first_name} ${stay.guest.last_name}` : "Sin huesped";
+  const guestName = stay.guest ? `${stay.guest.first_name} ${stay.guest.last_name}` : "Sin huésped";
   const roomNumber = stay.room?.room_number || "-";
   const accommodationType = stay.room?.accommodation_types?.name || "-";
   const checkInDate = stay.check_in_date ? dayjs(stay.check_in_date).format("DD/MM/YYYY") : "-";
@@ -133,7 +133,7 @@ const CancelReservationPage: React.FC = () => {
     <div className="animate-fade-in mx-auto max-w-4xl pb-12">
       <ConfirmDialog />
       <PageHeader
-        title={`Reserva #${stay.order_number || "-"}`}
+        title={`Numero de estadía #${stay.order_number || "-"}`}
         subtitle={displayDate}
         icon="pi-times-circle"
         tag="Cancelar"
@@ -146,7 +146,7 @@ const CancelReservationPage: React.FC = () => {
         <div className="flex flex-col gap-6">
           <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
             <h3 className="mb-3 text-sm font-black tracking-wide text-gray-500 uppercase">
-              Informacion de la reserva
+              Información de la estadía
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -156,7 +156,7 @@ const CancelReservationPage: React.FC = () => {
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Huesped</p>
+                <p className="text-xs text-gray-500">Huésped</p>
                 <p className="font-bold text-gray-800">{guestName}</p>
               </div>
               <div>
@@ -176,7 +176,7 @@ const CancelReservationPage: React.FC = () => {
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
             <label className="text-sm font-bold text-gray-700">
-              Motivo de cancelacion <span className="text-amber-500">*</span>
+              Motivo de cancelación <span className="text-amber-500">*</span>
             </label>
             <Controller
               name="observation"
@@ -185,7 +185,7 @@ const CancelReservationPage: React.FC = () => {
               render={({ field }) => (
                 <InputTextarea
                   {...field}
-                  placeholder="Ingrese el motivo por el cual se cancela la reserva..."
+                  placeholder="Ingrese el motivo por el cual se cancela la estadía..."
                   rows={4}
                   className={`w-full rounded-xl border-gray-200 ${errors.observation ? "p-invalid" : ""}`}
                 />
@@ -195,13 +195,13 @@ const CancelReservationPage: React.FC = () => {
               <p className="text-xs text-red-500">{errors.observation.message}</p>
             )}
             <p className="text-xs text-gray-400">
-              Este campo es obligatorio. La observacion quedara registrada en el historial.
+              Este campo es obligatorio. La observación quedara registrada en el historial.
             </p>
 
             <Button
               unstyled
               type="submit"
-              label="Cancelar Reserva"
+              label="Cancelar Estadía"
               icon="pi pi-times-circle"
               className="mt-4 w-full rounded-2xl border-none bg-red-500 py-4 text-lg font-black text-white shadow-lg hover:bg-red-600"
               loading={cancelStay.isPending}
@@ -213,4 +213,4 @@ const CancelReservationPage: React.FC = () => {
   );
 };
 
-export default CancelReservationPage;
+export default CancelestadíationPage;

@@ -56,7 +56,7 @@ export const RoomActionModal: React.FC<RoomActionModalProps> = ({
   const navigate = useNavigate();
 
   const isRoom = selectedAccommodationType === AccommodationTypeEnum.HABITACION;
-  const isToday = date && dayjs(date).format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD");
+  const isToday = date && !dayjs(date).isAfter(dayjs(), "day");
   const hasCleaning = room?.cleaning_log && room.cleaning_log.length > 0;
 
   const accommodationId = useMemo(() => {
@@ -124,7 +124,7 @@ export const RoomActionModal: React.FC<RoomActionModalProps> = ({
       {
         icon: "pi pi-calendar",
         label: "Reservar",
-        className: "bg-[#f9b000]",
+        className: "bg-amber-600 hover:bg-amber-700",
         onClick: navigateToBooking,
       },
     ];
@@ -133,7 +133,7 @@ export const RoomActionModal: React.FC<RoomActionModalProps> = ({
       buttons.unshift({
         icon: "pi pi-sign-in",
         label: "Check-in",
-        className: "bg-emerald-500",
+        className: "bg-amber-500 hover:bg-amber-600",
         onClick: navigateToCheckIn,
       });
     }
@@ -146,7 +146,7 @@ export const RoomActionModal: React.FC<RoomActionModalProps> = ({
       return {
         icon: "pi pi-sign-out",
         label: "Realizar Check-out",
-        className: "bg-[#ff3d47]",
+        className: "bg-orange-600 hover:bg-orange-700",
         onClick: onGoToCheckOut,
       };
     }
@@ -155,7 +155,7 @@ export const RoomActionModal: React.FC<RoomActionModalProps> = ({
       return {
         icon: "pi pi-sign-in",
         label: "Check-in",
-        className: "bg-yellow-500",
+        className: "bg-amber-500 hover:bg-amber-600",
         onClick: onConfirmCheckIn,
       };
     }
@@ -164,7 +164,7 @@ export const RoomActionModal: React.FC<RoomActionModalProps> = ({
       return {
         icon: "pi pi-dollar",
         label: "Abonar",
-        className: "bg-orange-500",
+        className: "bg-yellow-600 hover:bg-yellow-700",
         onClick: onCheckInAction,
       };
     }
@@ -251,19 +251,8 @@ export const RoomActionModal: React.FC<RoomActionModalProps> = ({
             {renderActionButton({
               icon: "pi pi-sign-out",
               label: "Realizar Check-out",
-              className: "bg-[#ff3d47]",
+              className: "bg-orange-600 hover:bg-orange-700",
               onClick: onGoToCheckOut,
-            })}
-          </div>
-        )}
-
-        {action === RoomActionEnum.OCCUPIED && (
-          <div className="grid grid-cols-1 gap-3">
-            {renderActionButton({
-              icon: "pi pi-file",
-              label: "Ver Orden",
-              className: "bg-[#6366f1]",
-              onClick: navigateToInvoice,
             })}
           </div>
         )}
@@ -273,14 +262,14 @@ export const RoomActionModal: React.FC<RoomActionModalProps> = ({
             {renderActionButton({
               icon: "pi pi-sparkles",
               label: hasCleaning ? "Limpieza realizada" : "Limpieza",
-              className: "bg-[#2d79ff]",
+              className: "bg-slate-500 hover:bg-slate-600",
               onClick: navigateToCleaningTask,
               disabled: hasCleaning,
             })}
             {renderActionButton({
               icon: "pi pi-wrench",
               label: "Mantenimiento",
-              className: "bg-[#6e7687]",
+              className: "bg-slate-600 hover:bg-slate-700",
               onClick: navigateToMaintenanceTask,
             })}
           </div>
@@ -289,16 +278,27 @@ export const RoomActionModal: React.FC<RoomActionModalProps> = ({
         {action === RoomActionEnum.BOOKING && activeStay?.origin_was_reservation && (
           <div className="grid grid-cols-2 gap-3">
             {renderActionButton({
-              icon: "pi pi-times-circle",
-              label: "Cancelar Reserva",
-              className: "bg-red-500",
-              onClick: navigateToCancelReservation,
-            })}
-            {renderActionButton({
               icon: "pi pi-calendar-plus",
               label: "Mover Reserva",
-              className: "bg-cyan-600",
+              className: "bg-blue-600 hover:bg-blue-700",
               onClick: navigateToMoveReservation,
+            })}
+          </div>
+        )}
+
+        {activeStay && (
+          <div className="grid grid-cols-2 gap-3">
+            {renderActionButton({
+              icon: "pi pi-file",
+              label: "Ver Orden",
+              className: "bg-blue-600 hover:bg-blue-700",
+              onClick: navigateToInvoice,
+            })}
+            {renderActionButton({
+              icon: "pi pi-times-circle",
+              label: "Cancelar estadía",
+              className: "bg-red-600 hover:bg-red-700",
+              onClick: navigateToCancelReservation,
             })}
           </div>
         )}

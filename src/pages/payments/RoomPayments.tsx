@@ -36,26 +36,6 @@ const RoomPayments: React.FC = () => {
     return (row.total_price || 0) - totalPaid;
   };
 
-  const getTotalPaidFromPayments = (row: any) => {
-    const stayPayments = payments[row.id] || [];
-    return stayPayments.reduce((sum, payment) => sum + Number(payment.amount), 0);
-  };
-
-  const getPaymentTypeDisplay = (type: string) => {
-    switch (type) {
-      case "ABONO_RESERVA":
-        return "Abono";
-      case "PAGO_COMPLETO_RESERVA":
-        return "Pago Completo";
-      case "PAGO_CHECKIN_DIRECTO":
-        return "Check-in Directo";
-      case "ANTICIPADO_COMPLETO":
-        return "Anticipado";
-      default:
-        return type;
-    }
-  };
-
   return (
     <div className="animate-fade-in flex flex-col gap-6">
       <div className="flex items-center justify-between">

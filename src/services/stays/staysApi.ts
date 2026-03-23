@@ -160,6 +160,7 @@ export const staysApi = {
     docNumber?: string;
     isReservation?: boolean | null;
   }): Promise<{ data: any[]; count: number }> => {
+    // TODO: pendiente agregar filtros para mostrar solo las facturas activas
     const { data, error } = await supabase.rpc("get_stays_paginated", {
       p_accommodation_type_id: params.accommodation_type_id,
       p_page: params.page || 0,

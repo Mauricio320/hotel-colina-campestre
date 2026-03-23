@@ -12,7 +12,7 @@ export interface PaymentSectionProps {
     subtotal: number;
     iva: number;
     total: number;
-    discountAmount?: number;
+    invoiceAmount?: number;
   };
   nights: number;
   personCount: number;
@@ -126,12 +126,12 @@ const PaymentSection: React.FC<PaymentSectionProps> = ({
             )}
 
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Descuento</span>
+              <span className="text-gray-600">Valor de Factura</span>
               <span
-                className={`font-medium ${priceInfo.discountAmount && priceInfo.discountAmount > 0 ? "text-red-600" : "text-gray-800"}`}
+                className={`font-medium ${priceInfo.invoiceAmount && priceInfo.invoiceAmount > 0 ? "text-emerald-600" : "text-gray-800"}`}
               >
-                {priceInfo.discountAmount && priceInfo.discountAmount > 0
-                  ? `-$${priceInfo.discountAmount.toLocaleString()}`
+                {priceInfo.invoiceAmount && priceInfo.invoiceAmount > 0
+                  ? `$${priceInfo.invoiceAmount.toLocaleString()}`
                   : "-"}
               </span>
             </div>
