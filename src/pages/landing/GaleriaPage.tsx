@@ -66,17 +66,27 @@ export default function GaleriaPage() {
     );
   }, [filteredImages.length]);
 
+  // Cleanup on mount to ensure scroll is enabled
   useEffect(() => {
-    if (lightboxIndex === null) return;
+    document.body.style.overflow = "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
 
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeLightbox();
       if (e.key === "ArrowRight") goNext();
       if (e.key === "ArrowLeft") goPrev();
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    document.body.style.overflow = "hidden";
+    if (lightboxIndex !== null) {
+      document.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
@@ -87,26 +97,37 @@ export default function GaleriaPage() {
   return (
     <div className="min-h-screen bg-[#faf9f6]">
       {/* ── Header ────────────────────────────────────────────────── */}
-      <header className="bg-[#006948] px-6 py-5">
+      <header className="bg-[#006948] px-6 py-3">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Galería de Fotos</h1>
-            <p className="mt-1 text-sm text-white/70">Hotel Colina Campestre</p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-lg font-bold text-white">Galería de Fotos</h1>
+            <span className="text-sm text-white/50">|</span>
+            <span className="text-sm text-white/70">Hotel Colina Campestre</span>
           </div>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 rounded-full bg-white/15 px-5 py-2.5 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            state={{ scrollTo: "fotos" }}
+            className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/25"
           >
-            <i className="pi pi-arrow-left" aria-hidden="true" />
-            Volver al inicio
+            <i className="pi pi-arrow-left text-xs" aria-hidden="true" />
+            Volver
           </Link>
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-8 py-12">
+      <div className="mx-auto max-w-7xl px-8 py-6">
+        {/* ── Title Section ───────────────────────────────────────── */}
+        <div className="mb-8 text-center">
+          <h2 className="text-3xl font-bold text-[#1a1c1a]">Galería de Fotos</h2>
+          <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-[#006948]" />
+          <p className="mx-auto mt-4 max-w-2xl text-base text-[#4a4a4a]">
+            Descubre los rincones y paisajes que hacen especial al Hotel Colina Campestre.
+          </p>
+        </div>
+
         {/* ── Category filter tabs ────────────────────────────────── */}
         <div
-          className="mb-10 flex flex-wrap justify-center gap-2"
+          className="mb-6 flex flex-wrap items-center justify-center gap-2"
           role="tablist"
           aria-label="Filtrar galería por categoría"
         >
@@ -135,7 +156,7 @@ export default function GaleriaPage() {
           })}
         </div>
 
-        {/* ── Masonry-style photo grid ────────────────────────────── */}
+        {/* ── Bento-style photo grid ─────────────────────────────── */}
         <div
           className="columns-2 gap-4 md:columns-3 lg:columns-4"
           role="list"
@@ -246,6 +267,21 @@ function GalleryCard({ image, index, onClick }: GalleryCardProps) {
   const { ref, isVisible } = useInView();
   const delay = (index % 8) * 60;
 
+  // Determine aspect ratio based on index for bento effect
+  const getAspectRatio = () => {
+    const pattern = index % 6;
+    switch (pattern) {
+      case 0:
+        return "1/1"; // Square (was large)
+      case 2:
+        return "3/4"; // Portrait (was tall)
+      case 4:
+        return "4/3"; // Landscape (was wide)
+      default:
+        return "4/3"; // Standard
+    }
+  };
+
   return (
     <div
       ref={ref}
@@ -266,10 +302,8 @@ function GalleryCard({ image, index, onClick }: GalleryCardProps) {
           src={image.src}
           alt={image.alt}
           loading="lazy"
-          width={600}
-          height={image.featured ? 800 : 450}
           className="w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-          style={{ aspectRatio: image.featured ? "3/4" : "4/3" }}
+          style={{ aspectRatio: getAspectRatio() }}
         />
         {/* Hover overlay */}
         <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">

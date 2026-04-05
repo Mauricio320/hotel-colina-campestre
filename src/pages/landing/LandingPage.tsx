@@ -1,55 +1,59 @@
-import { Navigation } from "./components/Navigation";
-import { HotelHeroSection } from "./components/HotelHeroSection";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { ContactoSection } from "./components/ContactoSection";
+import { FotosSection } from "./components/FotosSection";
 import { HotelAboutSection } from "./components/HotelAboutSection";
+import { HotelHeroSection } from "./components/HotelHeroSection";
+import { Navigation } from "./components/Navigation";
+import { ScrollReveal } from "./components/ScrollReveal";
 import { ServicesSection } from "./components/ServicesSection";
 import { TurismoSection } from "./components/TurismoSection";
-import { FotosSection } from "./components/FotosSection";
-import { ContactoSection } from "./components/ContactoSection";
-import { Footer } from "./components/Footer";
-
-// Default hotel content
-const hotelHeroContent = {
-  title: "Hotel ideal para familias, turistas y viajeros de negocios",
-  subtitle:
-    "Experimente la serenidad de nuestro refugio campestre con todas las comodidades de la ciudad.",
-  background_image: "public/images-hotel/WhatsApp Image 2025-10-21 at 2.38.31 PM (2).jpeg",
-  background_images: [
-    "public/images-hotel/WhatsApp Image 2025-10-21 at 2.38.31 PM (2).jpeg",
-    "/images-hotel/Sala principal.jpeg",
-    "/images-hotel/Sala segudo piso.jpeg",
-    "/images-hotel/WhatsApp Image 2025-10-21 at 2.38.25 PM (2).jpeg",
-    "/images-hotel/WhatsApp Image 2025-10-21 at 2.38.25 PM.jpeg",
-  ],
-  cta_text: "Reservar ahora",
-  cta_link: "/reservar",
-};
-
-// Servicios del hotel
-const hotelServices = [
-  { id: "1", icon: "pi-clock", title: "Recepción 24 horas" },
-  { id: "2", icon: "pi-home", title: "Habitaciones equipadas" },
-  { id: "3", icon: "pi-desktop", title: "TV Cable" },
-  { id: "4", icon: "pi-cog", title: "Aire acondicionado" },
-  { id: "5", icon: "pi-heart", title: "Bar" },
-  { id: "6", icon: "pi-briefcase", title: "Guarda equipaje" },
-  { id: "7", icon: "pi-star", title: "Zona de juegos" },
-  { id: "8", icon: "pi-globe", title: "Zonas de aire libre" },
-  { id: "9", icon: "pi-car", title: "Parqueadero gratuito" },
-  { id: "10", icon: "pi-wifi", title: "Wifi" },
-];
+import { hotelHeroContent, hotelServices } from "./landingData";
 
 export const LandingPage = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Check if we should scroll to a specific section
+    const state = location.state as { scrollTo?: string } | null;
+    if (state?.scrollTo) {
+      const element = document.getElementById(state.scrollTo);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+      // Clear the state to prevent scrolling on page refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+
   return (
-    <div id="inicio" className="min-h-screen bg-[#faf9f6]">
+    <div id="inicio" className="min-h-screen overflow-x-hidden bg-[#faf9f6]">
       <Navigation />
 
       <main>
         <HotelHeroSection content={hotelHeroContent} />
-        <HotelAboutSection />
-        <ServicesSection services={hotelServices} />
-        <FotosSection />
-        <TurismoSection />
-        <ContactoSection />
+
+        <ScrollReveal variant="fade-up">
+          <HotelAboutSection />
+        </ScrollReveal>
+
+        <ScrollReveal variant="fade-up" delay={100}>
+          <ServicesSection services={hotelServices} />
+        </ScrollReveal>
+
+        <ScrollReveal variant="fade-up">
+          <FotosSection />
+        </ScrollReveal>
+
+        <ScrollReveal variant="slide-left">
+          <TurismoSection />
+        </ScrollReveal>
+
+        <ScrollReveal variant="fade-up">
+          <ContactoSection />
+        </ScrollReveal>
       </main>
     </div>
   );

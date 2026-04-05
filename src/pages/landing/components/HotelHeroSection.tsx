@@ -46,7 +46,10 @@ export const HotelHeroSection = ({ content }: HotelHeroSectionProps) => {
   }, [goToNext, images.length]);
 
   return (
-    <section id="hotel" className="relative flex min-h-[921px] items-center overflow-hidden pt-20">
+    <section
+      id="hotel"
+      className="relative flex min-h-[calc(100dvh-72px)] items-center overflow-hidden pt-20"
+    >
       {/* Background Images */}
       <div className="absolute inset-0 z-0">
         {images.map((src, index) => (

@@ -131,26 +131,23 @@ export const HotelAboutSection = () => {
               <div className="absolute inset-0 flex items-center justify-between px-4">
                 <button
                   onClick={goToPrevious}
-                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#c4c4b8]/90 shadow-lg backdrop-blur-md transition-all hover:scale-110"
+                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#faf9f6]/10 shadow-lg backdrop-blur-md transition-all hover:scale-110"
                 >
-                  <i className="pi pi-chevron-left text-lg text-[#006948]"></i>
+                  <i className="pi pi-chevron-left text-lg text-white"></i>
                 </button>
                 <button
                   onClick={goToNext}
-                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#c4c4b8]/90 shadow-lg backdrop-blur-md transition-all hover:scale-110"
+                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[#faf9f6]/10 shadow-lg backdrop-blur-md transition-all hover:scale-110"
                 >
-                  <i className="pi pi-chevron-right text-lg text-[#006948]"></i>
+                  <i className="pi pi-chevron-right text-lg text-white"></i>
                 </button>
               </div>
             </div>
 
             {/* Floating Card - Changes with image - Compact */}
-            <div className="absolute right-0 bottom-3 left-0 mx-auto w-[92%] rounded-2xl bg-[#c4c4b8]/90 p-3 shadow-2xl backdrop-blur-md">
-              <span className="mb-1 block text-[10px] font-bold tracking-[0.2em] text-[#006948] uppercase">
-                {currentItem.badge}
-              </span>
-              <h3 className="mb-1 text-base font-bold text-[#1a1c1a]">{currentItem.title}</h3>
-              <p className="text-xs leading-snug text-[#4a4a42]">{currentItem.description}</p>
+            <div className="absolute right-0 bottom-3 left-0 mx-auto w-[92%] rounded-2xl bg-[#faf9f6]/10 p-3 shadow-2xl backdrop-blur-md">
+              <h3 className="mb-1 text-base font-bold text-white">{currentItem.title}</h3>
+              <p className="text-xs leading-snug text-white/80">{currentItem.description}</p>
             </div>
           </div>
         </div>
