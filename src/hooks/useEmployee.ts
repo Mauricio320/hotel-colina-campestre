@@ -12,7 +12,13 @@ export const useEmployeeQuery = (authId: string | null) => {
     queryFn: () => getEmployeeByAuthId(authId || ""),
     enabled: !!authId,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
+    retry: (failureCount, error: any) => {
+      // Don't retry on auth or DB errors — they won't self-heal
+      if (error?.message === "UNAUTHORIZED" || error?.message === "DATABASE_NOT_READY") {
+        return false;
+      }
+      return failureCount < 2;
+    },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 };
@@ -65,6 +71,8 @@ export const useEmployeeWithSync = (authId: string | null) => {
   React.useEffect(() => {
     if (isError && authId && !syncProfileMutation.isPending) {
       const errorType = error?.message;
+      // Don't sync on auth errors — the session is invalid
+      if (errorType === "UNAUTHORIZED") return;
       if (errorType === "DATABASE_NOT_READY" || !employee) {
         syncProfileMutation.mutate(authId);
       }
