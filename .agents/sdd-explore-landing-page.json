@@ -1,0 +1,34 @@
+{
+  "phase": "explore",
+  "feature": "landing-page",
+  "project": "hotel-colina-campestre",
+  "description": "Explore codebase to understand current architecture for landing page implementation",
+  "context": {
+    "tech_stack": {
+      "frontend": "React 19 + TypeScript + Vite",
+      "backend": "Supabase",
+      "data_fetching": "TanStack Query v5",
+      "ui_components": "PrimeReact v10",
+      "styling": "Tailwind CSS",
+      "forms": "React Hook Form"
+    },
+    "architecture": "3-layer: Component → Hook (TanStack Query) → Service (Supabase)",
+    "existing_landing": {
+      "note": "Craft.js based page builder already exists at /craft-tutorial",
+      "tables": ["landing_pages", "landing_page_state"],
+      "new_requirement": "User wants 5 specific editable sections instead of page builder"
+    },
+    "requirements": {
+      "sections": ["Hotel", "Comfaboy", "Turismo", "Fotos", "Contacto"],
+      "features": [
+        "Landing page with 5 sections",
+        "Admin interface to edit each section",
+        "Menu item 'Configurar Landing Page' with sub-items",
+        "Supabase migrations and storage buckets",
+        "Public URLs for images",
+        "Responsive design (mobile optimized)"
+      ]
+    },
+    "reference_template": "feature.html (available in root)"
+  }
+}

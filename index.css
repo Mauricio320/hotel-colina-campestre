@@ -2,4 +2,9 @@
 
 .sc-gFqAkO {
   padding: 4px !important;
-} 
+}
+
+/* Scroll offset for fixed navbar on landing page */
+section[id] {
+  scroll-margin-top: 64px;
+}

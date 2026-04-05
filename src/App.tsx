@@ -38,7 +38,10 @@ const MoveReservationPage = lazy(() => import("@/pages/stays/MoveReservationPage
 const CheckInPayment = lazy(() => import("@/pages/stays/CheckInPayment"));
 const CraftTutorialPage = lazy(() => import("@/pages/craft-tutorial/CraftTutorialPage"));
 const CraftTutorialPreview = lazy(() => import("@/pages/craft-tutorial/CraftTutorialPreview"));
-const LandingEditPage = lazy(() => import("@/pages/landing-edit/LandingEditPage"));
+
+const LandingPage = lazy(() => import("@/pages/landing/LandingPage"));
+const GaleriaPage = lazy(() => import("@/pages/landing/GaleriaPage"));
+const LandingPageAdmin = lazy(() => import("@/pages/admin/landing-page/LandingPageAdmin"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -110,20 +113,23 @@ const AppContent: React.FC = () => {
     <Routes>
       <Route path="/login" element={!user ? <Login /> : <Navigate to="/calendar" />} />
 
-      {/* Root route - redirects based on auth */}
-      <Route path="/" element={user ? <Navigate to="/calendar" /> : <Navigate to="/login" />} />
-
-      {/* Editor visual de Landing Page - Fuera del Layout pero protegido */}
+      {/* Public Landing Page */}
       <Route
-        path="/landing-edit"
+        path="/"
         element={
-          user ? (
-            <Suspense fallback={<PageLoader />}>
-              <LandingEditPage />
-            </Suspense>
-          ) : (
-            <Navigate to="/login" />
-          )
+          <Suspense fallback={<PageLoader />}>
+            <LandingPage />
+          </Suspense>
+        }
+      />
+
+      {/* Public Gallery Page */}
+      <Route
+        path="/galeria"
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <GaleriaPage />
+          </Suspense>
         }
       />
 
@@ -356,6 +362,20 @@ const AppContent: React.FC = () => {
           }
         />
       </Route>
+
+      {/* Admin Landing Page Configuration */}
+      <Route
+        path="/admin/landing-page/*"
+        element={
+          user ? (
+            <Suspense fallback={<PageLoader />}>
+              <LandingPageAdmin />
+            </Suspense>
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
 
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

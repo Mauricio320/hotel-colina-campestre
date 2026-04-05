@@ -72,7 +72,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
       } catch (error) {
-        console.error("Auth initialization error:", error);
+        // Session invalid or expired — user stays null, no error logged
+        setUser(null);
       } finally {
         setAuthLoading(false);
         initializing.current = false;
@@ -99,7 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => subscription.unsubscribe();
-  }, [employeeError]);
+  }, []); // No dependencies — run once on mount
 
   // Enhanced login with error handling
   const handleLogin = async (email: string, password: string) => {

@@ -61,21 +61,14 @@ export const signOut = async (): Promise<void> => {
  * Gets the current session
  */
 export const getCurrentSession = async (): Promise<AuthResponse> => {
-  try {
-    const { data, error } = await supabase.auth.getSession();
+  const { data } = await supabase.auth.getSession();
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return {
-      user: data.session?.user ?? null,
-      session: data.session,
-    };
-  } catch (error) {
-    const errorType = handleSupabaseError(error);
-    throw new Error(errorType);
-  }
+  // If no session or token is expired, return null gracefully
+  // This prevents 403 errors when visiting public routes with a stale token
+  return {
+    user: data.session?.user ?? null,
+    session: data.session,
+  };
 };
 
 /**
