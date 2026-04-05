@@ -2,17 +2,10 @@
  * Contacto Editor Component (Placeholder)
  */
 
-import { useLandingPageSection } from "@/hooks/useLandingPageSection";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { Button } from "primereact/button";
 
 export const ContactoEditor = () => {
-  const { data: sectionData, isLoading } = useLandingPageSection("contacto");
-
-  if (isLoading) {
-    return <ProgressSpinner />;
-  }
-
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold">Editar Sección Contacto</h2>

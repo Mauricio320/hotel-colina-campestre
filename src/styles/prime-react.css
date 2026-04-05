@@ -320,14 +320,6 @@ main {
   position: relative !important;
 }
 
-/* Evitar scroll duplicado en el contenedor principal */
-body {
-  overflow: hidden !important;
-}
-
-html {
-  overflow: hidden !important;
-}
 
 .p-inputtextarea {
   border: 1px solid var(--hotel-border) !important;
