@@ -45,7 +45,8 @@ export const useRooms = (category?: string) => {
       roomsApi.updateRoomStatus(
         roomId,
         statusId,
-        observation || `Cambio de estado manual a ${actionType} para el día ${statusDate || dayjs().format("YYYY-MM-DD")}`,
+        observation ||
+          `Cambio de estado manual a ${actionType} para el día ${statusDate || dayjs().format("YYYY-MM-DD")}`,
         actionType,
         employeeId,
         statusDate,

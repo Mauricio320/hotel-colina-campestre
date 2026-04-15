@@ -1,6 +1,5 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
-import { ContactoSection } from "./components/ContactoSection";
 import { FotosSection } from "./components/FotosSection";
 import { HotelAboutSection } from "./components/HotelAboutSection";
 import { HotelHeroSection } from "./components/HotelHeroSection";
@@ -8,13 +7,60 @@ import { Navigation } from "./components/Navigation";
 import { ScrollReveal } from "./components/ScrollReveal";
 import { ServicesSection } from "./components/ServicesSection";
 import { TurismoSection } from "./components/TurismoSection";
-import { hotelHeroContent, hotelServices } from "./landingData";
+import { useAllLandingSections, useAllLandingImages } from "@/hooks/useLandingPageCms";
+import {
+  HeroContent,
+  AboutContent,
+  ServicesContent,
+  GalleryContent,
+  TourismContent,
+  ContactContent,
+  SectionContent,
+} from "@/types/landingPage";
+
+const ContactoSection = lazy(() =>
+  import("./components/ContactoSection").then((m) => ({ default: m.ContactoSection }))
+);
 
 export const LandingPage = () => {
   const location = useLocation();
 
+  const { data: sections = [], isLoading: sectionsLoading } = useAllLandingSections();
+  const { data: imagesBySection, isLoading: imagesLoading } = useAllLandingImages();
+
+  const sectionMap = useMemo(() => {
+    const map = new Map<string, SectionContent>();
+    for (const section of sections) {
+      map.set(section.section.section_type, section);
+    }
+    return map;
+  }, [sections]);
+
+  const dbHero = sectionMap.get("hero")?.content as HeroContent | undefined;
+  const aboutContent = sectionMap.get("about")?.content as AboutContent | undefined;
+  const servicesContent = sectionMap.get("services")?.content as ServicesContent | undefined;
+  const galleryContent = sectionMap.get("gallery")?.content as GalleryContent | undefined;
+  const tourismContent = sectionMap.get("tourism")?.content as TourismContent | undefined;
+  const contactContent = sectionMap.get("contact")?.content as ContactContent | undefined;
+
+  const heroImages = imagesBySection?.hero ?? [];
+  const aboutImages = imagesBySection?.about ?? [];
+  const servicesImages = imagesBySection?.services ?? [];
+  const galleryImages = imagesBySection?.gallery ?? [];
+  const tourismImages = imagesBySection?.tourism ?? [];
+
+  const heroContent = {
+    title: dbHero?.title ?? "",
+    subtitle: dbHero?.subtitle ?? "",
+    cta_text: dbHero?.cta_text ?? "",
+    cta_link: dbHero?.cta_link ?? "",
+    background_images: heroImages.map((img) => img.public_url),
+  };
+
+  const hasHeroContent = Boolean(dbHero?.title || dbHero?.subtitle || heroImages.length > 0);
+  const heroReady = !sectionsLoading && !imagesLoading;
+
   useEffect(() => {
-    // Check if we should scroll to a specific section
     const state = location.state as { scrollTo?: string } | null;
     if (state?.scrollTo) {
       const element = document.getElementById(state.scrollTo);
@@ -23,7 +69,6 @@ export const LandingPage = () => {
           element.scrollIntoView({ behavior: "smooth" });
         }, 100);
       }
-      // Clear the state to prevent scrolling on page refresh
       window.history.replaceState({}, document.title);
     }
   }, [location]);
@@ -32,27 +77,29 @@ export const LandingPage = () => {
     <div id="inicio" className="min-h-screen overflow-x-hidden bg-[#faf9f6]">
       <Navigation />
 
-      <main>
-        <HotelHeroSection content={hotelHeroContent} />
+      <main className="main-lagingPage">
+        {heroReady && hasHeroContent && <HotelHeroSection content={heroContent} />}
 
         <ScrollReveal variant="fade-up">
-          <HotelAboutSection />
+          <HotelAboutSection content={aboutContent} images={aboutImages} />
         </ScrollReveal>
 
         <ScrollReveal variant="fade-up" delay={100}>
-          <ServicesSection services={hotelServices} />
+          <ServicesSection content={servicesContent} images={servicesImages} />
         </ScrollReveal>
 
         <ScrollReveal variant="fade-up">
-          <FotosSection />
+          <FotosSection content={galleryContent} images={galleryImages} />
         </ScrollReveal>
 
         <ScrollReveal variant="slide-left">
-          <TurismoSection />
+          <TurismoSection content={tourismContent} images={tourismImages} />
         </ScrollReveal>
 
         <ScrollReveal variant="fade-up">
-          <ContactoSection />
+          <Suspense fallback={<div className="h-[520px]" />}>
+            <ContactoSection content={contactContent} />
+          </Suspense>
         </ScrollReveal>
       </main>
     </div>

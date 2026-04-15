@@ -1,13 +1,13 @@
-import { useEditor } from '@craftjs/core';
-import { Tooltip } from '@mui/material';
-import cx from 'classnames';
-import React from 'react';
-import { styled } from 'styled-components';
+import { useEditor } from "@craftjs/core";
+import { Tooltip } from "@mui/material";
+import cx from "classnames";
+import React from "react";
+import { styled } from "styled-components";
 
-import Checkmark from '../../../public/icons/check.svg';
-import Customize from '../../../public/icons/customize.svg';
-import RedoSvg from '../../../public/icons/toolbox/redo.svg';
-import UndoSvg from '../../../public/icons/toolbox/undo.svg';
+import Checkmark from "../../../public/icons/check.svg";
+import Customize from "../../../public/icons/customize.svg";
+import RedoSvg from "../../../public/icons/toolbox/redo.svg";
+import UndoSvg from "../../../public/icons/toolbox/undo.svg";
 
 const HeaderDiv = styled.div`
   width: 100%;
@@ -59,10 +59,10 @@ export const Header = () => {
   }));
 
   return (
-    <HeaderDiv className="header text-white transition w-full">
-      <div className="items-center flex w-full px-4 justify-end">
+    <HeaderDiv className="header w-full text-white transition">
+      <div className="flex w-full items-center justify-end px-4">
         {enabled && (
-          <div className="flex-1 flex">
+          <div className="flex flex-1">
             <Tooltip title="Undo" placement="bottom">
               <Item disabled={!canUndo} onClick={() => actions.history.undo()}>
                 <UndoSvg />
@@ -78,22 +78,18 @@ export const Header = () => {
         <div className="flex">
           <Btn
             className={cx([
-              'transition cursor-pointer',
+              "cursor-pointer transition",
               {
-                'bg-green-400': enabled,
-                'bg-primary': !enabled,
+                "bg-green-400": enabled,
+                "bg-primary": !enabled,
               },
             ])}
             onClick={() => {
               actions.setOptions((options) => (options.enabled = !enabled));
             }}
           >
-            {enabled ? (
-              <Checkmark viewBox="-3 -3 20 20" />
-            ) : (
-              <Customize viewBox="2 0 16 16" />
-            )}
-            {enabled ? 'Finish Editing' : 'Edit'}
+            {enabled ? <Checkmark viewBox="-3 -3 20 20" /> : <Customize viewBox="2 0 16 16" />}
+            {enabled ? "Finish Editing" : "Edit"}
           </Btn>
         </div>
       </div>

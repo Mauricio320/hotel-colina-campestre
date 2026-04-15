@@ -28,7 +28,6 @@ export const attractionItemSchema = z.object({
   name: z.string().min(1, "El nombre es requerido").max(100, "Máximo 100 caracteres"),
   description: z.string().max(500, "Máximo 500 caracteres"),
   image: z.string().url("Debe ser una URL válida"),
-  distance_km: z.number().min(0, "La distancia debe ser positiva"),
 });
 
 export const photoItemSchema = z.object({

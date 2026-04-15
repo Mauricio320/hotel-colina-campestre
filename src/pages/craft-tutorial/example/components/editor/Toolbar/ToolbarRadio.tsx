@@ -1,5 +1,5 @@
-import { FormControlLabel, Radio } from '@mui/material';
-import React from 'react';
+import { FormControlLabel, Radio } from "@mui/material";
+import React from "react";
 
 // Inspired by blueprintjs
 function StyledRadio(props) {
@@ -9,8 +9,8 @@ function StyledRadio(props) {
       color="default"
       size="small"
       sx={{
-        '&.Mui-checked': {
-          color: 'rgb(19, 115, 230)',
+        "&.Mui-checked": {
+          color: "rgb(19, 115, 230)",
         },
       }}
       {...props}
@@ -19,7 +19,5 @@ function StyledRadio(props) {
 }
 
 export const ToolbarRadio = ({ value, label }: any) => {
-  return (
-    <FormControlLabel value={value} control={<StyledRadio />} label={label} />
-  );
+  return <FormControlLabel value={value} control={<StyledRadio />} label={label} />;
 };

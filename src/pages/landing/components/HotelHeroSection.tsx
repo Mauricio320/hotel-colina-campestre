@@ -1,19 +1,20 @@
 import { useState, useCallback, useEffect } from "react";
-import { HotelContent } from "@/types/landingPage";
 import { Button } from "primereact/button";
 
+interface HeroSectionContent {
+  title: string;
+  subtitle: string;
+  cta_text: string;
+  cta_link: string;
+  background_images: string[];
+}
+
 interface HotelHeroSectionProps {
-  content: HotelContent["hero"];
+  content: HeroSectionContent;
 }
 
 export const HotelHeroSection = ({ content }: HotelHeroSectionProps) => {
-  const images =
-    content?.background_images && content.background_images.length > 0
-      ? content.background_images
-      : [
-          content?.background_image ||
-            "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920",
-        ];
+  const images = content?.background_images?.length ? content.background_images : [];
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -38,11 +39,33 @@ export const HotelHeroSection = ({ content }: HotelHeroSectionProps) => {
     goTo(newIndex);
   }, [currentIndex, images.length, goTo]);
 
-  // Auto-advance every 5 seconds
   useEffect(() => {
     if (images.length <= 1) return;
-    const timer = setInterval(goToNext, 5000);
-    return () => clearInterval(timer);
+    let timer: number | undefined;
+
+    const start = () => {
+      if (timer) return;
+      timer = window.setInterval(goToNext, 5000);
+    };
+    const stop = () => {
+      if (timer) {
+        clearInterval(timer);
+        timer = undefined;
+      }
+    };
+
+    const handleVisibility = () => {
+      if (document.hidden) stop();
+      else start();
+    };
+
+    start();
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [goToNext, images.length]);
 
   return (
@@ -50,13 +73,15 @@ export const HotelHeroSection = ({ content }: HotelHeroSectionProps) => {
       id="hotel"
       className="relative flex min-h-[calc(100dvh-72px)] items-center overflow-hidden pt-20"
     >
-      {/* Background Images */}
       <div className="absolute inset-0 z-0">
         {images.map((src, index) => (
           <img
             key={src}
             src={src}
             alt="Hotel Colina Campestre"
+            loading={index === 0 ? "eager" : "lazy"}
+            fetchPriority={index === 0 ? "high" : "low"}
+            decoding={index === 0 ? "sync" : "async"}
             className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-600 ${
               index === currentIndex ? "opacity-100" : "opacity-0"
             }`}
@@ -65,27 +90,31 @@ export const HotelHeroSection = ({ content }: HotelHeroSectionProps) => {
         <div className="absolute inset-0 bg-black/30" />
       </div>
 
-      {/* Content */}
       <div className="relative z-10 mx-auto w-full max-w-7xl px-8">
         <div className="max-w-2xl rounded-xl border border-white/10 bg-[#faf9f6]/10 p-10 backdrop-blur-md">
-          <h1 className="mb-6 text-5xl leading-tight font-extrabold tracking-tighter text-white md:text-6xl">
-            {content?.title || "Hotel ideal para familias, turistas y viajeros de negocios"}
-          </h1>
-          <p className="mb-8 text-lg font-light text-white/90">
-            {content?.subtitle ||
-              "Experimente la serenidad de nuestro refugio campestre con todas las comodidades de la ciudad."}
-          </p>
-          <Button
-            unstyled
-            label={content?.cta_text || "Reservar ahora"}
-            icon="pi pi-arrow-right"
-            className="flex items-center gap-2 rounded-full bg-[#006948] px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:opacity-90"
-            onClick={() => (window.location.href = content?.cta_link || "/reservar")}
-          />
+          {content?.title && (
+            <h1 className="mb-6 text-5xl leading-tight font-extrabold tracking-tighter text-white md:text-6xl">
+              {content.title}
+            </h1>
+          )}
+          {content?.subtitle && (
+            <p className="mb-8 text-lg font-light text-white/90">{content.subtitle}</p>
+          )}
+          {content?.cta_text && (
+            <Button
+              unstyled
+              label={content.cta_text}
+              icon="pi pi-arrow-right"
+              className="flex items-center gap-2 rounded-full bg-[#006948] px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:opacity-90"
+              onClick={() => {
+                if (content.cta_link)
+                  window.open(content.cta_link, "_blank", "noopener,noreferrer");
+              }}
+            />
+          )}
         </div>
       </div>
 
-      {/* Gallery Navigation Buttons */}
       {images.length > 1 && (
         <>
           <button

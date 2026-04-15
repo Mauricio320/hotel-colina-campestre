@@ -35,7 +35,6 @@ const AdminAuthorizationModal: React.FC<AdminAuthorizationModalProps> = ({
     );
   }, [adminList]);
 
-
   const handleConfirm = async () => {
     if (!selectedAdmin) {
       setError("Seleccione un administrador");

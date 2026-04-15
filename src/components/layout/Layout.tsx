@@ -88,12 +88,12 @@ const Layout: React.FC<LayoutProps> = ({ employee, onLogout }) => {
       path: "/settings",
       roles: [Role.Admin],
     },
-    // {
-    //   label: "Landing Page",
-    //   icon: "pi pi-globe",
-    //   path: "/landing-editor",
-    //   roles: [Role.Admin],
-    // },
+    {
+      label: "Landing Page",
+      icon: "pi pi-globe",
+      path: "/admin/landing-page",
+      roles: [Role.Admin],
+    },
     {
       label: "Mis Datos",
       icon: "pi pi-user",

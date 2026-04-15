@@ -16,10 +16,13 @@ export const useSettings = () => {
     enabled: true,
   });
 
-  const settings = useMemo(() => ({
-    iva: settingsData?.find((s) => s.key === "iva_percentage")?.value || 19,
-    mat: settingsData?.find((s) => s.key === "extra_mattress_price")?.value || 30000,
-  }), [settingsData]);
+  const settings = useMemo(
+    () => ({
+      iva: settingsData?.find((s) => s.key === "iva_percentage")?.value || 19,
+      mat: settingsData?.find((s) => s.key === "extra_mattress_price")?.value || 30000,
+    }),
+    [settingsData]
+  );
 
   const updateSettingMutation = useMutation({
     mutationFn: ({ key, value }: { key: string; value: number }) => updateSetting(key, value),

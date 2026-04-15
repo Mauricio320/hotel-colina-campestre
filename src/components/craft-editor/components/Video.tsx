@@ -20,7 +20,9 @@ const VideoSettings = () => {
   const getEmbedUrl = (url: string, type: string, autoplay: boolean) => {
     let embedUrl = url;
     if (type === "youtube") {
-      const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s]+)/)?.[1];
+      const videoId = url.match(
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s]+)/
+      )?.[1];
       if (videoId) {
         embedUrl = `https://www.youtube.com/embed/${videoId}${autoplay ? "?autoplay=1" : ""}`;
       }
@@ -133,7 +135,12 @@ export const Video = (props: VideoProps) => {
   };
 
   return (
-    <div ref={(ref) => { connect(drag(ref)); }} style={{ width: mergedProps.width }}>
+    <div
+      ref={(ref) => {
+        connect(drag(ref));
+      }}
+      style={{ width: mergedProps.width }}
+    >
       {mergedProps.type === "direct" ? (
         <video
           src={getEmbedUrl()}
@@ -165,7 +172,7 @@ export const Video = (props: VideoProps) => {
 
 Video.craft = {
   displayName: "Video",
-  
+
   props: defaultProps,
   rules: {
     canDrag: true,

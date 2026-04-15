@@ -63,7 +63,9 @@ const ImageSettings = () => {
         <label className="text-sm font-medium text-gray-700">Ajuste de imagen</label>
         <select
           value={props.objectFit}
-          onChange={(e) => setProp((p: ImageProps) => (p.objectFit = e.target.value as ImageProps["objectFit"]))}
+          onChange={(e) =>
+            setProp((p: ImageProps) => (p.objectFit = e.target.value as ImageProps["objectFit"]))
+          }
           className="mt-1 w-full rounded border p-2 text-sm"
         >
           <option value="cover">Cover (cubrir)</option>
@@ -97,7 +99,9 @@ export const Image = (props: ImageProps) => {
 
   return (
     <img
-      ref={(ref) => { connect(drag(ref)); }}
+      ref={(ref) => {
+        connect(drag(ref));
+      }}
       src={mergedProps.src}
       alt={mergedProps.alt}
       style={{
@@ -113,7 +117,7 @@ export const Image = (props: ImageProps) => {
 
 Image.craft = {
   displayName: "Imagen",
-  
+
   props: defaultProps,
   rules: {
     canDrag: true,

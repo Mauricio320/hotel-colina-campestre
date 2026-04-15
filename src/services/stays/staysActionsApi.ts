@@ -96,7 +96,8 @@ export const staysActionsApi = {
         action_type:
           paymentType === PaymentType.ABONO_RESERVA ? "ABONO-RESERVA" : "PAGO-COMPLETO-RESERVA",
         observation:
-          observation || `${paymentType}: ${amount.toLocaleString()} de ${totalPrice.toLocaleString()}`,
+          observation ||
+          `${paymentType}: ${amount.toLocaleString()} de ${totalPrice.toLocaleString()}`,
       });
     }
 
@@ -272,7 +273,9 @@ export const staysActionsApi = {
     const finalObservation =
       `Check-out realizado${finalPayment > 0 ? ". Pago final: $" + finalPayment.toLocaleString() : ""}${observation ? ". " + observation : ""}`.trim();
 
-    const keyId = accommodationTypeId ? { accommodation_type_id: accommodationTypeId } : { room_id: roomId };
+    const keyId = accommodationTypeId
+      ? { accommodation_type_id: accommodationTypeId }
+      : { room_id: roomId };
 
     const { error: historyError } = await supabase.from("room_history").insert({
       ...keyId,

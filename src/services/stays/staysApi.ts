@@ -201,7 +201,9 @@ export const staysApi = {
       .gt("check_out_date", checkInDate);
 
     if (roomIds.length > 0) {
-      query = query.or(`room_id.in.(${roomIds.join(",")}),accommodation_type_id.eq.${accommodationTypeId}`);
+      query = query.or(
+        `room_id.in.(${roomIds.join(",")}),accommodation_type_id.eq.${accommodationTypeId}`
+      );
     } else {
       query = query.eq("accommodation_type_id", accommodationTypeId);
     }

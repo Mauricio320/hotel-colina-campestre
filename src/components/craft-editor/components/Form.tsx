@@ -63,7 +63,11 @@ const FormSettings = () => {
     }));
   };
 
-  const updateField = (fieldId: string, field: keyof FormProps["fields"][0], value: string | boolean) => {
+  const updateField = (
+    fieldId: string,
+    field: keyof FormProps["fields"][0],
+    value: string | boolean
+  ) => {
     setProp((p: FormProps) => ({
       ...p,
       fields: p.fields.map((f) => (f.id === fieldId ? { ...f, [field]: value } : f)),
@@ -198,7 +202,9 @@ export const Form = (props: FormProps) => {
   if (submitted) {
     return (
       <div
-        ref={(ref) => { connect(drag(ref)); }}
+        ref={(ref) => {
+          connect(drag(ref));
+        }}
         style={{
           padding: "32px",
           backgroundColor: "#f0fdf4",
@@ -216,7 +222,9 @@ export const Form = (props: FormProps) => {
 
   return (
     <div
-      ref={(ref) => { connect(drag(ref)); }}
+      ref={(ref) => {
+        connect(drag(ref));
+      }}
       style={{
         padding: "32px",
         backgroundColor: "#ffffff",
@@ -225,11 +233,16 @@ export const Form = (props: FormProps) => {
       }}
     >
       {mergedProps.title && (
-        <h3 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "24px", color: "#1f2937" }}>
+        <h3
+          style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "24px", color: "#1f2937" }}
+        >
           {mergedProps.title}
         </h3>
       )}
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+      >
         {mergedProps.fields.map((field) => (
           <div key={field.id}>
             <label
@@ -296,7 +309,7 @@ export const Form = (props: FormProps) => {
 
 Form.craft = {
   displayName: "Formulario",
-  
+
   props: defaultProps,
   rules: {
     canDrag: true,

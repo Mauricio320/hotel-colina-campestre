@@ -1,50 +1,56 @@
-/**
- * Landing Page Admin Layout
- *
- * Admin panel for editing landing page sections.
- */
-
 import { useState } from "react";
 import { TabMenu } from "primereact/tabmenu";
-import { HotelEditor } from "./components/HotelEditor";
-import { ComfaboyEditor } from "./components/ComfaboyEditor";
-import { TurismoEditor } from "./components/TurismoEditor";
-import { FotosEditor } from "./components/FotosEditor";
-import { ContactoEditor } from "./components/ContactoEditor";
+import PageHeader from "@/components/ui/PageHeader";
+import { HeroEditor } from "./components/HeroEditor";
+import { AboutEditor } from "./components/AboutEditor";
+import { ServicesEditor } from "./components/ServicesEditor";
+import { GalleryEditor } from "./components/GalleryEditor";
+import { TourismEditor } from "./components/TourismEditor";
+import { ContactEditor } from "./components/ContactEditor";
+import { SectionType } from "@/types/landingPage";
 
-type SectionTab = "hotel" | "comfaboy" | "turismo" | "fotos" | "contacto";
+type SectionTab = SectionType;
 
 export const LandingPageAdmin = () => {
-  const [activeTab, setActiveTab] = useState<SectionTab>("hotel");
+  const [activeTab, setActiveTab] = useState<SectionTab>("hero");
 
-  const tabs = [
-    { label: "Hotel", icon: "pi pi-home", value: "hotel" as SectionTab },
-    { label: "Comfaboy", icon: "pi pi-users", value: "comfaboy" as SectionTab },
-    { label: "Turismo", icon: "pi pi-map", value: "turismo" as SectionTab },
-    { label: "Fotos", icon: "pi pi-images", value: "fotos" as SectionTab },
-    { label: "Contacto", icon: "pi pi-envelope", value: "contacto" as SectionTab },
+  const tabs: { label: string; icon: string; value: SectionTab }[] = [
+    { label: "Hero", icon: "pi pi-home", value: "hero" },
+    { label: "Acerca de", icon: "pi pi-info-circle", value: "about" },
+    { label: "Servicios", icon: "pi pi-star", value: "services" },
+    { label: "Galería", icon: "pi pi-images", value: "gallery" },
+    { label: "Turismo", icon: "pi pi-map", value: "tourism" },
+    { label: "Contacto", icon: "pi pi-envelope", value: "contact" },
   ];
 
   const renderEditor = () => {
     switch (activeTab) {
-      case "hotel":
-        return <HotelEditor />;
-      case "comfaboy":
-        return <ComfaboyEditor />;
-      case "turismo":
-        return <TurismoEditor />;
-      case "fotos":
-        return <FotosEditor />;
-      case "contacto":
-        return <ContactoEditor />;
+      case "hero":
+        return <HeroEditor />;
+      case "about":
+        return <AboutEditor />;
+      case "services":
+        return <ServicesEditor />;
+      case "gallery":
+        return <GalleryEditor />;
+      case "tourism":
+        return <TourismEditor />;
+      case "contact":
+        return <ContactEditor />;
       default:
-        return <HotelEditor />;
+        return <HeroEditor />;
     }
   };
 
   return (
-    <div className="p-6">
-      <h1 className="mb-6 text-3xl font-bold text-[#1a1c1a]">Configurar Landing Page</h1>
+    <div className="animate-fade-in flex flex-col gap-6 p-6">
+      <PageHeader
+        variant="simple"
+        title="Landing Page"
+        subtitle="Configura el contenido público del sitio"
+        icon="pi-globe"
+        color="emerald"
+      />
 
       <TabMenu
         model={tabs.map((tab) => ({
@@ -55,7 +61,7 @@ export const LandingPageAdmin = () => {
         activeIndex={tabs.findIndex((t) => t.value === activeTab)}
       />
 
-      <div className="mt-6">{renderEditor()}</div>
+      <div>{renderEditor()}</div>
     </div>
   );
 };

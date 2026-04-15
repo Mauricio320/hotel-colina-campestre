@@ -2,10 +2,7 @@ import { CalendarMobile } from "@/components/calendar/CalendarMobile";
 import { useBlockUI } from "@/context/BlockUIContext";
 import { RoomsQueryAndStayCategory } from "@/hooks/useRooms";
 import { AccommodationType, Room, RoomStatus, Stay } from "@/types";
-import {
-  RoomActionEnum,
-  RoomStatusEnum,
-} from "@/util/enums/status-rooms.enum";
+import { RoomActionEnum, RoomStatusEnum } from "@/util/enums/status-rooms.enum";
 import dayjs from "dayjs";
 import React, { useEffect } from "react";
 

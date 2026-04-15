@@ -1,167 +1,162 @@
-/**
- * Landing Page API Service
- *
- * Service layer for interacting with Supabase for landing page data.
- * Follows the 3-layer architecture: Service -> Hook -> Component
- */
-
 import { supabase } from "@/config/supabase";
 import {
   LandingPageSection,
   LandingPageContent,
   SectionContent,
   SectionType,
-  HotelContent,
-  ComfaboyContent,
-  TurismoContent,
-  FotosContent,
-  ContactoContent,
+  HeroContent,
+  AboutContent,
+  ServicesContent,
+  GalleryContent,
+  TourismContent,
+  ContactContent,
   UploadImageResult,
+  LandingPageImage,
+  SaveImageParams,
+  UpdateLandingImageParams,
 } from "@/types/landingPage";
 
-// Default content for each section type
 const getDefaultContent = (
   sectionType: SectionType
-): HotelContent | ComfaboyContent | TurismoContent | FotosContent | ContactoContent => {
+):
+  | HeroContent
+  | AboutContent
+  | ServicesContent
+  | GalleryContent
+  | TourismContent
+  | ContactContent => {
   switch (sectionType) {
-    case "hotel":
-      return {
-        hero: {
-          title: "",
-          subtitle: "",
-          background_image: "",
-          cta_text: "Reservar ahora",
-          cta_link: "/reservar",
-        },
-        about: {
-          label: "Nuestra Esencia",
-          title: "",
-          description_1: "",
-          description_2: "",
-          image_1: "",
-        },
-        services: { title: "Servicios Exclusivos", items: [] },
-      } as HotelContent;
-    case "comfaboy":
-      return {
-        hero: { title: "", background_image: "" },
-        description: "",
-        benefits: [],
-      } as ComfaboyContent;
-    case "turismo":
+    case "hero":
       return {
         title: "",
         subtitle: "",
-        attractions: [],
-      } as TurismoContent;
-    case "fotos":
+        cta_text: "Reservar ahora",
+        cta_link: "/reservar",
+      } as HeroContent;
+    case "about":
       return {
-        title: "",
-        photos: [],
-      } as FotosContent;
-    case "contacto":
-      return {
+        label: "Nuestra Esencia",
         title: "",
         description: "",
-        map_embed_url: "",
-        contact_info: { address: "", phone: "", email: "", hours: "" },
-        form_enabled: true,
-      } as ContactoContent;
+        cta_text: "Reservar Apartamento",
+        cta_link: "/reservar",
+        features: [],
+        gallery_items: [],
+      } as AboutContent;
+    case "services":
+      return {
+        title: "Nuestros Servicios",
+        description: "",
+        featured_image_slot: "comfaboy_featured",
+        featured_alt: "Convenio Comfaboy",
+        items: [],
+      } as ServicesContent;
+    case "gallery":
+      return {
+        title: "Galería de Fotos",
+        description: "",
+        featured_slots: [],
+      } as GalleryContent;
+    case "tourism":
+      return { title: "", subtitle: "", attractions: [] } as TourismContent;
+    case "contact":
+      return {
+        title: "Contacto",
+        description: "",
+        address: "",
+        phone1: "",
+        phone2: "",
+        email: "",
+        hours: "",
+        whatsapp: "",
+        map_lat: 0,
+        map_lng: 0,
+      } as ContactContent;
     default:
-      return {} as HotelContent;
+      return {} as HeroContent;
   }
 };
 
-/**
- * Parse content JSON based on section type
- */
 const parseContent = (
   sectionType: SectionType,
   contentJson: Record<string, unknown>
-): HotelContent | ComfaboyContent | TurismoContent | FotosContent | ContactoContent => {
+):
+  | HeroContent
+  | AboutContent
+  | ServicesContent
+  | GalleryContent
+  | TourismContent
+  | ContactContent => {
   if (!contentJson || Object.keys(contentJson).length === 0) {
     return getDefaultContent(sectionType);
   }
   return contentJson as unknown as
-    | HotelContent
-    | ComfaboyContent
-    | TurismoContent
-    | FotosContent
-    | ContactoContent;
+    | HeroContent
+    | AboutContent
+    | ServicesContent
+    | GalleryContent
+    | TourismContent
+    | ContactContent;
 };
 
 export const landingPageApi = {
-  /**
-   * Fetch all landing page sections with their content
-   */
   fetchAllSections: async (): Promise<SectionContent[]> => {
     const { data, error } = await supabase
       .from("landing_page_sections")
-      .select(
-        `
-        *,
-        landing_page_content!inner(*)
-      `
-      )
+      .select(`*, landing_page_content!inner(*)`)
       .eq("is_active", true)
       .order("display_order", { ascending: true });
 
-    if (error) {
-      console.error("Error fetching landing page sections:", error);
-      throw new Error(`Failed to fetch sections: ${error.message}`);
-    }
-
+    if (error) throw new Error(`Failed to fetch sections: ${error.message}`);
     if (!data) return [];
 
-    return data.map((item: LandingPageSection & { landing_page_content: LandingPageContent[] }) => {
-      const content = item.landing_page_content?.[0];
-      const sectionType = item.section_type as SectionType;
-      return {
-        section: {
-          id: item.id,
-          section_type: sectionType,
-          is_active: item.is_active,
-          display_order: item.display_order,
-          created_at: item.created_at,
-          updated_at: item.updated_at,
-        },
-        content: content
-          ? parseContent(sectionType, content.content_json)
-          : getDefaultContent(sectionType),
-        lastEditedBy: content?.last_edited_by,
-        updatedAt: content?.updated_at || item.updated_at,
-      };
-    });
+    return data.map(
+      (
+        item: LandingPageSection & {
+          landing_page_content: LandingPageContent | LandingPageContent[] | null;
+        }
+      ) => {
+        const rawContent = item.landing_page_content;
+        const content = Array.isArray(rawContent) ? rawContent[0] : rawContent;
+        const sectionType = item.section_type as SectionType;
+        return {
+          section: {
+            id: item.id,
+            section_type: sectionType,
+            is_active: item.is_active,
+            display_order: item.display_order,
+            created_at: item.created_at,
+            updated_at: item.updated_at,
+          },
+          content: content
+            ? parseContent(sectionType, content.content_json)
+            : getDefaultContent(sectionType),
+          lastEditedBy: content?.last_edited_by,
+          updatedAt: content?.updated_at || item.updated_at,
+        };
+      }
+    );
   },
 
-  /**
-   * Fetch a single section by type
-   */
   fetchSection: async (sectionType: SectionType): Promise<SectionContent | null> => {
     const { data, error } = await supabase
       .from("landing_page_sections")
-      .select(
-        `
-        *,
-        landing_page_content!inner(*)
-      `
-      )
+      .select(`*, landing_page_content(*)`)
       .eq("section_type", sectionType)
       .single();
 
     if (error) {
-      if (error.code === "PGRST116") {
-        // No rows returned
-        return null;
-      }
-      console.error(`Error fetching section ${sectionType}:`, error);
+      if (error.code === "PGRST116") return null;
       throw new Error(`Failed to fetch section: ${error.message}`);
     }
-
     if (!data) return null;
 
-    const content = (data as LandingPageSection & { landing_page_content: LandingPageContent[] })
-      .landing_page_content?.[0];
+    const rawContent = (
+      data as LandingPageSection & {
+        landing_page_content: LandingPageContent | LandingPageContent[] | null;
+      }
+    ).landing_page_content;
+    const content = Array.isArray(rawContent) ? rawContent[0] : rawContent;
 
     return {
       section: {
@@ -180,15 +175,11 @@ export const landingPageApi = {
     };
   },
 
-  /**
-   * Update section content
-   */
   updateSection: async (
     sectionType: SectionType,
     content: unknown,
     employeeId: string
   ): Promise<LandingPageContent> => {
-    // First, get the section ID
     const { data: sectionData, error: sectionError } = await supabase
       .from("landing_page_sections")
       .select("id")
@@ -199,7 +190,6 @@ export const landingPageApi = {
       throw new Error(`Section ${sectionType} not found`);
     }
 
-    // Upsert the content
     const { data, error } = await supabase
       .from("landing_page_content")
       .upsert(
@@ -214,17 +204,92 @@ export const landingPageApi = {
       .select()
       .single();
 
-    if (error) {
-      console.error(`Error updating section ${sectionType}:`, error);
-      throw new Error(`Failed to update section: ${error.message}`);
-    }
-
+    if (error) throw new Error(`Failed to update section: ${error.message}`);
     return data;
   },
 
-  /**
-   * Upload image to storage
-   */
+  fetchImages: async (sectionType: SectionType): Promise<LandingPageImage[]> => {
+    const { data, error } = await supabase
+      .from("landing_page_images")
+      .select("*, section:landing_page_sections!inner(section_type)")
+      .eq("section.section_type", sectionType)
+      .order("display_order", { ascending: true });
+
+    if (error) throw new Error(`Failed to fetch images: ${error.message}`);
+    return (data as LandingPageImage[]) || [];
+  },
+
+  fetchAllImagesGrouped: async (): Promise<Record<SectionType, LandingPageImage[]>> => {
+    const { data, error } = await supabase
+      .from("landing_page_images")
+      .select("*, section:landing_page_sections!inner(section_type)")
+      .order("display_order", { ascending: true });
+
+    if (error) throw new Error(`Failed to fetch images: ${error.message}`);
+
+    const grouped: Record<SectionType, LandingPageImage[]> = {
+      hero: [],
+      about: [],
+      services: [],
+      gallery: [],
+      tourism: [],
+      contact: [],
+    };
+
+    for (const row of (data ?? []) as (LandingPageImage & {
+      section: { section_type: SectionType };
+    })[]) {
+      const type = row.section.section_type;
+      if (grouped[type]) grouped[type].push(row);
+    }
+
+    return grouped;
+  },
+
+  saveImage: async (params: SaveImageParams): Promise<LandingPageImage> => {
+    const { data, error } = await supabase
+      .from("landing_page_images")
+      .insert({
+        section_id: params.section_id,
+        storage_path: params.storage_path,
+        public_url: params.public_url,
+        alt_text: params.alt_text,
+        title: params.title,
+        description: params.description,
+        category: params.category,
+        badge: params.badge,
+        featured: params.featured ?? false,
+        slot: params.slot,
+        display_order: params.display_order ?? 0,
+      })
+      .select()
+      .single();
+
+    if (error) throw new Error(`Failed to save image: ${error.message}`);
+    return data as LandingPageImage;
+  },
+
+  deleteImageRecord: async (id: string): Promise<void> => {
+    const { error } = await supabase.from("landing_page_images").delete().eq("id", id);
+    if (error) throw new Error(`Failed to delete image record: ${error.message}`);
+  },
+
+  updateImage: async (params: UpdateLandingImageParams): Promise<LandingPageImage> => {
+    const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    if (params.alt_text !== undefined) patch.alt_text = params.alt_text;
+    if (params.category !== undefined) patch.category = params.category;
+
+    const { data, error } = await supabase
+      .from("landing_page_images")
+      .update(patch)
+      .eq("id", params.id)
+      .select()
+      .single();
+
+    if (error) throw new Error(`Failed to update image: ${error.message}`);
+    return data as LandingPageImage;
+  },
+
   uploadImage: async (file: File, sectionType: SectionType): Promise<UploadImageResult> => {
     const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -232,47 +297,26 @@ export const landingPageApi = {
 
     const { error: uploadError } = await supabase.storage
       .from("landing-page-images")
-      .upload(filePath, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
+      .upload(filePath, file, { cacheControl: "3600", upsert: false });
 
-    if (uploadError) {
-      console.error("Error uploading image:", uploadError);
-      throw new Error(`Failed to upload image: ${uploadError.message}`);
-    }
+    if (uploadError) throw new Error(`Failed to upload image: ${uploadError.message}`);
 
-    // Get public URL
     const {
       data: { publicUrl },
     } = supabase.storage.from("landing-page-images").getPublicUrl(filePath);
 
-    return {
-      url: publicUrl,
-      path: filePath,
-    };
+    return { url: publicUrl, path: filePath };
   },
 
-  /**
-   * Delete image from storage
-   */
   deleteImage: async (path: string): Promise<void> => {
     const { error } = await supabase.storage.from("landing-page-images").remove([path]);
-
-    if (error) {
-      console.error("Error deleting image:", error);
-      throw new Error(`Failed to delete image: ${error.message}`);
-    }
+    if (error) throw new Error(`Failed to delete image: ${error.message}`);
   },
 
-  /**
-   * Get public URL for an image path
-   */
   getImageUrl: (path: string): string => {
     const {
       data: { publicUrl },
     } = supabase.storage.from("landing-page-images").getPublicUrl(path);
-
     return publicUrl;
   },
 };

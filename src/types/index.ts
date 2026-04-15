@@ -338,19 +338,19 @@ export interface ContainerProps {
   width?: string;
   maxWidth?: string;
   minHeight?: string;
-  flexDirection?: 'row' | 'column';
-  justifyContent?: 'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around';
-  alignItems?: 'flex-start' | 'center' | 'flex-end' | 'stretch';
+  flexDirection?: "row" | "column";
+  justifyContent?: "flex-start" | "center" | "flex-end" | "space-between" | "space-around";
+  alignItems?: "flex-start" | "center" | "flex-end" | "stretch";
   gap?: number;
 }
 
 export interface TextProps {
   text: string;
-  tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
+  tag: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" | "span";
   fontSize?: number;
   fontWeight?: string;
   color?: string;
-  textAlign?: 'left' | 'center' | 'right' | 'justify';
+  textAlign?: "left" | "center" | "right" | "justify";
   lineHeight?: number;
   margin?: number;
 }
@@ -360,7 +360,7 @@ export interface ImageProps {
   alt: string;
   width?: string;
   height?: string;
-  objectFit?: 'cover' | 'contain' | 'fill' | 'none';
+  objectFit?: "cover" | "contain" | "fill" | "none";
   borderRadius?: number;
 }
 
@@ -372,9 +372,9 @@ export interface HeroProps {
   textColor?: string;
   ctaText?: string;
   ctaUrl?: string;
-  ctaVariant?: 'primary' | 'secondary' | 'outline';
+  ctaVariant?: "primary" | "secondary" | "outline";
   minHeight?: string;
-  textAlign?: 'left' | 'center' | 'right';
+  textAlign?: "left" | "center" | "right";
   overlayOpacity?: number;
 }
 
@@ -402,10 +402,10 @@ export interface GalleryProps {
 export interface ButtonProps {
   text: string;
   url?: string;
-  variant: 'primary' | 'secondary' | 'outline';
-  size?: 'small' | 'medium' | 'large';
+  variant: "primary" | "secondary" | "outline";
+  size?: "small" | "medium" | "large";
   fullWidth?: boolean;
-  onClickAction?: 'link' | 'scroll' | 'modal';
+  onClickAction?: "link" | "scroll" | "modal";
 }
 
 export interface SpacerProps {
@@ -414,7 +414,7 @@ export interface SpacerProps {
 
 export interface VideoProps {
   url: string;
-  type: 'youtube' | 'vimeo' | 'direct';
+  type: "youtube" | "vimeo" | "direct";
   autoplay?: boolean;
   controls?: boolean;
   width?: string;
@@ -425,7 +425,7 @@ export interface FormProps {
   title?: string;
   fields: Array<{
     id: string;
-    type: 'text' | 'email' | 'tel' | 'textarea';
+    type: "text" | "email" | "tel" | "textarea";
     label: string;
     required?: boolean;
     placeholder?: string;

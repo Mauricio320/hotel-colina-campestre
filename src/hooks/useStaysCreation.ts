@@ -53,9 +53,7 @@ export const useStaysCreation = () => {
       queryClient.setQueryData<Stay[]>(["stays"], (old) => {
         if (!old) return [newStay];
         // Reemplazar el temporal con el real
-        return old.map((stay) =>
-          stay.id === context?.tempStayId ? newStay : stay
-        );
+        return old.map((stay) => (stay.id === context?.tempStayId ? newStay : stay));
       });
     },
 

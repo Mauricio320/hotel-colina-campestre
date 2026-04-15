@@ -612,7 +612,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
             unstyled
             label="Descargar Excel de Pagos"
             icon="pi pi-file-excel"
-            className="bg-emerald-500 w-full p-3 font-bold text-white"
+            className="w-full bg-emerald-500 p-3 font-bold text-white"
             onClick={handleRoomPaymentsReport}
             disabled={loading}
           />
@@ -654,7 +654,7 @@ const Reports: React.FC<ReportsProps> = ({ userRole }) => {
             unstyled
             label="Descargar Excel de Facturas"
             icon="pi pi-file-pdf"
-            className="bg-yellow-500 text-white w-full p-3 font-bold"
+            className="w-full bg-yellow-500 p-3 font-bold text-white"
             onClick={handlePaymentsInvoiceReport}
             disabled={loading}
           />

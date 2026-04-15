@@ -1,21 +1,21 @@
-import { Element, useEditor } from '@craftjs/core';
-import { Tooltip } from '@mui/material';
-import React from 'react';
-import { styled } from 'styled-components';
+import { Element, useEditor } from "@craftjs/core";
+import { Tooltip } from "@mui/material";
+import React from "react";
+import { styled } from "styled-components";
 
-import ButtonSvg from '../../../public/icons/toolbox/button.svg';
-import SquareSvg from '../../../public/icons/toolbox/rectangle.svg';
-import TypeSvg from '../../../public/icons/toolbox/text.svg';
-import YoutubeSvg from '../../../public/icons/toolbox/video-line.svg';
-import { Button } from '../../selectors/Button';
-import { Container } from '../../selectors/Container';
-import { Text } from '../../selectors/Text';
-import { Video } from '../../selectors/Video';
+import ButtonSvg from "../../../public/icons/toolbox/button.svg";
+import SquareSvg from "../../../public/icons/toolbox/rectangle.svg";
+import TypeSvg from "../../../public/icons/toolbox/text.svg";
+import YoutubeSvg from "../../../public/icons/toolbox/video-line.svg";
+import { Button } from "../../selectors/Button";
+import { Container } from "../../selectors/Container";
+import { Text } from "../../selectors/Text";
+import { Video } from "../../selectors/Video";
 
 const ToolboxDiv = styled.div<{ $enabled: boolean }>`
   transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-  ${(props) => (!props.$enabled ? `width: 0;` : '')}
-  ${(props) => (!props.$enabled ? `opacity: 0;` : '')}
+  ${(props) => (!props.$enabled ? `width: 0;` : "")}
+  ${(props) => (!props.$enabled ? `opacity: 0;` : "")}
 `;
 
 const Item = styled.a<{ $move?: boolean }>`
@@ -47,9 +47,9 @@ export const Toolbox = () => {
   return (
     <ToolboxDiv
       $enabled={enabled && enabled}
-      className="toolbox transition w-12 h-full flex flex-col bg-white"
+      className="toolbox flex h-full w-12 flex-col bg-white transition"
     >
-      <div className="flex flex-1 flex-col items-center pt-3 gap-3">
+      <div className="flex flex-1 flex-col items-center gap-3 pt-3">
         <div
           ref={(ref) => {
             create(
@@ -73,10 +73,7 @@ export const Toolbox = () => {
         </div>
         <div
           ref={(ref) => {
-            create(
-              ref,
-              <Text fontSize="12" textAlign="left" text="Hi there" />
-            );
+            create(ref, <Text fontSize="12" textAlign="left" text="Hi there" />);
           }}
         >
           <Tooltip title="Text" placement="right">

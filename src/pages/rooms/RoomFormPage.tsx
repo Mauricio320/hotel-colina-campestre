@@ -297,72 +297,78 @@ const RoomFormPage: React.FC = () => {
               </div>
 
               <div className="divide-y divide-gray-50 bg-white">
-                {[...fields].sort((a, b) => a.person_count - b.person_count).map((field) => {
-                  // Encontrar el índice real en el array original fields
-                  const originalIndex = fields.findIndex((f) => f.id === field.id);
-                  return (
-                  <div
-                    key={field.id}
-                    className="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-4 p-4 transition-colors hover:bg-gray-50"
-                  >
-                    <div>
-                      <Controller
-                        name={`rates.${originalIndex}.person_count`}
-                        control={control}
-                        render={({ field }) => (
-                          <InputNumber
-                            value={field.value}
-                            onValueChange={(e) => field.onChange(e.value)}
-                            min={1}
-                            showButtons
-                            minFractionDigits={0}
-                            maxFractionDigits={0}
-                            className="w-full text-center"
-                            inputClassName="text-center font-black text-emerald-600 border-none bg-transparent text-lg w-full"
-                            placeholder="0"
+                {[...fields]
+                  .sort((a, b) => a.person_count - b.person_count)
+                  .map((field) => {
+                    // Encontrar el índice real en el array original fields
+                    const originalIndex = fields.findIndex((f) => f.id === field.id);
+                    return (
+                      <div
+                        key={field.id}
+                        className="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-4 p-4 transition-colors hover:bg-gray-50"
+                      >
+                        <div>
+                          <Controller
+                            name={`rates.${originalIndex}.person_count`}
+                            control={control}
+                            render={({ field }) => (
+                              <InputNumber
+                                value={field.value}
+                                onValueChange={(e) => field.onChange(e.value)}
+                                min={1}
+                                showButtons
+                                minFractionDigits={0}
+                                maxFractionDigits={0}
+                                className="w-full text-center"
+                                inputClassName="text-center font-black text-emerald-600 border-none bg-transparent text-lg w-full"
+                                placeholder="0"
+                              />
+                            )}
                           />
-                        )}
-                      />
-                    </div>
+                        </div>
 
-                    <i className="pi pi-arrow-right text-gray-300"></i>
+                        <i className="pi pi-arrow-right text-gray-300"></i>
 
-                    <div className="flex justify-center">
-                      <Controller
-                        name={`rates.${originalIndex}.rate`}
-                        control={control}
-                        render={({ field }) => (
-                          <InputNumber
-                            value={field.value}
-                            onValueChange={(e) => field.onChange(e.value)}
-                            mode="currency"
-                            currency="COP"
-                            locale="es-CO"
-                            minFractionDigits={0}
-                            maxFractionDigits={0}
-                            className="w-full text-center"
-                            inputClassName="text-center font-black text-emerald-600 border-none bg-transparent text-lg w-full"
-                            placeholder="0"
+                        <div className="flex justify-center">
+                          <Controller
+                            name={`rates.${originalIndex}.rate`}
+                            control={control}
+                            render={({ field }) => (
+                              <InputNumber
+                                value={field.value}
+                                onValueChange={(e) => field.onChange(e.value)}
+                                mode="currency"
+                                currency="COP"
+                                locale="es-CO"
+                                minFractionDigits={0}
+                                maxFractionDigits={0}
+                                className="w-full text-center"
+                                inputClassName="text-center font-black text-emerald-600 border-none bg-transparent text-lg w-full"
+                                placeholder="0"
+                              />
+                            )}
                           />
-                        )}
-                      />
-                    </div>
+                        </div>
 
-                    <Button
-                      unstyled
-                      type="button"
-                      icon="pi pi-trash"
-                      disabled={fields.length === 1}
-                      className="flex h-10 w-10 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-30"
-                      onClick={() => {
-                        const personCount = fields[originalIndex]?.person_count || 1;
-                        confirmRemoveRate(originalIndex, personCount);
-                      }}
-                      tooltip={fields.length === 1 ? "Debe mantener al menos una tarifa" : "Eliminar tarifa"}
-                    />
-                  </div>
-                );
-                })}
+                        <Button
+                          unstyled
+                          type="button"
+                          icon="pi pi-trash"
+                          disabled={fields.length === 1}
+                          className="flex h-10 w-10 items-center justify-center rounded-full text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-30"
+                          onClick={() => {
+                            const personCount = fields[originalIndex]?.person_count || 1;
+                            confirmRemoveRate(originalIndex, personCount);
+                          }}
+                          tooltip={
+                            fields.length === 1
+                              ? "Debe mantener al menos una tarifa"
+                              : "Eliminar tarifa"
+                          }
+                        />
+                      </div>
+                    );
+                  })}
               </div>
             </div>
             {fields.length === 0 && (

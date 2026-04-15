@@ -1,8 +1,8 @@
-import { Element, useNode } from '@craftjs/core';
-import React from 'react';
+import { Element, useNode } from "@craftjs/core";
+import React from "react";
 
-import { Button } from '../Button';
-import { Container } from '../Container';
+import { Button } from "../Button";
+import { Container } from "../Container";
 
 export const Custom3BtnDrop = ({ children }) => {
   const {
@@ -13,7 +13,7 @@ export const Custom3BtnDrop = ({ children }) => {
       ref={(dom) => {
         connect(dom);
       }}
-      className="w-full h-full"
+      className="h-full w-full"
     >
       {children}
     </div>
@@ -26,13 +26,9 @@ Custom3BtnDrop.craft = {
       const {
         data: { nodes },
       } = self;
-      const btnNodes = nodes.filter(
-        (id) => helpers(id).get().data.type === Button
-      );
+      const btnNodes = nodes.filter((id) => helpers(id).get().data.type === Button);
 
-      const outgoingButtonNodes = outgoingNodes.filter(
-        (node) => node.data.type === Button
-      );
+      const outgoingButtonNodes = outgoingNodes.filter((node) => node.data.type === Button);
 
       if (outgoingButtonNodes.length < btnNodes.length) {
         return true;
@@ -45,10 +41,8 @@ Custom3BtnDrop.craft = {
 export const Custom3 = (props: any) => {
   return (
     <Container {...props} className="overflow-hidden">
-      <div className="w-full mb-4">
-        <h2 className="text-center text-xs text-white">
-          I must have at least 1 button
-        </h2>
+      <div className="mb-4 w-full">
+        <h2 className="text-center text-xs text-white">I must have at least 1 button</h2>
       </div>
       <Element canvas is={Custom3BtnDrop} id="wow">
         <Button background={{ r: 184, g: 247, b: 247, a: 1 }} />
@@ -59,5 +53,5 @@ export const Custom3 = (props: any) => {
 
 Custom3.craft = {
   ...Container.craft,
-  displayName: 'Custom 3',
+  displayName: "Custom 3",
 };

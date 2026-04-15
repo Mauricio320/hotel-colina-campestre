@@ -81,8 +81,7 @@ const CancelestadíationPage: React.FC = () => {
 
   const onSubmit = (data: CancelFormData) => {
     confirmDialog({
-      message:
-        "¿Esta seguro que desea cancelar esta estadía? Esta accion no se puede deshacer.",
+      message: "¿Esta seguro que desea cancelar esta estadía? Esta accion no se puede deshacer.",
       header: "Confirmar cancelación",
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Si, cancelar",
