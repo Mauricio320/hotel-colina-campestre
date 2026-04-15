@@ -499,4 +499,5 @@ main {
 
 .main-lagingPage {
   height: 100% !important;
+  overflow: hidden !important;
 }
