@@ -22,56 +22,56 @@ export const Navigation = () => {
   const menuRef = useRef<MenuType>(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const atBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight - 10;
+    const sectionIds = navLinks.map((link) => link.href.replace("#", ""));
+    const SCAN_LINE_OFFSET = 100;
+    let ticking = false;
+
+    const updateActive = () => {
+      ticking = false;
+
+      const presentSections = sectionIds
+        .map((id) => ({ id, el: document.getElementById(id) }))
+        .filter((item): item is { id: string; el: HTMLElement } => item.el !== null);
+
+      if (presentSections.length === 0) return;
+
+      const atBottom =
+        window.innerHeight + window.scrollY >= document.body.scrollHeight - 10;
       if (atBottom) {
-        setActiveSection(navLinks[navLinks.length - 1].href.replace("#", ""));
+        setActiveSection(presentSections[presentSections.length - 1].id);
+        return;
+      }
+
+      let current = presentSections[0].id;
+      for (const { id, el } of presentSections) {
+        const top = el.getBoundingClientRect().top;
+        if (top <= SCAN_LINE_OFFSET) {
+          current = id;
+        } else {
+          break;
+        }
+      }
+      setActiveSection(current);
+    };
+
+    const schedule = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateActive);
+        ticking = true;
       }
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
-  useEffect(() => {
-    const sectionIds = navLinks.map((link) => link.href.replace("#", ""));
-    const elements = sectionIds
-      .map((id) => document.getElementById(id))
-      .filter((el): el is HTMLElement => el !== null);
+    window.addEventListener("scroll", schedule, { passive: true });
 
-    if (elements.length === 0) return;
+    const resizeObserver = new ResizeObserver(schedule);
+    resizeObserver.observe(document.body);
 
-    const ratioMap = new Map<string, number>();
+    updateActive();
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          ratioMap.set(entry.target.id, entry.intersectionRatio);
-        }
-
-        let maxRatio = 0;
-        let maxId = sectionIds[0];
-        for (const [id, ratio] of ratioMap) {
-          if (ratio > maxRatio) {
-            maxRatio = ratio;
-            maxId = id;
-          }
-        }
-
-        if (maxRatio > 0) {
-          setActiveSection(maxId);
-        }
-      },
-      {
-        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-        rootMargin: "-72px 0px 0px 0px",
-      }
-    );
-
-    for (const el of elements) {
-      observer.observe(el);
-    }
-
-    return () => observer.disconnect();
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      resizeObserver.disconnect();
+    };
   }, []);
 
   const scrollToSection = (href: string) => {

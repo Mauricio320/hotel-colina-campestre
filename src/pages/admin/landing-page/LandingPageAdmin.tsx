@@ -15,8 +15,8 @@ export const LandingPageAdmin = () => {
   const [activeTab, setActiveTab] = useState<SectionTab>("hero");
 
   const tabs: { label: string; icon: string; value: SectionTab }[] = [
-    { label: "Hero", icon: "pi pi-home", value: "hero" },
-    { label: "Acerca de", icon: "pi pi-info-circle", value: "about" },
+    { label: "Hotel", icon: "pi pi-home", value: "hero" },
+    { label: "Colina Suites", icon: "pi pi-building-columns", value: "about" },
     { label: "Servicios", icon: "pi pi-star", value: "services" },
     { label: "Galería", icon: "pi pi-images", value: "gallery" },
     { label: "Turismo", icon: "pi pi-map", value: "tourism" },
