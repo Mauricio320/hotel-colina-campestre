@@ -198,7 +198,8 @@ export const roomsApi = {
       previous_status_id: currentRoom?.status_id,
       new_status_id: statusId,
       action_type: actionType,
-      observation: observation || `Cambio de estado manual a ${actionType} para el día ${targetDate}`,
+      observation:
+        observation || `Cambio de estado manual a ${actionType} para el día ${targetDate}`,
       employee_id: employeeId,
     });
     if (logError) throw logError;

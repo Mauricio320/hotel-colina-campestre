@@ -10,7 +10,8 @@ const defaultProps: CardsProps = {
       id: "1",
       icon: "pi pi-star",
       title: "Habitaciones de lujo",
-      description: "Disfruta de nuestras cómodas y elegantes habitaciones diseñadas para tu descanso.",
+      description:
+        "Disfruta de nuestras cómodas y elegantes habitaciones diseñadas para tu descanso.",
     },
     {
       id: "2",
@@ -73,7 +74,10 @@ const CardsSettings = () => {
         <select
           value={props.columns}
           onChange={(e) =>
-            setProp((p: CardsProps) => ({ ...p, columns: parseInt(e.target.value) as CardsProps["columns"] }))
+            setProp((p: CardsProps) => ({
+              ...p,
+              columns: parseInt(e.target.value) as CardsProps["columns"],
+            }))
           }
           className="mt-1 w-full rounded border p-2 text-sm"
         >
@@ -176,7 +180,9 @@ export const Cards = (props: CardsProps) => {
 
   return (
     <div
-      ref={(ref) => { connect(drag(ref)); }}
+      ref={(ref) => {
+        connect(drag(ref));
+      }}
       style={{
         display: "grid",
         gridTemplateColumns: `repeat(${mergedProps.columns}, 1fr)`,
@@ -238,7 +244,7 @@ export const Cards = (props: CardsProps) => {
 
 Cards.craft = {
   displayName: "Tarjetas",
-  
+
   props: defaultProps,
   rules: {
     canDrag: true,

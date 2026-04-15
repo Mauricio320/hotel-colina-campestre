@@ -92,7 +92,9 @@ const HeroSettings = () => {
         <label className="text-sm font-medium text-gray-700">Variante del botón</label>
         <select
           value={props.ctaVariant}
-          onChange={(e) => setProp((p: HeroProps) => (p.ctaVariant = e.target.value as HeroProps["ctaVariant"]))}
+          onChange={(e) =>
+            setProp((p: HeroProps) => (p.ctaVariant = e.target.value as HeroProps["ctaVariant"]))
+          }
           className="mt-1 w-full rounded border p-2 text-sm"
         >
           <option value="primary">Primario</option>
@@ -118,7 +120,9 @@ const HeroSettings = () => {
         <label className="text-sm font-medium text-gray-700">Alineación del texto</label>
         <select
           value={props.textAlign}
-          onChange={(e) => setProp((p: HeroProps) => (p.textAlign = e.target.value as HeroProps["textAlign"]))}
+          onChange={(e) =>
+            setProp((p: HeroProps) => (p.textAlign = e.target.value as HeroProps["textAlign"]))
+          }
           className="mt-1 w-full rounded border p-2 text-sm"
         >
           <option value="left">Izquierda</option>
@@ -134,7 +138,9 @@ const HeroSettings = () => {
           max="1"
           step="0.1"
           value={props.overlayOpacity}
-          onChange={(e) => setProp((p: HeroProps) => (p.overlayOpacity = parseFloat(e.target.value)))}
+          onChange={(e) =>
+            setProp((p: HeroProps) => (p.overlayOpacity = parseFloat(e.target.value)))
+          }
           className="mt-1 w-full"
         />
         <span className="text-xs text-gray-500">{props.overlayOpacity}</span>
@@ -186,15 +192,24 @@ export const Hero = (props: HeroProps) => {
 
   return (
     <div
-      ref={(ref) => { connect(drag(ref)); }}
+      ref={(ref) => {
+        connect(drag(ref));
+      }}
       style={{
         position: "relative",
         minHeight: mergedProps.minHeight,
         display: "flex",
         alignItems: "center",
-        justifyContent: mergedProps.textAlign === "center" ? "center" : mergedProps.textAlign === "left" ? "flex-start" : "flex-end",
+        justifyContent:
+          mergedProps.textAlign === "center"
+            ? "center"
+            : mergedProps.textAlign === "left"
+              ? "flex-start"
+              : "flex-end",
         padding: "48px",
-        backgroundImage: mergedProps.backgroundImage ? `url(${mergedProps.backgroundImage})` : undefined,
+        backgroundImage: mergedProps.backgroundImage
+          ? `url(${mergedProps.backgroundImage})`
+          : undefined,
         backgroundColor: mergedProps.backgroundColor,
         backgroundSize: "cover",
         backgroundPosition: "center",
@@ -252,7 +267,7 @@ export const Hero = (props: HeroProps) => {
 
 Hero.craft = {
   displayName: "Hero",
-  
+
   props: defaultProps,
   rules: {
     canDrag: true,

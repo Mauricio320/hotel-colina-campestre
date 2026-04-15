@@ -269,7 +269,10 @@ const Settings: React.FC<SettingsProps> = ({ userRole }) => {
         className="w-full max-w-md"
         contentClassName="p-0"
       >
-        <form onSubmit={handlePaymentSubmit(onPaymentSubmit)} className="rounded-b-2xl bg-white p-6">
+        <form
+          onSubmit={handlePaymentSubmit(onPaymentSubmit)}
+          className="rounded-b-2xl bg-white p-6"
+        >
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-1">
               <label className="text-xs font-bold text-gray-700">

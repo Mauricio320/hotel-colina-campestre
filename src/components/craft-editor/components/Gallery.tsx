@@ -71,7 +71,10 @@ const GallerySettings = () => {
         <select
           value={props.columns}
           onChange={(e) =>
-            setProp((p: GalleryProps) => ({ ...p, columns: parseInt(e.target.value) as GalleryProps["columns"] }))
+            setProp((p: GalleryProps) => ({
+              ...p,
+              columns: parseInt(e.target.value) as GalleryProps["columns"],
+            }))
           }
           className="mt-1 w-full rounded border p-2 text-sm"
         >
@@ -119,7 +122,9 @@ const GallerySettings = () => {
         </div>
       </div>
       <div>
-        <label className="text-sm font-medium text-gray-700">Imágenes ({props.images.length})</label>
+        <label className="text-sm font-medium text-gray-700">
+          Imágenes ({props.images.length})
+        </label>
         <div className="mt-2 flex flex-col gap-2">
           {props.images.map((image, index) => (
             <div key={index} className="rounded border border-gray-200 p-2">
@@ -165,7 +170,9 @@ export const Gallery = (props: GalleryProps) => {
 
   return (
     <div
-      ref={(ref) => { connect(drag(ref)); }}
+      ref={(ref) => {
+        connect(drag(ref));
+      }}
       style={{
         display: "grid",
         gridTemplateColumns: `repeat(${mergedProps.columns}, 1fr)`,
@@ -209,7 +216,7 @@ export const Gallery = (props: GalleryProps) => {
 
 Gallery.craft = {
   displayName: "Galería",
-  
+
   props: defaultProps,
   rules: {
     canDrag: true,

@@ -31,9 +31,7 @@ export const useMoveStay = () => {
       // Actualizar stay en lista: cambiar room_id
       queryClient.setQueryData<Stay[]>(["stays"], (old) => {
         if (!old) return old;
-        return old.map((stay) =>
-          stay.id === stayId ? { ...stay, room_id: newRoomId } : stay
-        );
+        return old.map((stay) => (stay.id === stayId ? { ...stay, room_id: newRoomId } : stay));
       });
 
       // Actualizar stay individual

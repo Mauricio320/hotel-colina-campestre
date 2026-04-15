@@ -1,46 +1,61 @@
-/**
- * Fotos Section Component
- *
- * Bento-style gallery preview on the landing page with asymmetric grid
- * and a "Ver más" button linking to the full gallery at /galeria.
- */
-
 import { Link } from "react-router-dom";
-import { FotosContent } from "@/types/landingPage";
-import { GALLERY_IMAGES } from "./gallery-data";
+import { GalleryContent, LandingPageImage } from "@/types/landingPage";
 
 interface FotosSectionProps {
-  content?: FotosContent;
+  content?: GalleryContent;
+  images?: LandingPageImage[];
 }
 
-export const FotosSection = ({ content }: FotosSectionProps) => {
-  const { title } = content || {};
+interface BentoImage {
+  src: string;
+  alt: string;
+  category?: string;
+}
 
-  // Select 7 featured images: 4 on top row, 3 on bottom row
-  const topRowImages = [
-    GALLERY_IMAGES[0], // Centro del hotel
-    GALLERY_IMAGES[1], // Habitación
-    GALLERY_IMAGES[6], // Paisaje
-    GALLERY_IMAGES[13], // Zona de eventos
-  ];
+const DEFAULT_TITLE = "Galería de Fotos";
+const DEFAULT_DESCRIPTION =
+  "Descubre los rincones y paisajes que hacen especial al Hotel Colina Campestre.";
 
-  const bottomRowImages = [
-    GALLERY_IMAGES[25], // Espacio para familias
-    GALLERY_IMAGES[2], // Habitación múltiple
-    GALLERY_IMAGES[16], // Atardecer
-  ];
+export const FotosSection = ({ content, images = [] }: FotosSectionProps) => {
+  const title = content?.title || DEFAULT_TITLE;
+  const description = content?.description || DEFAULT_DESCRIPTION;
+
+  const resolvedBento: BentoImage[] = (content?.featured_slots ?? [])
+    .map((slot, idx): BentoImage | null => {
+      const found = images.find((img) => img.slot === slot);
+      if (!found) return null;
+      return {
+        src: found.public_url,
+        alt: found.alt_text || `Imagen ${idx + 1}`,
+        category: found.category || undefined,
+      };
+    })
+    .filter((item): item is BentoImage => item !== null);
+
+  if (resolvedBento.length === 0) return null;
+
+  const count = resolvedBento.length;
+  const isBento = count >= 7;
+  const topRowImages = isBento ? resolvedBento.slice(0, 4) : resolvedBento;
+  const bottomRowImages = isBento ? resolvedBento.slice(4, 7) : [];
+
+  const adaptiveCols =
+    count === 1
+      ? "grid-cols-1"
+      : count === 2
+        ? "grid-cols-1 sm:grid-cols-2"
+        : count === 3
+          ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+          : "grid-cols-2 md:grid-cols-4";
 
   return (
     <section id="fotos" className="bg-white py-16">
       <div className="mx-auto max-w-7xl px-8">
-        {/* Header */}
         <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-2xl">
-            <h2 className="text-3xl font-bold text-[#1a1c1a]">{title || "Galería de Fotos"}</h2>
+            <h2 className="text-3xl font-bold text-[#1a1c1a]">{title}</h2>
             <div className="mt-4 h-1 w-16 rounded-full bg-[#006948]" />
-            <p className="mt-4 text-[#4a4a4a]">
-              Descubre los rincones y paisajes que hacen especial al Hotel Colina Campestre.
-            </p>
+            <p className="mt-4 text-[#4a4a4a]">{description}</p>
           </div>
           <Link
             to="/galeria"
@@ -51,36 +66,30 @@ export const FotosSection = ({ content }: FotosSectionProps) => {
           </Link>
         </div>
 
-        {/* Grid Layout: 4 on top, 3 on bottom */}
         <div className="flex flex-col gap-4">
-          {/* Top row - 4 images */}
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {topRowImages.map((image) => (
-              <BentoCard key={image.src} image={image} />
+          <div className={`grid gap-4 ${adaptiveCols}`}>
+            {topRowImages.map((image, idx) => (
+              <BentoCard key={`top-${idx}`} image={image} />
             ))}
           </div>
 
-          {/* Bottom row - 3 images: 1 wide + 2 normal */}
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <BentoCard image={bottomRowImages[0]} className="col-span-2" />
-            <BentoCard image={bottomRowImages[1]} />
-            <BentoCard image={bottomRowImages[2]} />
-          </div>
+          {isBento && bottomRowImages.length > 0 && (
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              {bottomRowImages[0] && (
+                <BentoCard image={bottomRowImages[0]} className="col-span-2" />
+              )}
+              {bottomRowImages[1] && <BentoCard image={bottomRowImages[1]} />}
+              {bottomRowImages[2] && <BentoCard image={bottomRowImages[2]} />}
+            </div>
+          )}
         </div>
       </div>
     </section>
   );
 };
 
-/* ── Bento Card Component ─────────────────────────────────────────── */
-
 interface BentoCardProps {
-  image: {
-    src: string;
-    alt: string;
-    category: string;
-    size?: string;
-  };
+  image: BentoImage;
   className?: string;
 }
 
@@ -97,18 +106,17 @@ function BentoCard({ image, className = "" }: BentoCardProps) {
           className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         />
 
-        {/* Gradient overlay - always visible but intensifies on hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300" />
 
-        {/* Content overlay */}
         <div className="absolute inset-0 flex flex-col justify-end p-5">
-          <span className="mb-2 inline-block w-fit rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white/90 backdrop-blur-sm">
-            {image.category}
-          </span>
+          {image.category && (
+            <span className="mb-2 inline-block w-fit rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white/90 backdrop-blur-sm">
+              {image.category}
+            </span>
+          )}
           <h3 className="text-lg font-semibold text-white">{image.alt}</h3>
         </div>
 
-        {/* Hover icon */}
         <div className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/0 text-white/0 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/20 group-hover:text-white">
           <i className="pi pi-arrow-up-right" aria-hidden="true" />
         </div>

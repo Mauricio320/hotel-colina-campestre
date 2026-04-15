@@ -1,10 +1,3 @@
-/**
- * Navigation Component
- *
- * Fixed navigation bar with smooth scroll to sections.
- * Mobile-responsive with hamburger menu.
- */
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
@@ -26,20 +19,13 @@ const navLinks: NavLink[] = [
 
 export const Navigation = () => {
   const [activeSection, setActiveSection] = useState("hotel");
-  const [isScrolled, setIsScrolled] = useState(false);
   const menuRef = useRef<MenuType>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-
-      const atBottom =
-        window.innerHeight + window.scrollY >=
-        document.body.scrollHeight - 10;
+      const atBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight - 10;
       if (atBottom) {
-        setActiveSection(
-          navLinks[navLinks.length - 1].href.replace("#", "")
-        );
+        setActiveSection(navLinks[navLinks.length - 1].href.replace("#", ""));
       }
     };
     window.addEventListener("scroll", handleScroll, { passive: true });

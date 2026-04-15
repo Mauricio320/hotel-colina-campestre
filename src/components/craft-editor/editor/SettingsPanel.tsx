@@ -2,7 +2,11 @@ import { useEditor } from "@craftjs/core";
 import React from "react";
 
 export const SettingsPanel = () => {
-  const { selected, nodeName, settings: SettingsComponent } = useEditor((state) => {
+  const {
+    selected,
+    nodeName,
+    settings: SettingsComponent,
+  } = useEditor((state) => {
     const [currentNodeId] = state.events.selected;
     const currentNode = currentNodeId ? state.nodes[currentNodeId] : null;
 
@@ -23,10 +27,10 @@ export const SettingsPanel = () => {
       </div>
       <div className="p-4">
         {selected ? (
-          SettingsComponent ? <SettingsComponent /> : (
-            <p className="text-sm text-gray-500">
-              Este componente no tiene propiedades editables
-            </p>
+          SettingsComponent ? (
+            <SettingsComponent />
+          ) : (
+            <p className="text-sm text-gray-500">Este componente no tiene propiedades editables</p>
           )
         ) : (
           <p className="text-sm text-gray-500">

@@ -87,7 +87,9 @@ const TextSettings = () => {
         <label className="text-sm font-medium text-gray-700">Alineación</label>
         <select
           value={props.textAlign}
-          onChange={(e) => setProp((p: TextProps) => (p.textAlign = e.target.value as TextProps["textAlign"]))}
+          onChange={(e) =>
+            setProp((p: TextProps) => (p.textAlign = e.target.value as TextProps["textAlign"]))
+          }
           className="mt-1 w-full rounded border p-2 text-sm"
         >
           <option value="left">Izquierda</option>
@@ -123,7 +125,9 @@ export const Text = (props: TextProps) => {
 
   return (
     <Tag
-      ref={(ref) => { connect(drag(ref)); }}
+      ref={(ref) => {
+        connect(drag(ref));
+      }}
       style={{
         fontSize: `${mergedProps.fontSize}px`,
         fontWeight: mergedProps.fontWeight,
@@ -140,7 +144,7 @@ export const Text = (props: TextProps) => {
 
 Text.craft = {
   displayName: "Texto",
-  
+
   props: defaultProps,
   rules: {
     canDrag: true,

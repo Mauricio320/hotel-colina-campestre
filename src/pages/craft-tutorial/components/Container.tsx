@@ -6,7 +6,13 @@ export type ContainerProps = {
   color?: { r: number; g: number; b: number; a: number };
   flexDirection?: "row" | "column" | "row-reverse" | "column-reverse";
   alignItems?: "flex-start" | "flex-end" | "center" | "stretch" | "baseline";
-  justifyContent?: "flex-start" | "flex-end" | "center" | "space-between" | "space-around" | "space-evenly";
+  justifyContent?:
+    | "flex-start"
+    | "flex-end"
+    | "center"
+    | "space-between"
+    | "space-around"
+    | "space-evenly";
   fillSpace?: "yes" | "no";
   width?: string;
   height?: string;

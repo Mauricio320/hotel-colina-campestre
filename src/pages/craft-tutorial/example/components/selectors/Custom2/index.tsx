@@ -1,8 +1,8 @@
-import { Element, useNode } from '@craftjs/core';
-import React from 'react';
+import { Element, useNode } from "@craftjs/core";
+import React from "react";
 
-import { Container } from '../Container';
-import { Video } from '../Video';
+import { Container } from "../Container";
+import { Video } from "../Video";
 
 export const Custom2VideoDrop = ({ children }) => {
   const {
@@ -13,7 +13,7 @@ export const Custom2VideoDrop = ({ children }) => {
       ref={(dom) => {
         connect(dom);
       }}
-      className="flex-1 ml-5 h-full"
+      className="ml-5 h-full flex-1"
     >
       {children}
     </div>
@@ -23,8 +23,7 @@ Custom2VideoDrop.craft = {
   rules: {
     canMoveIn: (nodes, self, helper) => {
       return (
-        nodes.every((node) => node.data.type === Video) &&
-        helper(self.id).decendants().length === 0
+        nodes.every((node) => node.data.type === Video) && helper(self.id).decendants().length === 0
       );
     },
   },
@@ -48,5 +47,5 @@ export const Custom2 = (props: any) => {
 
 Custom2.craft = {
   ...Container.craft,
-  displayName: 'Custom 2',
+  displayName: "Custom 2",
 };

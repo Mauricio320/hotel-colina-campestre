@@ -363,19 +363,18 @@ const AppContent: React.FC = () => {
         />
       </Route>
 
-      {/* Admin Landing Page Configuration */}
       <Route
-        path="/admin/landing-page/*"
-        element={
-          user ? (
+        element={user ? <Layout employee={employee} onLogout={logout} /> : <Navigate to="/login" />}
+      >
+        <Route
+          path="/admin/landing-page/*"
+          element={
             <Suspense fallback={<PageLoader />}>
               <LandingPageAdmin />
             </Suspense>
-          ) : (
-            <Navigate to="/login" />
-          )
-        }
-      />
+          }
+        />
+      </Route>
 
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

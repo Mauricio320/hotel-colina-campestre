@@ -163,7 +163,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
             unstyled
             icon="pi pi-arrow-left"
             onClick={onBack}
-            className="p-button-rounded h-10 w-10 rounded-2xl p-button-text p-button-secondary border border-gray-100 bg-gray-50 text-gray-600 shadow-sm transition-all duration-300 hover:bg-blue-50 hover:text-blue-600"
+            className="p-button-rounded p-button-text p-button-secondary h-10 w-10 rounded-2xl border border-gray-100 bg-gray-50 text-gray-600 shadow-sm transition-all duration-300 hover:bg-blue-50 hover:text-blue-600"
             tooltip={backTooltip}
             tooltipOptions={{ position: "bottom" }}
           />

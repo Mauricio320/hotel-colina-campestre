@@ -17,7 +17,13 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       VitePWA({
         registerType: "autoUpdate",
-        includeAssets: ["favicon.ico", "favicon-32x32.png", "favicon-16x16.png", "apple-touch-icon-180x180.png", "maskable-icon-512x512.png"],
+        includeAssets: [
+          "favicon.ico",
+          "favicon-32x32.png",
+          "favicon-16x16.png",
+          "apple-touch-icon-180x180.png",
+          "maskable-icon-512x512.png",
+        ],
         manifest: {
           name: "Hotel Colina Campestre",
           short_name: "Hotel Colina",
@@ -29,30 +35,30 @@ export default defineConfig(({ mode }) => {
             {
               src: "pwa-64x64.png",
               sizes: "64x64",
-              type: "image/png"
+              type: "image/png",
             },
             {
               src: "pwa-192x192.png",
               sizes: "192x192",
-              type: "image/png"
+              type: "image/png",
             },
             {
               src: "pwa-512x512.png",
               sizes: "512x512",
-              type: "image/png"
+              type: "image/png",
             },
             {
               src: "maskable-icon-512x512.png",
               sizes: "512x512",
               type: "image/png",
-              purpose: "maskable"
-            }
-          ]
+              purpose: "maskable",
+            },
+          ],
         },
         workbox: {
-          globPatterns: ["**/*.{js,css,html,ico,png,svg,webp}"]
-        }
-      })
+          globPatterns: ["**/*.{js,css,html,ico,png,svg,webp}"],
+        },
+      }),
     ],
     define: {
       "process.env.API_KEY": JSON.stringify(env.GEMINI_API_KEY),

@@ -10,14 +10,23 @@ export const paymentMethodsApi = {
   },
 
   create: async (name: string): Promise<PaymentMethod> => {
-    const { data, error } = await supabase.from("payment_methods").insert({ name }).select().single();
+    const { data, error } = await supabase
+      .from("payment_methods")
+      .insert({ name })
+      .select()
+      .single();
 
     if (error) throw new Error(error.message);
     return data;
   },
 
   update: async (id: string, name: string): Promise<PaymentMethod> => {
-    const { data, error } = await supabase.from("payment_methods").update({ name }).eq("id", id).select().single();
+    const { data, error } = await supabase
+      .from("payment_methods")
+      .update({ name })
+      .eq("id", id)
+      .select()
+      .single();
 
     if (error) throw new Error(error.message);
     return data;

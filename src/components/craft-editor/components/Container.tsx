@@ -75,7 +75,12 @@ const ContainerSettings = () => {
         <label className="text-sm font-medium text-gray-700">Dirección Flex</label>
         <select
           value={props.flexDirection}
-          onChange={(e) => setProp((p: ContainerProps) => (p.flexDirection = e.target.value as ContainerProps["flexDirection"]))}
+          onChange={(e) =>
+            setProp(
+              (p: ContainerProps) =>
+                (p.flexDirection = e.target.value as ContainerProps["flexDirection"])
+            )
+          }
           className="mt-1 w-full rounded border p-2 text-sm"
         >
           <option value="column">Vertical</option>
@@ -86,7 +91,12 @@ const ContainerSettings = () => {
         <label className="text-sm font-medium text-gray-700">Alineación horizontal</label>
         <select
           value={props.justifyContent}
-          onChange={(e) => setProp((p: ContainerProps) => (p.justifyContent = e.target.value as ContainerProps["justifyContent"]))}
+          onChange={(e) =>
+            setProp(
+              (p: ContainerProps) =>
+                (p.justifyContent = e.target.value as ContainerProps["justifyContent"])
+            )
+          }
           className="mt-1 w-full rounded border p-2 text-sm"
         >
           <option value="flex-start">Izquierda</option>
@@ -124,7 +134,9 @@ export const Container = (props: ContainerComponentProps) => {
 
   return (
     <div
-      ref={(ref) => { connect(drag(ref)); }}
+      ref={(ref) => {
+        connect(drag(ref));
+      }}
       style={{
         background: mergedProps.background,
         padding: `${mergedProps.padding}px`,

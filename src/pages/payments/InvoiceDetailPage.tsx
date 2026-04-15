@@ -434,9 +434,7 @@ const InvoiceDetailPage: React.FC = () => {
       <div className="mt-8 rounded-2xl border border-gray-100 bg-white p-6 text-center shadow-sm">
         <div className="mb-2 flex items-center justify-center gap-2">
           <i className="pi pi-heart-fill text-red-500"></i>
-          <p className="text-sm font-medium text-gray-600">
-            Gracias por elegir 
-          </p>
+          <p className="text-sm font-medium text-gray-600">Gracias por elegir</p>
         </div>
         <p className="text-xs text-gray-500">
           Documento de control interno. Generado el {new Date().toLocaleString()}

@@ -49,7 +49,9 @@ const NewsletterSettings = () => {
         <input
           type="text"
           value={props.successMessage}
-          onChange={(e) => setProp((p: NewsletterProps) => ({ ...p, successMessage: e.target.value }))}
+          onChange={(e) =>
+            setProp((p: NewsletterProps) => ({ ...p, successMessage: e.target.value }))
+          }
           className="mt-1 w-full rounded border p-2 text-sm"
         />
       </div>
@@ -77,7 +79,9 @@ export const Newsletter = (props: NewsletterProps) => {
   if (submitted) {
     return (
       <div
-        ref={(ref) => { connect(drag(ref)); }}
+        ref={(ref) => {
+          connect(drag(ref));
+        }}
         style={{
           padding: "48px",
           backgroundColor: "#f0fdf4",
@@ -95,7 +99,9 @@ export const Newsletter = (props: NewsletterProps) => {
 
   return (
     <div
-      ref={(ref) => { connect(drag(ref)); }}
+      ref={(ref) => {
+        connect(drag(ref));
+      }}
       style={{
         padding: "48px",
         backgroundColor: "#059669",
@@ -103,7 +109,9 @@ export const Newsletter = (props: NewsletterProps) => {
         textAlign: "center",
       }}
     >
-      <h3 style={{ fontSize: "1.75rem", fontWeight: "bold", color: "#ffffff", marginBottom: "8px" }}>
+      <h3
+        style={{ fontSize: "1.75rem", fontWeight: "bold", color: "#ffffff", marginBottom: "8px" }}
+      >
         {mergedProps.title}
       </h3>
       {mergedProps.description && (
@@ -159,7 +167,7 @@ export const Newsletter = (props: NewsletterProps) => {
 
 Newsletter.craft = {
   displayName: "Newsletter",
-  
+
   props: defaultProps,
   rules: {
     canDrag: true,

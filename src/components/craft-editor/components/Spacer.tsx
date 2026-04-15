@@ -39,7 +39,9 @@ export const Spacer = (props: SpacerProps) => {
 
   return (
     <div
-      ref={(ref) => { connect(drag(ref)); }}
+      ref={(ref) => {
+        connect(drag(ref));
+      }}
       style={{
         height: `${mergedProps.height}px`,
       }}
@@ -49,7 +51,7 @@ export const Spacer = (props: SpacerProps) => {
 
 Spacer.craft = {
   displayName: "Espaciador",
-  
+
   props: defaultProps,
   rules: {
     canDrag: true,

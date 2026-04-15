@@ -1,15 +1,15 @@
-import { UserComponent, useNode } from '@craftjs/core';
-import cx from 'classnames';
-import React from 'react';
-import { styled } from 'styled-components';
+import { UserComponent, useNode } from "@craftjs/core";
+import cx from "classnames";
+import React from "react";
+import { styled } from "styled-components";
 
-import { ButtonSettings } from './ButtonSettings';
+import { ButtonSettings } from "./ButtonSettings";
 
-import { Text } from '../Text';
+import { Text } from "../Text";
 
 type ButtonProps = {
-  background?: Record<'r' | 'g' | 'b' | 'a', number>;
-  color?: Record<'r' | 'g' | 'b' | 'a', number>;
+  background?: Record<"r" | "g" | "b" | "a", number>;
+  color?: Record<"r" | "g" | "b" | "a", number>;
   buttonStyle?: string;
   margin?: any[];
   text?: string;
@@ -18,23 +18,18 @@ type ButtonProps = {
 
 // N.B: Alias required StyledComponent props for Transient Props; https://styled-components.com/docs/api#transient-props
 type StyledButtonProps = {
-  $background?: Record<'r' | 'g' | 'b' | 'a', number>;
+  $background?: Record<"r" | "g" | "b" | "a", number>;
   $buttonStyle?: string;
   $margin?: any[];
 };
 
 const StyledButton = styled.button<StyledButtonProps>`
   background: ${(props) =>
-    props.$buttonStyle === 'full'
-      ? `rgba(${Object.values(props.$background)})`
-      : 'transparent'};
+    props.$buttonStyle === "full" ? `rgba(${Object.values(props.$background)})` : "transparent"};
   border: 2px solid transparent;
   border-color: ${(props) =>
-    props.$buttonStyle === 'outline'
-      ? `rgba(${Object.values(props.$background)})`
-      : 'transparent'};
-  margin: ${({ $margin }) =>
-    `${$margin[0]}px ${$margin[1]}px ${$margin[2]}px ${$margin[3]}px`};
+    props.$buttonStyle === "outline" ? `rgba(${Object.values(props.$background)})` : "transparent"};
+  margin: ${({ $margin }) => `${$margin[0]}px ${$margin[1]}px ${$margin[2]}px ${$margin[3]}px`};
 `;
 
 export const Button: UserComponent<ButtonProps> = ({
@@ -57,9 +52,9 @@ export const Button: UserComponent<ButtonProps> = ({
         connect(dom);
       }}
       className={cx([
-        'rounded w-full px-4 py-2',
+        "w-full rounded px-4 py-2",
         {
-          'shadow-lg': buttonStyle === 'full',
+          "shadow-lg": buttonStyle === "full",
         },
       ])}
       $buttonStyle={buttonStyle}
@@ -72,16 +67,16 @@ export const Button: UserComponent<ButtonProps> = ({
 };
 
 Button.craft = {
-  displayName: 'Button',
+  displayName: "Button",
   props: {
     background: { r: 255, g: 255, b: 255, a: 0.5 },
     color: { r: 92, g: 90, b: 90, a: 1 },
-    buttonStyle: 'full',
-    text: 'Button',
-    margin: ['5', '0', '5', '0'],
+    buttonStyle: "full",
+    text: "Button",
+    margin: ["5", "0", "5", "0"],
     textComponent: {
       ...Text.craft.props,
-      textAlign: 'center',
+      textAlign: "center",
     },
   },
   related: {

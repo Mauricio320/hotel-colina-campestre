@@ -42,7 +42,9 @@ const ButtonSettings = () => {
         <label className="text-sm font-medium text-gray-700">Variante</label>
         <select
           value={props.variant}
-          onChange={(e) => setProp((p: ButtonProps) => (p.variant = e.target.value as ButtonProps["variant"]))}
+          onChange={(e) =>
+            setProp((p: ButtonProps) => (p.variant = e.target.value as ButtonProps["variant"]))
+          }
           className="mt-1 w-full rounded border p-2 text-sm"
         >
           <option value="primary">Primario (Ámbar)</option>
@@ -54,7 +56,9 @@ const ButtonSettings = () => {
         <label className="text-sm font-medium text-gray-700">Tamaño</label>
         <select
           value={props.size}
-          onChange={(e) => setProp((p: ButtonProps) => (p.size = e.target.value as ButtonProps["size"]))}
+          onChange={(e) =>
+            setProp((p: ButtonProps) => (p.size = e.target.value as ButtonProps["size"]))
+          }
           className="mt-1 w-full rounded border p-2 text-sm"
         >
           <option value="small">Pequeño</option>
@@ -120,7 +124,9 @@ export const Button = (props: ButtonProps) => {
 
   return (
     <a
-      ref={(ref) => { connect(drag(ref)); }}
+      ref={(ref) => {
+        connect(drag(ref));
+      }}
       href={mergedProps.url}
       style={{
         display: mergedProps.fullWidth ? "block" : "inline-block",
@@ -142,7 +148,7 @@ export const Button = (props: ButtonProps) => {
 
 Button.craft = {
   displayName: "Botón",
-  
+
   props: defaultProps,
   rules: {
     canDrag: true,

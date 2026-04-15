@@ -1,6 +1,5 @@
 import { useLandingPageState } from "@/hooks/useLandingPage";
 
-
 const CraftTutorialPreview = () => {
   const { data: savedState, isLoading } = useLandingPageState();
 

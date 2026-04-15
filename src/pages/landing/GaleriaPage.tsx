@@ -1,58 +1,57 @@
-/**
- * Galeria Page
- *
- * Full gallery page showing all hotel photos with category filters
- * and a lightbox. Reached via "Ver todas las fotos" on the landing page.
- */
-
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
-import {
-  GALLERY_IMAGES,
-  GALLERY_CATEGORIES,
-  GalleryCategory,
-  GalleryImage,
-} from "@/pages/landing/components/gallery-data";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { useLandingImages } from "@/hooks/useLandingPageCms";
+import { useLandingImageCategories } from "@/hooks/useLandingImageCategories";
+import { LandingPageImage } from "@/types/landingPage";
+import { useScrollReveal } from "./hooks/useScrollReveal";
 
-/* ── Intersection Observer hook for scroll animations ─────────────── */
-
-function useInView() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(el);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  return { ref, isVisible };
+interface GalleryCardImage {
+  id: string;
+  src: string;
+  alt: string;
+  category: string;
 }
 
-/* ── Main component ──────────────────────────────────────────────── */
+const ALL_CATEGORIES = "Todos";
+
+function toCardImage(img: LandingPageImage, idx: number): GalleryCardImage {
+  return {
+    id: img.id,
+    src: img.public_url,
+    alt: img.alt_text || `Imagen ${idx + 1}`,
+    category: img.category || "Sin categoría",
+  };
+}
 
 export default function GaleriaPage() {
-  const [activeCategory, setActiveCategory] = useState<GalleryCategory>("Todos");
+  const { data: rawImages = [], isLoading: loadingImages } = useLandingImages("gallery");
+  const { data: categories = [] } = useLandingImageCategories();
+
+  const galleryImages: GalleryCardImage[] = useMemo(
+    () => rawImages.map(toCardImage),
+    [rawImages]
+  );
+
+  const categoryTabs = useMemo(() => {
+    const names = categories.map((c) => c.name);
+    const orphanCategories = Array.from(
+      new Set(
+        galleryImages
+          .map((img) => img.category)
+          .filter((cat) => cat && cat !== "Sin categoría" && !names.includes(cat))
+      )
+    );
+    return [ALL_CATEGORIES, ...names, ...orphanCategories];
+  }, [categories, galleryImages]);
+
+  const [activeCategory, setActiveCategory] = useState<string>(ALL_CATEGORIES);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const filteredImages =
-    activeCategory === "Todos"
-      ? GALLERY_IMAGES
-      : GALLERY_IMAGES.filter((img) => img.category === activeCategory);
-
-  /* ── Lightbox keyboard navigation ──────────────────────────────── */
+    activeCategory === ALL_CATEGORIES
+      ? galleryImages
+      : galleryImages.filter((img) => img.category === activeCategory);
 
   const closeLightbox = useCallback(() => setLightboxIndex(null), []);
 
@@ -66,7 +65,6 @@ export default function GaleriaPage() {
     );
   }, [filteredImages.length]);
 
-  // Cleanup on mount to ensure scroll is enabled
   useEffect(() => {
     document.body.style.overflow = "";
     return () => {
@@ -96,7 +94,6 @@ export default function GaleriaPage() {
 
   return (
     <div className="min-h-screen bg-[#faf9f6]">
-      {/* ── Header ────────────────────────────────────────────────── */}
       <header className="bg-[#006948] px-6 py-3">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3">
@@ -116,7 +113,6 @@ export default function GaleriaPage() {
       </header>
 
       <div className="mx-auto max-w-7xl px-8 py-6">
-        {/* ── Title Section ───────────────────────────────────────── */}
         <div className="mb-8 text-center">
           <h2 className="text-3xl font-bold text-[#1a1c1a]">Galería de Fotos</h2>
           <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-[#006948]" />
@@ -125,71 +121,79 @@ export default function GaleriaPage() {
           </p>
         </div>
 
-        {/* ── Category filter tabs ────────────────────────────────── */}
-        <div
-          className="mb-6 flex flex-wrap items-center justify-center gap-2"
-          role="tablist"
-          aria-label="Filtrar galería por categoría"
-        >
-          {GALLERY_CATEGORIES.map((cat) => {
-            const isActive = activeCategory === cat;
-            return (
-              <button
-                key={cat}
-                role="tab"
-                aria-selected={isActive}
-                onClick={() => setActiveCategory(cat)}
-                className={`rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#006948] ${
-                  isActive
-                    ? "bg-[#006948] text-white shadow-md"
-                    : "bg-white text-[#4a4a4a] shadow-sm hover:bg-[#006948]/10 hover:text-[#006948]"
-                }`}
-              >
-                {cat}
-                {cat !== "Todos" && (
-                  <span className="ml-1.5 text-xs opacity-70">
-                    ({GALLERY_IMAGES.filter((img) => img.category === cat).length})
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ── Bento-style photo grid ─────────────────────────────── */}
-        <div
-          className="columns-2 gap-4 md:columns-3 lg:columns-4"
-          role="list"
-          aria-label="Galería de fotos"
-        >
-          {filteredImages.map((image, index) => (
-            <GalleryCard
-              key={image.src}
-              image={image}
-              index={index}
-              onClick={() => setLightboxIndex(index)}
-            />
-          ))}
-        </div>
-
-        {/* ── Empty state ─────────────────────────────────────────── */}
-        {filteredImages.length === 0 && (
+        {loadingImages ? (
+          <div className="flex justify-center py-16">
+            <ProgressSpinner style={{ width: "48px", height: "48px" }} />
+          </div>
+        ) : galleryImages.length === 0 ? (
           <div className="py-16 text-center">
             <i className="pi pi-images mb-4 text-5xl text-[#ccc]" aria-hidden="true" />
-            <p className="text-[#888]">No hay fotos en esta categoría</p>
+            <p className="text-[#888]">Aún no hay fotos en la galería</p>
           </div>
-        )}
+        ) : (
+          <>
+            <div
+              className="mb-6 flex flex-wrap items-center justify-center gap-2"
+              role="tablist"
+              aria-label="Filtrar galería por categoría"
+            >
+              {categoryTabs.map((cat) => {
+                const isActive = activeCategory === cat;
+                const count =
+                  cat === ALL_CATEGORIES
+                    ? galleryImages.length
+                    : galleryImages.filter((img) => img.category === cat).length;
+                return (
+                  <button
+                    key={cat}
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`cursor-pointer rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#006948] ${
+                      isActive
+                        ? "bg-[#006948] text-white shadow-md"
+                        : "bg-white text-[#4a4a4a] shadow-sm hover:bg-[#006948]/10 hover:text-[#006948]"
+                    }`}
+                  >
+                    {cat}
+                    {cat !== ALL_CATEGORIES && <span className="ml-1.5 text-xs opacity-70">({count})</span>}
+                  </button>
+                );
+              })}
+            </div>
 
-        {/* ── Photo counter ───────────────────────────────────────── */}
-        {filteredImages.length > 0 && (
-          <p className="mt-8 text-center text-sm text-[#888]">
-            {filteredImages.length} {filteredImages.length === 1 ? "foto" : "fotos"}
-          </p>
+            <div
+              className="columns-2 gap-4 md:columns-3 lg:columns-4"
+              role="list"
+              aria-label="Galería de fotos"
+            >
+              {filteredImages.map((image, index) => (
+                <GalleryCard
+                  key={image.id}
+                  image={image}
+                  index={index}
+                  onClick={() => setLightboxIndex(index)}
+                />
+              ))}
+            </div>
+
+            {filteredImages.length === 0 && (
+              <div className="py-16 text-center">
+                <i className="pi pi-images mb-4 text-5xl text-[#ccc]" aria-hidden="true" />
+                <p className="text-[#888]">No hay fotos en esta categoría</p>
+              </div>
+            )}
+
+            {filteredImages.length > 0 && (
+              <p className="mt-8 text-center text-sm text-[#888]">
+                {filteredImages.length} {filteredImages.length === 1 ? "foto" : "fotos"}
+              </p>
+            )}
+          </>
         )}
       </div>
 
-      {/* ── Lightbox modal ────────────────────────────────────────── */}
-      {lightboxIndex !== null && (
+      {lightboxIndex !== null && filteredImages[lightboxIndex] && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center overscroll-y-contain bg-black/95"
           onClick={closeLightbox}
@@ -197,23 +201,20 @@ export default function GaleriaPage() {
           aria-modal="true"
           aria-label="Visor de imagen"
         >
-          {/* Close button */}
           <button
-            className="absolute top-4 right-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="absolute top-4 right-4 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             onClick={closeLightbox}
             aria-label="Cerrar visor"
           >
             <i className="pi pi-times text-lg" aria-hidden="true" />
           </button>
 
-          {/* Counter */}
           <div className="absolute top-4 left-4 z-10 rounded-full bg-white/10 px-4 py-1.5 text-sm text-white backdrop-blur-sm">
             {lightboxIndex + 1} / {filteredImages.length}
           </div>
 
-          {/* Previous button */}
           <button
-            className="absolute left-4 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="absolute left-4 z-10 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             onClick={(e) => {
               e.stopPropagation();
               goPrev();
@@ -223,7 +224,6 @@ export default function GaleriaPage() {
             <i className="pi pi-chevron-left text-lg" aria-hidden="true" />
           </button>
 
-          {/* Image */}
           <figure
             className="flex max-h-[90vh] max-w-[90vw] flex-col items-center"
             onClick={(e) => e.stopPropagation()}
@@ -238,9 +238,8 @@ export default function GaleriaPage() {
             </figcaption>
           </figure>
 
-          {/* Next button */}
           <button
-            className="absolute right-4 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="absolute right-4 z-10 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             onClick={(e) => {
               e.stopPropagation();
               goNext();
@@ -255,30 +254,27 @@ export default function GaleriaPage() {
   );
 }
 
-/* ── Gallery Card ────────────────────────────────────────────────── */
-
 interface GalleryCardProps {
-  image: GalleryImage;
+  image: GalleryCardImage;
   index: number;
   onClick: () => void;
 }
 
 function GalleryCard({ image, index, onClick }: GalleryCardProps) {
-  const { ref, isVisible } = useInView();
+  const { ref, isVisible } = useScrollReveal<HTMLDivElement>();
   const delay = (index % 8) * 60;
 
-  // Determine aspect ratio based on index for bento effect
   const getAspectRatio = () => {
     const pattern = index % 6;
     switch (pattern) {
       case 0:
-        return "1/1"; // Square (was large)
+        return "1/1";
       case 2:
-        return "3/4"; // Portrait (was tall)
+        return "3/4";
       case 4:
-        return "4/3"; // Landscape (was wide)
+        return "4/3";
       default:
-        return "4/3"; // Standard
+        return "4/3";
     }
   };
 
@@ -305,16 +301,16 @@ function GalleryCard({ image, index, onClick }: GalleryCardProps) {
           className="w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           style={{ aspectRatio: getAspectRatio() }}
         />
-        {/* Hover overlay */}
         <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <div className="w-full p-4">
             <p className="text-sm font-medium text-white">{image.alt}</p>
-            <span className="mt-1 inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-xs text-white/90 backdrop-blur-sm">
-              {image.category}
-            </span>
+            {image.category && image.category !== "Sin categoría" && (
+              <span className="mt-1 inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-xs text-white/90 backdrop-blur-sm">
+                {image.category}
+              </span>
+            )}
           </div>
         </div>
-        {/* Zoom icon on hover */}
         <div className="absolute top-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/0 text-white/0 backdrop-blur-sm transition-all duration-300 group-hover:bg-white/20 group-hover:text-white">
           <i className="pi pi-search-plus" aria-hidden="true" />
         </div>

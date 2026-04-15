@@ -20,9 +20,7 @@ export const SettingsPanel = () => {
           {selected ? "Configurar" : "Selecciona un elemento"}
         </h3>
         {selected && (
-          <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#6b7280" }}>
-            {nodeName}
-          </p>
+          <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#6b7280" }}>{nodeName}</p>
         )}
       </div>
       <div style={{ padding: "16px" }}>

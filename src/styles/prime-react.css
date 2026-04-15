@@ -320,7 +320,6 @@ main {
   position: relative !important;
 }
 
-
 .p-inputtextarea {
   border: 1px solid var(--hotel-border) !important;
   border-radius: var(--hotel-border-radius) !important;
@@ -496,4 +495,8 @@ main {
   padding: 0.75rem 1.25rem !important;
   background-color: var(--hotel-surface) !important;
   border-top: 1px solid var(--hotel-border) !important;
+}
+
+.main-lagingPage {
+  height: 100% !important;
 }

@@ -52,8 +52,7 @@ export const staysCreationApi = {
     const statusData = await roomStatusesApi.getStatusByName(statusName);
 
     if (statusData) {
-      const shouldUpdateRoom =
-        stayData.check_in_date === todayStr || stayData.status === "Active";
+      const shouldUpdateRoom = stayData.check_in_date === todayStr || stayData.status === "Active";
 
       if (shouldUpdateRoom) {
         await roomsApi.updateStatus(stayData.room_id, statusData.id, new Date());
@@ -91,9 +90,7 @@ export const staysCreationApi = {
     const promises: Promise<any>[] = [];
 
     if (params.stay) {
-      promises.push(
-        supabase.from("stays").update({ status: "Active" }).eq("id", params.stay.id)
-      );
+      promises.push(supabase.from("stays").update({ status: "Active" }).eq("id", params.stay.id));
     }
 
     promises.push(roomsApi.updateStatus(params.roomId, occupiedStatus.id, params.selectedDate));
