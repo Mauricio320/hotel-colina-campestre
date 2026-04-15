@@ -38,19 +38,6 @@ const hotelIcon = L.divIcon({
   popupAnchor: [0, -62],
 });
 
-const DEFAULT_CONTACT: ContactContent = {
-  title: "Contacto",
-  description: "Estamos aquí para ayudarte. Contáctanos por cualquiera de nuestros canales.",
-  address: "Vía Paipa - Tunja, Kilómetro 15",
-  phone1: "+57 312 456 7890",
-  phone2: "(608) 740 0000",
-  email: "recepcion@hotelcolinacampestre.com",
-  hours: "Atención personalizada todos los días de 7:00 AM a 9:00 PM",
-  whatsapp: "+573124567890",
-  map_lat: 4.820884414676493,
-  map_lng: -73.16965643183725,
-};
-
 interface ContactoSectionProps {
   content?: ContactContent;
 }
@@ -58,19 +45,18 @@ interface ContactoSectionProps {
 export const ContactoSection = ({ content }: ContactoSectionProps) => {
   const { ref, isVisible } = useScrollReveal<HTMLDivElement>();
 
-  const isLoaded = content !== undefined;
-  const source = isLoaded ? content! : DEFAULT_CONTACT;
+  if (!content) return null;
 
-  const title = source.title || "Contacto";
-  const description = source.description;
-  const address = source.address;
-  const phone1 = source.phone1;
-  const phone2 = source.phone2;
-  const email = source.email;
-  const hours = source.hours;
-  const whatsapp = source.whatsapp;
-  const hasMap = Boolean(source.map_lat && source.map_lng);
-  const coords: [number, number] = [source.map_lat, source.map_lng];
+  const title = content.title || "Contacto";
+  const description = content.description;
+  const address = content.address;
+  const phone1 = content.phone1;
+  const phone2 = content.phone2;
+  const email = content.email;
+  const hours = content.hours;
+  const whatsapp = content.whatsapp;
+  const hasMap = Boolean(content.map_lat && content.map_lng);
+  const coords: [number, number] = [content.map_lat, content.map_lng];
   const whatsappNumber = whatsapp.replace(/\+/g, "");
 
   const hasAnyContact = Boolean(phone1 || phone2 || email || whatsapp || hours);

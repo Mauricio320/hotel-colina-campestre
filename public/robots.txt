@@ -20,4 +20,4 @@ Disallow: /room-payments
 Disallow: /payments-invoice
 Disallow: /invoice/
 
-Sitemap: https://hotel-colina-campestre.vercel.app/sitemap.xml
+Sitemap: https://www.hotelcolinacampestre.com.co/sitemap.xml
