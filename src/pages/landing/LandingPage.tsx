@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { FotosSection } from "./components/FotosSection";
 import { HotelAboutSection } from "./components/HotelAboutSection";
@@ -7,6 +7,7 @@ import { Navigation } from "./components/Navigation";
 import { ScrollReveal } from "./components/ScrollReveal";
 import { ServicesSection } from "./components/ServicesSection";
 import { TurismoSection } from "./components/TurismoSection";
+import { ContactoSection } from "./components/ContactoSection";
 import { useAllLandingSections, useAllLandingImages } from "@/hooks/useLandingPageCms";
 import {
   HeroContent,
@@ -17,10 +18,6 @@ import {
   ContactContent,
   SectionContent,
 } from "@/types/landingPage";
-
-const ContactoSection = lazy(() =>
-  import("./components/ContactoSection").then((m) => ({ default: m.ContactoSection }))
-);
 
 export const LandingPage = () => {
   const location = useLocation();
@@ -97,9 +94,7 @@ export const LandingPage = () => {
         </ScrollReveal>
 
         <ScrollReveal variant="fade-up">
-          <Suspense fallback={<div className="h-[520px]" />}>
-            <ContactoSection content={contactContent} />
-          </Suspense>
+          <ContactoSection content={contactContent} />
         </ScrollReveal>
       </main>
     </div>

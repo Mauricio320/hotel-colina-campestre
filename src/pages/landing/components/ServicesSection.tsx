@@ -1,4 +1,4 @@
-import { ServicesContent, LandingPageImage, ServiceItem } from "@/types/landingPage";
+import { ServicesContent, LandingPageImage } from "@/types/landingPage";
 import { ServicesGrid } from "./ServicesGrid";
 
 interface ServicesSectionProps {
@@ -6,37 +6,14 @@ interface ServicesSectionProps {
   images?: LandingPageImage[];
 }
 
-const DEFAULT_TITLE = "Servicios";
-const DEFAULT_DESCRIPTION =
-  "Todo lo que necesitas para una estancia cómoda y placentera en el Hotel Colina Campestre.";
-const DEFAULT_FEATURED_IMAGE = "/image-comfaboy/comfaboy.jpeg";
-const DEFAULT_FEATURED_ALT = "Convenio Comfaboy";
-
-const DEFAULT_ITEMS: ServiceItem[] = [
-  { id: "1", icon: "pi-clock", title: "Recepción 24 horas" },
-  { id: "2", icon: "pi-home", title: "Habitaciones equipadas" },
-  { id: "3", icon: "pi-desktop", title: "TV Cable" },
-  { id: "4", icon: "pi-cog", title: "Aire acondicionado" },
-  { id: "5", icon: "pi-heart", title: "Bar" },
-  { id: "6", icon: "pi-briefcase", title: "Guarda equipaje" },
-  { id: "7", icon: "pi-star", title: "Zona de juegos" },
-  { id: "8", icon: "pi-globe", title: "Zonas de aire libre" },
-  { id: "9", icon: "pi-car", title: "Parqueadero gratuito" },
-  { id: "10", icon: "pi-wifi", title: "Wifi" },
-];
-
 export const ServicesSection = ({ content, images = [] }: ServicesSectionProps) => {
-  const isLoaded = content !== undefined;
+  if (!content) return null;
 
-  const title = content?.title || DEFAULT_TITLE;
-  const description = content?.description || DEFAULT_DESCRIPTION;
-
-  const featuredImage = isLoaded
-    ? (images.find((img) => img.slot === content?.featured_image_slot)?.public_url ?? null)
-    : DEFAULT_FEATURED_IMAGE;
-  const featuredAlt = content?.featured_alt || DEFAULT_FEATURED_ALT;
-
-  const items: ServiceItem[] = isLoaded ? (content?.items ?? []) : DEFAULT_ITEMS;
+  const title = content.title;
+  const description = content.description;
+  const featuredImage = images.find((img) => img.slot === content.featured_image_slot)?.public_url ?? null;
+  const featuredAlt = content.featured_alt;
+  const items = content.items ?? [];
 
   const hasFeaturedImage = Boolean(featuredImage);
   const hasItems = items.length > 0;
