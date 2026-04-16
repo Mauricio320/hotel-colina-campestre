@@ -6,67 +6,24 @@ interface ResolvedAttraction extends AttractionItem {
   image: string;
 }
 
-const DEFAULT_TITLE = "Experiencias Inolvidables de Turismo";
-const DEFAULT_SUBTITLE =
-  "Curamos las mejores rutas y actividades para que su estancia sea una inmersión total en la cultura boyacense.";
-
-const DEFAULT_ATTRACTIONS: ResolvedAttraction[] = [
-  {
-    id: "default-1",
-    slot: "default-1",
-    name: "Villa de Leyva",
-    description:
-      "Explore la plaza empedrada más grande de Colombia y viaje en el tiempo entre fachadas blancas y balcones de madera.",
-    category: "HISTORIA",
-    image: "/image-turismo/portones-de-tontogue.jpg",
-  },
-  {
-    id: "default-2",
-    slot: "default-2",
-    name: "Ruta de Artesanías",
-    description: "Ráquira y Nobsa te esperan con su magia en barro y lana.",
-    category: "CULTURA",
-    image: "/image-turismo/images.jfif",
-  },
-  {
-    id: "default-3",
-    slot: "default-3",
-    name: "Páramo de Iguaque",
-    description: "Senderos ecológicos entre frailejones y lagunas sagradas.",
-    category: "NATURALEZA",
-    image:
-      "/image-turismo/ecoturismo_apertura-turismo-ecologico-cuidado-planeta-medioambiente-sostenibilidad-viajes-excursiones--e1619178132829.avif",
-  },
-  {
-    id: "default-4",
-    slot: "default-4",
-    name: "Gastronomía Local",
-    description: "Sabores auténticos de la cocina boyacense.",
-    category: "GASTRONOMÍA",
-    image: "/image-turismo/view-of-the-lake-from.jpg",
-  },
-];
-
 interface TurismoSectionProps {
   content?: TourismContent;
   images?: LandingPageImage[];
 }
 
 export const TurismoSection = ({ content, images = [] }: TurismoSectionProps) => {
-  const isLoaded = content !== undefined;
+  if (!content) return null;
 
-  const title = content?.title || DEFAULT_TITLE;
-  const subtitle = content?.subtitle || DEFAULT_SUBTITLE;
+  const title = content.title;
+  const subtitle = content.subtitle;
 
-  const resolvedAttractions: ResolvedAttraction[] = isLoaded
-    ? (content?.attractions ?? [])
-        .map((item) => {
-          const image = images.find((img) => img.slot === item.slot)?.public_url;
-          if (!image) return null;
-          return { ...item, image };
-        })
-        .filter((item): item is ResolvedAttraction => item !== null)
-    : DEFAULT_ATTRACTIONS;
+  const resolvedAttractions: ResolvedAttraction[] = (content.attractions ?? [])
+    .map((item) => {
+      const image = images.find((img) => img.slot === item.slot)?.public_url;
+      if (!image) return null;
+      return { ...item, image };
+    })
+    .filter((item): item is ResolvedAttraction => item !== null);
 
   if (resolvedAttractions.length === 0) return null;
 

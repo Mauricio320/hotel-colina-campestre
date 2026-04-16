@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "primereact/button";
-import { AboutContent, AboutFeature, LandingPageImage } from "@/types/landingPage";
+import { AboutContent, LandingPageImage } from "@/types/landingPage";
 
 interface HotelAboutSectionProps {
   content?: AboutContent;
@@ -13,78 +13,27 @@ interface ResolvedGalleryItem {
   description: string;
 }
 
-const DEFAULT_LABEL = "Nuestra Esencia";
-const DEFAULT_TITLE = "Nuestros Apartamentos";
-const DEFAULT_DESCRIPTION =
-  "Contamos con 2 amplios apartamentos familiares equipados con todo lo necesario para que disfrute de una estadía cómoda y placentera. Perfectos para familias grandes o grupos que buscan espacio y privacidad.";
-const DEFAULT_CTA_TEXT = "Reservar Apartamento";
-const DEFAULT_CTA_LINK = "/reservar";
-
-const DEFAULT_FEATURES: AboutFeature[] = [
-  { id: "1", icon: "pi-check-circle", label: "Cocina equipada" },
-  { id: "2", icon: "pi-check-circle", label: "Sala de estar" },
-  { id: "3", icon: "pi-check-circle", label: "Baño privado" },
-  { id: "4", icon: "pi-check-circle", label: "TV Cable" },
-  { id: "5", icon: "pi-check-circle", label: "WiFi incluido" },
-  { id: "6", icon: "pi-check-circle", label: "Aire acondicionado" },
-];
-
-const DEFAULT_GALLERY: ResolvedGalleryItem[] = [
-  {
-    image: "/images-hotel/Centro del hotel.jpeg",
-    title: "Apartamento Familiar Grande",
-    description:
-      "Amplio apartamento con capacidad para 6 personas. Cuenta con 2 habitaciones, sala comedor, cocina equipada, baño privado y balcón con vista al paisaje campestre.",
-  },
-  {
-    image: "/images-hotel/Sala principal.jpeg",
-    title: "Apartamento Estándar",
-    description:
-      "Confortable apartamento para 4 personas con 1 habitación amplia, sala, cocina equipada y baño privado. Ideal para familias pequeñas o parejas.",
-  },
-  {
-    image: "/images-hotel/Sala segudo piso.jpeg",
-    title: "Cocina Equipada",
-    description:
-      "Todas nuestras cocinas incluyen nevera, estufa, utensilios básicos y área de comedor para preparar sus alimentos.",
-  },
-  {
-    image: "/images-hotel/WhatsApp Image 2025-10-21 at 2.38.25 PM.jpeg",
-    title: "Sala de Estar",
-    description:
-      "Amplia sala con TV, sofá cómodo y espacio ideal para descansar después de un día de actividades.",
-  },
-  {
-    image: "/images-hotel/WhatsApp Image 2025-10-21 at 2.38.25 PM (2).jpeg",
-    title: "Perfecto para Familias",
-    description:
-      "Espacios diseñados para el confort familiar, con zonas independientes y todo lo necesario para una estadía prolongada.",
-  },
-];
-
 export const HotelAboutSection = ({ content, images = [] }: HotelAboutSectionProps) => {
-  const isLoaded = content !== undefined;
+  if (!content) return null;
 
-  const title = content?.title || DEFAULT_TITLE;
-  const description = content?.description || DEFAULT_DESCRIPTION;
-  const ctaText = content?.cta_text || DEFAULT_CTA_TEXT;
-  const ctaLink = content?.cta_link || DEFAULT_CTA_LINK;
+  const title = content.title;
+  const description = content.description;
+  const ctaText = content.cta_text;
+  const ctaLink = content.cta_link;
 
-  const features: AboutFeature[] = isLoaded ? (content?.features ?? []) : DEFAULT_FEATURES;
+  const features = content.features ?? [];
 
-  const galleryItems: ResolvedGalleryItem[] = isLoaded
-    ? (content?.gallery_items ?? [])
-        .map((item) => {
-          const image = images.find((img) => img.slot === item.slot)?.public_url;
-          if (!image) return null;
-          return {
-            image,
-            title: item.title,
-            description: item.description,
-          };
-        })
-        .filter((item): item is ResolvedGalleryItem => item !== null)
-    : DEFAULT_GALLERY;
+  const galleryItems: ResolvedGalleryItem[] = (content.gallery_items ?? [])
+    .map((item) => {
+      const image = images.find((img) => img.slot === item.slot)?.public_url;
+      if (!image) return null;
+      return {
+        image,
+        title: item.title,
+        description: item.description,
+      };
+    })
+    .filter((item): item is ResolvedGalleryItem => item !== null);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const hasGallery = galleryItems.length > 0;
