@@ -10,6 +10,7 @@ import {
   GalleryContent,
   TourismContent,
   ContactContent,
+  BalnearioContent,
   UploadImageResult,
   LandingPageImage,
   SaveImageParams,
@@ -24,7 +25,8 @@ const getDefaultContent = (
   | ServicesContent
   | GalleryContent
   | TourismContent
-  | ContactContent => {
+  | ContactContent
+  | BalnearioContent => {
   switch (sectionType) {
     case "hero":
       return {
@@ -72,6 +74,13 @@ const getDefaultContent = (
         map_lat: 0,
         map_lng: 0,
       } as ContactContent;
+    case "balneario":
+      return {
+        title: "Balneario",
+        description: "",
+        gallery_alt: "Balneario del hotel",
+        items: [],
+      } as BalnearioContent;
     default:
       return {} as HeroContent;
   }
@@ -86,7 +95,8 @@ const parseContent = (
   | ServicesContent
   | GalleryContent
   | TourismContent
-  | ContactContent => {
+  | ContactContent
+  | BalnearioContent => {
   if (!contentJson || Object.keys(contentJson).length === 0) {
     return getDefaultContent(sectionType);
   }
@@ -96,7 +106,8 @@ const parseContent = (
     | ServicesContent
     | GalleryContent
     | TourismContent
-    | ContactContent;
+    | ContactContent
+    | BalnearioContent;
 };
 
 export const landingPageApi = {
@@ -234,6 +245,7 @@ export const landingPageApi = {
       gallery: [],
       tourism: [],
       contact: [],
+      balneario: [],
     };
 
     for (const row of (data ?? []) as (LandingPageImage & {

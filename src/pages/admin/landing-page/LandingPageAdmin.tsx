@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { TabMenu } from "primereact/tabmenu";
 import PageHeader from "@/components/ui/PageHeader";
 import { HeroEditor } from "./components/HeroEditor";
 import { AboutEditor } from "./components/AboutEditor";
 import { ServicesEditor } from "./components/ServicesEditor";
+import { BalnearioEditor } from "./components/BalnearioEditor";
 import { GalleryEditor } from "./components/GalleryEditor";
 import { TourismEditor } from "./components/TourismEditor";
 import { ContactEditor } from "./components/ContactEditor";
@@ -17,7 +17,8 @@ export const LandingPageAdmin = () => {
   const tabs: { label: string; icon: string; value: SectionTab }[] = [
     { label: "Hotel", icon: "pi pi-home", value: "hero" },
     { label: "Colina Suites", icon: "pi pi-building-columns", value: "about" },
-    { label: "Servicios", icon: "pi pi-star", value: "services" },
+    { label: "Arrayanes", icon: "pi pi-star", value: "services" },
+    { label: "Balneario", icon: "pi pi-sun", value: "balneario" },
     { label: "Galería", icon: "pi pi-images", value: "gallery" },
     { label: "Turismo", icon: "pi pi-map", value: "tourism" },
     { label: "Contacto", icon: "pi pi-envelope", value: "contact" },
@@ -31,6 +32,8 @@ export const LandingPageAdmin = () => {
         return <AboutEditor />;
       case "services":
         return <ServicesEditor />;
+      case "balneario":
+        return <BalnearioEditor />;
       case "gallery":
         return <GalleryEditor />;
       case "tourism":
@@ -52,14 +55,26 @@ export const LandingPageAdmin = () => {
         color="emerald"
       />
 
-      <TabMenu
-        model={tabs.map((tab) => ({
-          label: tab.label,
-          icon: tab.icon,
-          command: () => setActiveTab(tab.value),
-        }))}
-        activeIndex={tabs.findIndex((t) => t.value === activeTab)}
-      />
+      <div className="flex gap-1 overflow-x-auto rounded-xl border border-gray-200 bg-white p-1 shadow-sm">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.value;
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => setActiveTab(tab.value)}
+              className={
+                isActive
+                  ? "flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors"
+                  : "flex shrink-0 cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+              }
+            >
+              <i className={`${tab.icon} text-sm`} aria-hidden="true" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
       <div>{renderEditor()}</div>
     </div>
