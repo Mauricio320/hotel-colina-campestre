@@ -51,8 +51,14 @@ export const ContactoSection = ({ content }: ContactoSectionProps) => {
   const phone2 = content.phone2;
   const email = content.email;
   const hours = content.hours;
-  const hasMap = Boolean(content.map_lat && content.map_lng);
-  const coords: [number, number] = [content.map_lat, content.map_lng];
+  const hasMap =
+    typeof content.map_lat === "number" &&
+    typeof content.map_lng === "number" &&
+    content.map_lat !== 0 &&
+    content.map_lng !== 0;
+  const coords: [number, number] = hasMap
+    ? [content.map_lat, content.map_lng]
+    : [4.7110, -74.0721];
 
   const socialLinks = content.social_links ?? [];
   const hasAnyContact = Boolean(phone1 || phone2 || email || hours || socialLinks.length > 0);
