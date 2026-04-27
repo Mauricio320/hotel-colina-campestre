@@ -90,8 +90,8 @@ export const HotelHeroSection = ({ content }: HotelHeroSectionProps) => {
         <div className="absolute inset-0 bg-black/30" />
       </div>
 
-      <div className="relative z-10 w-full pl-20 md:pl-24">
-        <div className="max-w-sm rounded-xl border border-white/10 bg-[#faf9f6]/10 p-6 backdrop-blur-md">
+      <div className="relative z-10 w-full px-4 md:pl-24 md:pr-0">
+        <div className="mx-auto max-w-sm rounded-xl border border-white/10 bg-[#faf9f6]/10 p-6 backdrop-blur-md md:mx-0">
           {content?.title && (
             <h1 className="mb-3 text-2xl leading-tight font-extrabold tracking-tighter text-white md:text-3xl">
               {content.title}
