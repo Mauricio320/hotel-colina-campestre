@@ -4,7 +4,8 @@
       "Bash(node -e \"const fs=require\\('fs'\\);const html=fs.readFileSync\\('index.html','utf8'\\);const matches=html.match\\(/<script type=\\\\\"application\\\\/ld\\\\+json\\\\\">\\([\\\\s\\\\S]*?\\)<\\\\/script>/g\\);matches.forEach\\(\\(m,i\\)=>{const json=m.replace\\(/<script[^>]*>/,''\\).replace\\('</script>',''\\);try{JSON.parse\\(json\\);console.log\\('JSON-LD '+\\(i+1\\)+': OK'\\)}catch\\(e\\){console.log\\('JSON-LD '+\\(i+1\\)+' INVALID: '+e.message\\)}}\\);\")",
       "PowerShell(git log --oneline -20; git diff HEAD -- src/pages/landing/components/HotelHeroSection.tsx)",
       "PowerShell(git diff feat/add-balneario-cms-section..HEAD -- src/pages/landing/components/Navigation.tsx)",
-      "PowerShell(git diff HEAD -- src/pages/landing/components/Navigation.tsx)"
+      "PowerShell(git diff HEAD -- src/pages/landing/components/Navigation.tsx)",
+      "PowerShell(cd \"c:\\\\Users\\\\MauricioTriana\\\\Desktop\\\\proyectos-personales\\\\hotel-colina-campestre\"; Start-Process powershell -ArgumentList \"-NoExit -Command `\"npm run preview`\"\" -WindowStyle Normal)"
     ]
   }
 }
