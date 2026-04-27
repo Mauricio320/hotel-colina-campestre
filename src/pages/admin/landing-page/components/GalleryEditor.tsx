@@ -24,6 +24,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useBlockUI } from "@/context/BlockUIContext";
 import { optimizeImage } from "@/util/helper/imageOptimizer";
 import { GalleryContent, LandingPageImage, LandingImageCategory } from "@/types/landingPage";
+import { ImageEditOverlay } from "./shared/ImageEditOverlay";
+import { ImageMetadataDrawer } from "./shared/ImageMetadataDrawer";
 
 const FEATURED_LIMIT = 7;
 
@@ -65,6 +67,8 @@ export const GalleryEditor = () => {
   });
 
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [selectedImage, setSelectedImage] = useState<LandingPageImage | null>(null);
+  const [uploadCategory, setUploadCategory] = useState<string | null>(null);
 
   useEffect(() => {
     if (sectionData?.content) {
@@ -124,6 +128,7 @@ export const GalleryEditor = () => {
         slot: `gallery_${crypto.randomUUID()}`,
         displayOrder: images.length,
         altText: optimized.name.replace(/\.[^/.]+$/, ""),
+        category: uploadCategory,
       });
 
       const savedKB = Math.max(0, Math.round(originalSizeKB - optimizedSizeKB));
@@ -208,11 +213,7 @@ export const GalleryEditor = () => {
     if (!slot) return;
     setFormData((prev) => {
       const withoutSlot = prev.featured_slots.filter((s) => s !== slot);
-
-      if (value === "") {
-        return { ...prev, featured_slots: withoutSlot };
-      }
-
+      if (value === "") return { ...prev, featured_slots: withoutSlot };
       const targetIndex = parseInt(value, 10);
       const next = [...withoutSlot];
       while (next.length < FEATURED_LIMIT) next.push("");
@@ -277,15 +278,36 @@ export const GalleryEditor = () => {
       toast.current?.show({
         severity: "error",
         summary: "Error",
-        detail: "No se pudo eliminar la categoría.",
+        detail: "No se pudo eliminar.",
         life: 4000,
       });
     }
   };
 
   const featuredCount = formData.featured_slots.filter((s) => s).length;
-
   const categoryOptions = categories.map((cat) => ({ label: cat.name, value: cat.name }));
+  const categorizedImages = images.filter((img) => img.category);
+
+  const resolvedBento = (formData.featured_slots ?? [])
+    .map((slot): { img: LandingPageImage; slot: string } | null => {
+      const found = images.find((img) => img.slot === slot);
+      if (!found) return null;
+      return { img: found, slot };
+    })
+    .filter((item): item is { img: LandingPageImage; slot: string } => item !== null);
+
+  const isBento = resolvedBento.length >= 7;
+  const topRow = isBento ? resolvedBento.slice(0, 4) : resolvedBento;
+  const bottomRow = isBento ? resolvedBento.slice(4, 7) : [];
+
+  const adaptiveCols =
+    topRow.length === 1
+      ? "grid-cols-1"
+      : topRow.length === 2
+        ? "grid-cols-1 sm:grid-cols-2"
+        : topRow.length === 3
+          ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+          : "grid-cols-2 md:grid-cols-4";
 
   if (loadingContent) {
     return (
@@ -309,13 +331,7 @@ export const GalleryEditor = () => {
     <div className="space-y-6">
       <Toast ref={toast} />
 
-      <PageHeader
-        variant="simple"
-        title="Galería"
-        subtitle="Fotos destacadas del bento grid de la landing"
-        icon="pi-images"
-        color="emerald"
-      />
+      <ImageMetadataDrawer image={selectedImage} onHide={() => setSelectedImage(null)} />
 
       <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
         <h3 className="mb-4 text-base font-bold text-gray-800">Encabezado</h3>
@@ -329,7 +345,6 @@ export const GalleryEditor = () => {
               placeholder="Galería de Fotos"
             />
           </div>
-
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700">Descripción</label>
             <InputTextarea
@@ -346,8 +361,7 @@ export const GalleryEditor = () => {
       <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
         <h3 className="mb-1 text-base font-bold text-gray-800">Categorías</h3>
         <p className="mb-4 text-xs text-gray-500">
-          Categorías disponibles para etiquetar las imágenes. Se muestran como badge en la
-          landing.
+          Etiquetas que se muestran como badge sobre cada imagen en la landing.
         </p>
 
         <div className="space-y-2">
@@ -390,16 +404,92 @@ export const GalleryEditor = () => {
         </div>
       </div>
 
+      {resolvedBento.length > 0 && (
+        <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+          <div className="mb-4">
+            <h3 className="text-base font-bold text-gray-800">Vista previa del bento</h3>
+            <p className="mt-0.5 text-sm text-gray-500">
+              Así se ve en la landing · {featuredCount}/{FEATURED_LIMIT} posiciones asignadas · pasa
+              el cursor para editar
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <div className={`grid gap-3 ${adaptiveCols}`}>
+              {topRow.map(({ img, slot }) => (
+                <BentoPreviewTile
+                  key={img.id}
+                  img={img}
+                  onDelete={() => handleDeleteImage(img.id, img.storage_path, slot)}
+                  onEditMeta={() => setSelectedImage(img)}
+                />
+              ))}
+            </div>
+
+            {isBento && bottomRow.length > 0 && (
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                {bottomRow[0] && (
+                  <BentoPreviewTile
+                    img={bottomRow[0].img}
+                    className="col-span-2"
+                    onDelete={() =>
+                      handleDeleteImage(
+                        bottomRow[0].img.id,
+                        bottomRow[0].img.storage_path,
+                        bottomRow[0].slot
+                      )
+                    }
+                    onEditMeta={() => setSelectedImage(bottomRow[0].img)}
+                  />
+                )}
+                {bottomRow[1] && (
+                  <BentoPreviewTile
+                    img={bottomRow[1].img}
+                    onDelete={() =>
+                      handleDeleteImage(
+                        bottomRow[1].img.id,
+                        bottomRow[1].img.storage_path,
+                        bottomRow[1].slot
+                      )
+                    }
+                    onEditMeta={() => setSelectedImage(bottomRow[1].img)}
+                  />
+                )}
+                {bottomRow[2] && (
+                  <BentoPreviewTile
+                    img={bottomRow[2].img}
+                    onDelete={() =>
+                      handleDeleteImage(
+                        bottomRow[2].img.id,
+                        bottomRow[2].img.storage_path,
+                        bottomRow[2].slot
+                      )
+                    }
+                    onEditMeta={() => setSelectedImage(bottomRow[2].img)}
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-base font-bold text-gray-800">Imágenes</h3>
+            <h3 className="text-base font-bold text-gray-800">Todas las imágenes</h3>
             <p className="mt-0.5 text-sm text-gray-500">
-              Sube todas las fotos y marca hasta {FEATURED_LIMIT} como destacadas para el bento
-              grid. Destacadas: {featuredCount}/{FEATURED_LIMIT}
+              {categorizedImages.length} fotos · asigna la posición destacada para el bento
             </p>
           </div>
-          <div>
+          <div className="flex items-center gap-2">
+            <Dropdown
+              value={uploadCategory}
+              options={categoryOptions}
+              onChange={(e) => setUploadCategory(e.value)}
+              placeholder="Categoría para nuevas subidas"
+              className="text-sm"
+            />
             <input
               ref={fileInputRef}
               type="file"
@@ -413,7 +503,7 @@ export const GalleryEditor = () => {
               className="cursor-pointer bg-emerald-600 text-white hover:bg-emerald-700 disabled:cursor-not-allowed"
               onClick={() => fileInputRef.current?.click()}
               loading={uploadMutation.isPending}
-              disabled={uploadMutation.isPending}
+              disabled={uploadMutation.isPending || !uploadCategory}
             />
           </div>
         </div>
@@ -422,26 +512,47 @@ export const GalleryEditor = () => {
           <div className="flex justify-center py-8">
             <ProgressSpinner style={{ width: "32px", height: "32px" }} />
           </div>
-        ) : images.length === 0 ? (
+        ) : categorizedImages.length === 0 ? (
           <div className="rounded-lg border-2 border-dashed border-gray-200 py-12 text-center">
             <i className="pi pi-images mb-3 text-4xl text-gray-300"></i>
             <p className="text-sm text-gray-500">
-              No hay imágenes. Sube la primera imagen de la galería.
+              No hay imágenes con categoría. Selecciona una categoría y sube la primera imagen.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {images.map((img) => (
-              <GalleryImageCard
-                key={img.id}
-                image={img}
-                categoryOptions={categoryOptions}
-                position={getImagePosition(img.slot)}
-                onPositionChange={(value) => handlePositionChange(img.slot, value)}
-                onUpdate={handleUpdateImage}
-                onDelete={() => handleDeleteImage(img.id, img.storage_path, img.slot)}
-                deleting={deleteMutation.isPending}
-              />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {categorizedImages.map((img) => (
+              <div key={img.id} className="flex flex-col gap-1.5">
+                <ImageEditOverlay
+                  className="overflow-hidden rounded-lg"
+                  onDelete={() => handleDeleteImage(img.id, img.storage_path, img.slot)}
+                  onEditMeta={() => setSelectedImage(img)}
+                >
+                  <img
+                    src={img.public_url}
+                    alt={img.alt_text ?? ""}
+                    className="aspect-video w-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        "https://placehold.co/400x225?text=Error";
+                    }}
+                  />
+                </ImageEditOverlay>
+                <Dropdown
+                  value={getImagePosition(img.slot)}
+                  options={positionOptions}
+                  onChange={(e) => handlePositionChange(img.slot, e.value)}
+                  className="w-full text-xs"
+                  placeholder="Sin destacar"
+                />
+                <Dropdown
+                  value={img.category ?? null}
+                  options={categoryOptions}
+                  onChange={(e) => handleUpdateImage(img.id, { category: e.value })}
+                  className="w-full text-xs"
+                  placeholder="Sin categoría"
+                />
+              </div>
             ))}
           </div>
         )}
@@ -510,106 +621,36 @@ function CategoryRow({ category, onRename, onDelete, pendingDelete }: CategoryRo
   );
 }
 
-interface GalleryImageCardProps {
-  image: LandingPageImage;
-  categoryOptions: { label: string; value: string }[];
-  position: string;
-  onPositionChange: (value: string) => void;
-  onUpdate: (
-    id: string,
-    patch: { alt_text?: string | null; category?: string | null }
-  ) => Promise<void>;
+interface BentoPreviewTileProps {
+  img: LandingPageImage;
+  className?: string;
   onDelete: () => void;
-  deleting: boolean;
+  onEditMeta: () => void;
 }
 
-function GalleryImageCard({
-  image,
-  categoryOptions,
-  position,
-  onPositionChange,
-  onUpdate,
-  onDelete,
-  deleting,
-}: GalleryImageCardProps) {
-  const [altText, setAltText] = useState(image.alt_text ?? "");
-
-  useEffect(() => {
-    setAltText(image.alt_text ?? "");
-  }, [image.alt_text]);
-
-  const handleAltBlur = () => {
-    if (altText !== (image.alt_text ?? "")) {
-      onUpdate(image.id, { alt_text: altText || null });
-    }
-  };
-
-  const handleCategoryChange = (value: string | null) => {
-    onUpdate(image.id, { category: value });
-  };
-
+function BentoPreviewTile({ img, className = "", onDelete, onEditMeta }: BentoPreviewTileProps) {
   return (
-    <div className="group flex flex-col gap-2 rounded-lg border border-gray-100 p-2">
-      <div className="relative overflow-hidden rounded-md">
+    <ImageEditOverlay
+      className={`overflow-hidden rounded-2xl ${className}`}
+      onDelete={onDelete}
+      onEditMeta={onEditMeta}
+    >
+      <div className="relative h-56 w-full overflow-hidden md:h-72">
         <img
-          src={image.public_url}
-          alt={image.alt_text ?? "Imagen galería"}
-          className="h-32 w-full object-cover"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = "https://placehold.co/400x200?text=Error";
-          }}
+          src={img.public_url}
+          alt={img.alt_text ?? ""}
+          className="h-full w-full object-cover transition-transform duration-700 ease-out"
         />
-        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-          <Button
-            icon="pi pi-trash"
-            rounded
-            severity="danger"
-            size="small"
-            className="cursor-pointer"
-            onClick={onDelete}
-            loading={deleting}
-            tooltip="Eliminar"
-            tooltipOptions={{ position: "top" }}
-          />
+        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
+        <div className="absolute inset-0 flex flex-col justify-end p-5">
+          {img.category && (
+            <span className="mb-2 inline-block w-fit rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white/90 backdrop-blur-sm">
+              {img.category}
+            </span>
+          )}
+          {img.alt_text && <p className="text-lg font-semibold text-white">{img.alt_text}</p>}
         </div>
       </div>
-
-      <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600">Nombre</label>
-        <InputText
-          value={altText}
-          onChange={(e) => setAltText(e.target.value)}
-          onBlur={handleAltBlur}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-          }}
-          className="w-full"
-          placeholder="Nombre de la imagen"
-        />
-      </div>
-
-      <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600">Categoría</label>
-        <Dropdown
-          value={image.category ?? null}
-          options={categoryOptions}
-          onChange={(e) => handleCategoryChange(e.value ?? null)}
-          className="w-full"
-          placeholder="Sin categoría"
-          showClear
-        />
-      </div>
-
-      <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600">Destacar</label>
-        <Dropdown
-          value={position}
-          options={positionOptions}
-          onChange={(e) => onPositionChange(e.value)}
-          className="w-full"
-          placeholder="Destacar en..."
-        />
-      </div>
-    </div>
+    </ImageEditOverlay>
   );
 }

@@ -30,6 +30,8 @@ export const AboutEditor = () => {
 
   const saveMutation = useSaveLandingContent();
 
+  const [galleryPreviewIndex, setGalleryPreviewIndex] = useState(0);
+
   const [formData, setFormData] = useState<AboutContent>({
     label: "Nuestra Esencia",
     title: "",
@@ -134,11 +136,7 @@ export const AboutEditor = () => {
     });
   };
 
-  const handleGalleryItemChange = (
-    index: number,
-    field: keyof AboutGalleryItem,
-    value: string
-  ) => {
+  const handleGalleryItemChange = (index: number, field: keyof AboutGalleryItem, value: string) => {
     const updated = formData.gallery_items.map((item, i) =>
       i === index ? { ...item, [field]: value } : item
     );
@@ -166,14 +164,6 @@ export const AboutEditor = () => {
   return (
     <div className="space-y-6">
       <Toast ref={toast} />
-
-      <PageHeader
-        variant="simple"
-        title="Acerca de"
-        subtitle="Apartamentos, características y galería"
-        icon="pi-info-circle"
-        color="emerald"
-      />
 
       <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
         <h3 className="mb-4 text-base font-bold text-gray-800">Textos principales</h3>
@@ -239,8 +229,8 @@ export const AboutEditor = () => {
       <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
         <h3 className="mb-1 text-base font-bold text-gray-800">Características</h3>
         <p className="mb-4 text-xs text-gray-500">
-          Lista de features con icono + texto (ej. "Cocina equipada"). Se muestran en grilla 2x3
-          en la landing.
+          Lista de features con icono + texto (ej. "Cocina equipada"). Se muestran en grilla 2x3 en
+          la landing.
         </p>
 
         <Repeater
@@ -249,24 +239,21 @@ export const AboutEditor = () => {
           onRemove={handleRemoveFeature}
           addLabel="Agregar característica"
           emptyLabel="No hay características. Agrega la primera."
+          compact
           renderItem={(item, index) => (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[240px_1fr]">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">Icono</label>
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="w-52 shrink-0">
                 <IconPicker
                   value={item.icon}
                   onChange={(value) => handleFeatureChange(index, "icon", value)}
                 />
               </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">Texto</label>
-                <InputText
-                  value={item.label}
-                  onChange={(e) => handleFeatureChange(index, "label", e.target.value)}
-                  className="w-full"
-                  placeholder="Cocina equipada"
-                />
-              </div>
+              <InputText
+                value={item.label}
+                onChange={(e) => handleFeatureChange(index, "label", e.target.value)}
+                className="w-full"
+                placeholder="Cocina equipada"
+              />
             </div>
           )}
         />
@@ -278,6 +265,83 @@ export const AboutEditor = () => {
           Cada elemento tiene imagen, badge, título y descripción. Se muestran en un carrusel
           navegable en la landing.
         </p>
+
+        {(() => {
+          const resolvedItems = formData.gallery_items
+            .map((item) => {
+              const img = images.find((i) => i.slot === item.slot);
+              if (!img) return null;
+              return { image: img.public_url, title: item.title, description: item.description };
+            })
+            .filter(
+              (item): item is { image: string; title: string; description: string } => item !== null
+            );
+
+          if (resolvedItems.length === 0) return null;
+
+          const safeIndex = galleryPreviewIndex % resolvedItems.length;
+          const current = resolvedItems[safeIndex];
+
+          return (
+            <div className="mb-6">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-xs font-medium text-gray-500">
+                  Vista previa · así se ve en la landing
+                </p>
+                {resolvedItems.length > 1 && (
+                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                    <span>
+                      {safeIndex + 1} / {resolvedItems.length}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="relative h-[350px] overflow-hidden rounded-2xl shadow-xl">
+                <img
+                  src={current.image}
+                  alt={current.title}
+                  className="h-full w-full object-cover transition-opacity duration-300"
+                />
+
+                {resolvedItems.length > 1 && (
+                  <div className="absolute inset-0 flex items-center justify-between px-4">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setGalleryPreviewIndex(
+                          safeIndex === 0 ? resolvedItems.length - 1 : safeIndex - 1
+                        )
+                      }
+                      className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border-none bg-white/10 shadow-lg backdrop-blur-md transition-all hover:scale-110"
+                    >
+                      <i className="pi pi-chevron-left text-lg text-white" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setGalleryPreviewIndex(
+                          safeIndex === resolvedItems.length - 1 ? 0 : safeIndex + 1
+                        )
+                      }
+                      className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border-none bg-white/10 shadow-lg backdrop-blur-md transition-all hover:scale-110"
+                    >
+                      <i className="pi pi-chevron-right text-lg text-white" />
+                    </button>
+                  </div>
+                )}
+
+                <div className="absolute right-0 bottom-3 left-0 mx-auto w-[92%] rounded-2xl bg-white/10 p-3 shadow-2xl backdrop-blur-md">
+                  <h3 className="mb-1 text-base font-bold text-white">
+                    {current.title || "Sin título"}
+                  </h3>
+                  <p className="text-xs leading-snug text-white/80">
+                    {current.description || "Sin descripción"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         <Repeater
           items={formData.gallery_items}

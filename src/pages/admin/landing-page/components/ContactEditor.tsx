@@ -8,7 +8,10 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import PageHeader from "@/components/ui/PageHeader";
 import { useLandingContent, useSaveLandingContent } from "@/hooks/useLandingPageCms";
 import { useAuth } from "@/hooks/useAuth";
-import { ContactContent } from "@/types/landingPage";
+import { ContactContent, SocialLink } from "@/types/landingPage";
+import { DEFAULT_PRIME_ICON } from "@/util/primeIcons";
+import { Repeater } from "./shared/Repeater";
+import { IconPicker } from "./shared/IconPicker";
 
 export const ContactEditor = () => {
   const toast = useRef<Toast>(null);
@@ -30,9 +33,9 @@ export const ContactEditor = () => {
     phone2: "",
     email: "",
     hours: "",
-    whatsapp: "",
     map_lat: 0,
     map_lng: 0,
+    social_links: [],
   });
 
   useEffect(() => {
@@ -46,12 +49,46 @@ export const ContactEditor = () => {
         phone2: content.phone2 ?? "",
         email: content.email ?? "",
         hours: content.hours ?? "",
-        whatsapp: content.whatsapp ?? "",
         map_lat: content.map_lat ?? 0,
         map_lng: content.map_lng ?? 0,
+        social_links: content.social_links ?? [],
       });
     }
   }, [sectionData]);
+
+  const handleAddSocial = () => {
+    const newItem: SocialLink = {
+      id: crypto.randomUUID(),
+      icon: DEFAULT_PRIME_ICON,
+      label: "",
+      url: "",
+      color: "",
+      subtitle: "",
+    };
+    setFormData({ ...formData, social_links: [...(formData.social_links ?? []), newItem] });
+  };
+
+  const handleRemoveSocial = (index: number) => {
+    setFormData({
+      ...formData,
+      social_links: (formData.social_links ?? []).filter((_, i) => i !== index),
+    });
+  };
+
+  const handleSocialChange = (index: number, field: keyof SocialLink, value: string) => {
+    const updated = (formData.social_links ?? []).map((item, i) =>
+      i === index ? { ...item, [field]: value } : item
+    );
+    setFormData({ ...formData, social_links: updated });
+  };
+
+  const handleMoveSocial = (from: number, to: number) => {
+    const list = [...(formData.social_links ?? [])];
+    if (to < 0 || to >= list.length) return;
+    const [moved] = list.splice(from, 1);
+    list.splice(to, 0, moved);
+    setFormData({ ...formData, social_links: list });
+  };
 
   const handleSave = async () => {
     if (!employee?.id) return;
@@ -98,15 +135,6 @@ export const ContactEditor = () => {
   return (
     <div className="space-y-6">
       <Toast ref={toast} />
-
-      <PageHeader
-        variant="simple"
-        title="Contacto"
-        subtitle="Información de contacto, mapa y canales"
-        icon="pi-envelope"
-        color="emerald"
-      />
-
       <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
         <h3 className="mb-4 text-base font-bold text-gray-800">Encabezado</h3>
         <div className="space-y-4">
@@ -137,62 +165,6 @@ export const ContactEditor = () => {
         <h3 className="mb-4 text-base font-bold text-gray-800">Datos de contacto</h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <label className="mb-1.5 block text-sm font-medium text-gray-700">Dirección</label>
-            <InputText
-              value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              className="w-full"
-              placeholder="Vía Paipa - Tunja, Kilómetro 15"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700">
-              Teléfono principal
-            </label>
-            <InputText
-              value={formData.phone1}
-              onChange={(e) => setFormData({ ...formData, phone1: e.target.value })}
-              className="w-full"
-              placeholder="+57 312 456 7890"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700">
-              Teléfono secundario
-            </label>
-            <InputText
-              value={formData.phone2}
-              onChange={(e) => setFormData({ ...formData, phone2: e.target.value })}
-              className="w-full"
-              placeholder="(608) 740 0000"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700">Email</label>
-            <InputText
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full"
-              placeholder="recepcion@hotelcolinacampestre.com"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700">
-              WhatsApp (con código país)
-            </label>
-            <InputText
-              value={formData.whatsapp}
-              onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-              className="w-full"
-              placeholder="+573124567890"
-            />
-          </div>
-
-          <div className="sm:col-span-2">
             <label className="mb-1.5 block text-sm font-medium text-gray-700">
               Horario de atención
             </label>
@@ -204,6 +176,81 @@ export const ContactEditor = () => {
             />
           </div>
         </div>
+      </div>
+
+      <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+        <h3 className="mb-1 text-base font-bold text-gray-800">Redes sociales</h3>
+        <p className="mb-4 text-xs text-gray-500">
+          Se muestran en el panel de contacto, debajo de los teléfonos y el email. Si eliges un
+          color de marca, la fila usa ese color en fondo, icono y texto.
+        </p>
+
+        <Repeater
+          items={formData.social_links ?? []}
+          onAdd={handleAddSocial}
+          onRemove={handleRemoveSocial}
+          onMove={handleMoveSocial}
+          addLabel="Agregar red social"
+          emptyLabel="No hay redes sociales. Agrega la primera."
+          compact
+          renderItem={(item, index) => (
+            <div className="space-y-2 py-1">
+              <div className="flex items-center gap-2">
+                <div className="w-44 shrink-0">
+                  <IconPicker
+                    value={item.icon}
+                    onChange={(value) => handleSocialChange(index, "icon", value)}
+                  />
+                </div>
+                <InputText
+                  value={item.label}
+                  onChange={(e) => handleSocialChange(index, "label", e.target.value)}
+                  className="min-w-0 flex-2"
+                  placeholder="Nombre"
+                />
+                <InputText
+                  value={item.url}
+                  onChange={(e) => handleSocialChange(index, "url", e.target.value)}
+                  className="min-w-0 flex-3"
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  type="color"
+                  value={item.color || "#E1306C"}
+                  onChange={(e) => handleSocialChange(index, "color", e.target.value)}
+                  className="h-8 w-10 cursor-pointer rounded border border-gray-300"
+                  aria-label="Color de marca"
+                />
+                <InputText
+                  value={item.color ?? ""}
+                  onChange={(e) => handleSocialChange(index, "color", e.target.value)}
+                  className="w-28 shrink-0"
+                  placeholder="#E1306C"
+                />
+                {item.color && (
+                  <Button
+                    icon="pi pi-times"
+                    rounded
+                    text
+                    size="small"
+                    className="cursor-pointer"
+                    onClick={() => handleSocialChange(index, "color", "")}
+                    tooltip="Quitar color"
+                    tooltipOptions={{ position: "top" }}
+                  />
+                )}
+                <InputText
+                  value={item.subtitle ?? ""}
+                  onChange={(e) => handleSocialChange(index, "subtitle", e.target.value)}
+                  className="min-w-0 flex-1"
+                  placeholder="Subtítulo (opcional)"
+                />
+              </div>
+            </div>
+          )}
+        />
       </div>
 
       <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">

@@ -71,7 +71,7 @@ export const HotelHeroSection = ({ content }: HotelHeroSectionProps) => {
   return (
     <section
       id="hotel"
-      className="relative flex min-h-[calc(100dvh-72px)] items-center overflow-hidden pt-20"
+      className="relative flex min-h-[calc(100dvh-72px)] items-end overflow-hidden pt-20 pb-12"
     >
       <div className="absolute inset-0 z-0">
         {images.map((src, index) => (
@@ -90,22 +90,22 @@ export const HotelHeroSection = ({ content }: HotelHeroSectionProps) => {
         <div className="absolute inset-0 bg-black/30" />
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-8">
-        <div className="max-w-2xl rounded-xl border border-white/10 bg-[#faf9f6]/10 p-10 backdrop-blur-md">
+      <div className="relative z-10 w-full pl-20 md:pl-24">
+        <div className="max-w-sm rounded-xl border border-white/10 bg-[#faf9f6]/10 p-6 backdrop-blur-md">
           {content?.title && (
-            <h1 className="mb-6 text-5xl leading-tight font-extrabold tracking-tighter text-white md:text-6xl">
+            <h1 className="mb-3 text-2xl leading-tight font-extrabold tracking-tighter text-white md:text-3xl">
               {content.title}
             </h1>
           )}
           {content?.subtitle && (
-            <p className="mb-8 text-lg font-light text-white/90">{content.subtitle}</p>
+            <p className="mb-5 text-sm font-light text-white/90">{content.subtitle}</p>
           )}
           {content?.cta_text && (
             <Button
               unstyled
               label={content.cta_text}
               icon="pi pi-arrow-right"
-              className="flex items-center gap-2 rounded-full bg-[#006948] px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:opacity-90"
+              className="flex items-center gap-2 rounded-full bg-[#006948] px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:opacity-90"
               onClick={() => {
                 if (content.cta_link)
                   window.open(content.cta_link, "_blank", "noopener,noreferrer");
@@ -121,7 +121,7 @@ export const HotelHeroSection = ({ content }: HotelHeroSectionProps) => {
             onClick={goToPrevious}
             disabled={isTransitioning}
             aria-label="Foto anterior"
-            className="absolute left-6 z-20 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border-none bg-white/20 text-white backdrop-blur-sm transition-all hover:bg-white/40 disabled:opacity-50"
+            className="absolute left-6 top-1/2 -translate-y-1/2 z-20 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border-none bg-white/20 text-white backdrop-blur-sm transition-all hover:bg-white/40 disabled:opacity-50"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -139,7 +139,7 @@ export const HotelHeroSection = ({ content }: HotelHeroSectionProps) => {
             onClick={goToNext}
             disabled={isTransitioning}
             aria-label="Siguiente foto"
-            className="absolute right-6 z-20 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border-none bg-white/20 text-white backdrop-blur-sm transition-all hover:bg-white/40 disabled:opacity-50"
+            className="absolute right-6 top-1/2 -translate-y-1/2 z-20 flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border-none bg-white/20 text-white backdrop-blur-sm transition-all hover:bg-white/40 disabled:opacity-50"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
