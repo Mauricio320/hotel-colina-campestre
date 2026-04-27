@@ -185,8 +185,8 @@ export const ContactoSection = ({ content }: ContactoSectionProps) => {
                           aria-hidden="true"
                         />
                       </div>
-                      <div>
-                        <span className="block font-medium" style={{ color: color ?? "#1a1c1a" }}>
+                      <div className="min-w-0 flex-1">
+                        <span className="block font-medium break-all" style={{ color: color ?? "#1a1c1a" }}>
                           {link.label}
                         </span>
                         {link.subtitle && (
