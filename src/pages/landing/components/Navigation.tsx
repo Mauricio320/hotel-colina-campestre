@@ -99,9 +99,16 @@ export const Navigation = () => {
             e.preventDefault();
             scrollToSection("#hotel");
           }}
-          className="text-xl font-bold tracking-tighter text-[#006948] transition-opacity hover:opacity-80"
+          className="flex items-center gap-2 transition-opacity hover:opacity-80"
         >
-          Hotel Colina Campestre
+          <img
+            src="/images/logo.png"
+            alt="Hotel Colina Campestre"
+            className="h-10 w-10 object-contain"
+          />
+          <span className="text-xl font-bold tracking-tighter text-[#006948]">
+            Hotel Colina Campestre
+          </span>
         </a>
 
         {/* Desktop Navigation */}
