@@ -68,6 +68,7 @@ interface UploadImageParams {
   slot?: string;
   displayOrder?: number;
   altText?: string;
+  category?: string | null;
 }
 
 export const useUploadLandingImage = () => {
@@ -81,6 +82,7 @@ export const useUploadLandingImage = () => {
       slot,
       displayOrder,
       altText,
+      category,
     }: UploadImageParams) => {
       const { url, path } = await landingPageApi.uploadImage(file, sectionType);
       const imageParams: SaveImageParams = {
@@ -90,6 +92,7 @@ export const useUploadLandingImage = () => {
         slot: slot ?? `${sectionType}_bg`,
         display_order: displayOrder ?? 0,
         alt_text: altText,
+        category: category ?? undefined,
       };
       return landingPageApi.saveImage(imageParams);
     },

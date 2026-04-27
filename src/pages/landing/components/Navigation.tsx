@@ -10,9 +10,10 @@ interface NavLink {
 
 const navLinks: NavLink[] = [
   { label: "Hotel", href: "#hotel" },
-  { label: "Apartamentos", href: "#apartamentos" },
-  { label: "Servicios", href: "#servicios" },
-  { label: "Fotos", href: "#fotos" },
+  { label: "Colina Suites", href: "#apartamentos" },
+  { label: "Arrayanes", href: "#servicios" },
+  { label: "Balneario", href: "#balneario" },
+  { label: "Galeria", href: "#fotos" },
   { label: "Turismo", href: "#turismo" },
   { label: "Contacto", href: "#contacto" },
 ];
@@ -35,8 +36,7 @@ export const Navigation = () => {
 
       if (presentSections.length === 0) return;
 
-      const atBottom =
-        window.innerHeight + window.scrollY >= document.body.scrollHeight - 10;
+      const atBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight - 10;
       if (atBottom) {
         setActiveSection(presentSections[presentSections.length - 1].id);
         return;

@@ -1,4 +1,4 @@
-export type SectionType = "hero" | "about" | "services" | "gallery" | "tourism" | "contact";
+export type SectionType = "hero" | "about" | "services" | "gallery" | "tourism" | "contact" | "balneario";
 
 export interface LandingPageSection {
   id: string;
@@ -43,7 +43,8 @@ export interface SectionContent {
     | ServicesContent
     | GalleryContent
     | TourismContent
-    | ContactContent;
+    | ContactContent
+    | BalnearioContent;
   lastEditedBy?: string;
   updatedAt: string;
 }
@@ -92,6 +93,19 @@ export interface ServiceItem {
   title: string;
 }
 
+export interface BalnearioContent {
+  title: string;
+  description: string;
+  gallery_alt: string;
+  items: BalnearioItem[];
+}
+
+export interface BalnearioItem {
+  id: string;
+  icon: string;
+  title: string;
+}
+
 export interface GalleryContent {
   title: string;
   description: string;
@@ -113,6 +127,15 @@ export interface AttractionItem {
   cta_link?: string;
 }
 
+export interface SocialLink {
+  id: string;
+  icon: string;
+  label: string;
+  url: string;
+  color?: string;
+  subtitle?: string;
+}
+
 export interface ContactContent {
   title: string;
   description: string;
@@ -121,9 +144,9 @@ export interface ContactContent {
   phone2: string;
   email: string;
   hours: string;
-  whatsapp: string;
   map_lat: number;
   map_lng: number;
+  social_links?: SocialLink[];
 }
 
 export interface UpdateSectionParams {

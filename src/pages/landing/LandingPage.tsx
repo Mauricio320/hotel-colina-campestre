@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
+import { BalnearioSection } from "./components/BalnearioSection";
 import { FotosSection } from "./components/FotosSection";
 import { HotelAboutSection } from "./components/HotelAboutSection";
 import { HotelHeroSection } from "./components/HotelHeroSection";
@@ -16,6 +17,7 @@ import {
   GalleryContent,
   TourismContent,
   ContactContent,
+  BalnearioContent,
   SectionContent,
 } from "@/types/landingPage";
 
@@ -39,12 +41,14 @@ export const LandingPage = () => {
   const galleryContent = sectionMap.get("gallery")?.content as GalleryContent | undefined;
   const tourismContent = sectionMap.get("tourism")?.content as TourismContent | undefined;
   const contactContent = sectionMap.get("contact")?.content as ContactContent | undefined;
+  const balnearioContent = sectionMap.get("balneario")?.content as BalnearioContent | undefined;
 
   const heroImages = imagesBySection?.hero ?? [];
   const aboutImages = imagesBySection?.about ?? [];
   const servicesImages = imagesBySection?.services ?? [];
   const galleryImages = imagesBySection?.gallery ?? [];
   const tourismImages = imagesBySection?.tourism ?? [];
+  const balnearioImages = imagesBySection?.balneario ?? [];
 
   const heroContent = {
     title: dbHero?.title ?? "",
@@ -83,6 +87,10 @@ export const LandingPage = () => {
 
         <ScrollReveal variant="fade-up" delay={100}>
           <ServicesSection content={servicesContent} images={servicesImages} />
+        </ScrollReveal>
+
+        <ScrollReveal variant="fade-up">
+          <BalnearioSection content={balnearioContent} images={balnearioImages} />
         </ScrollReveal>
 
         <ScrollReveal variant="fade-up">

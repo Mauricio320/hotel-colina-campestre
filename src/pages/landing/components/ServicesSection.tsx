@@ -33,11 +33,11 @@ export const ServicesSection = ({ content, images = [] }: ServicesSectionProps) 
           className={`grid gap-6 ${hasFeaturedImage && hasItems ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"}`}
         >
           {hasFeaturedImage && featuredImage && (
-            <div className="overflow-hidden rounded-2xl shadow-xl">
+            <div className="relative h-80 overflow-hidden rounded-2xl shadow-xl lg:h-full lg:min-h-[420px]">
               <img
                 src={featuredImage}
                 alt={featuredAlt}
-                className="h-full w-full object-cover"
+                className="absolute inset-0 h-full w-full object-cover"
               />
             </div>
           )}
