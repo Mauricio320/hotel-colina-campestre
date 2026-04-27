@@ -11,9 +11,13 @@ import {
   useSaveLandingContent,
 } from "@/hooks/useLandingPageCms";
 import { useAuth } from "@/hooks/useAuth";
-import { TourismContent, AttractionItem } from "@/types/landingPage";
+import { TourismContent, AttractionItem, LandingPageImage } from "@/types/landingPage";
 import { Repeater } from "./shared/Repeater";
 import { SlotImageUploader } from "./shared/SlotImageUploader";
+
+interface ResolvedAttraction extends AttractionItem {
+  image: LandingPageImage;
+}
 
 export const TourismEditor = () => {
   const toast = useRef<Toast>(null);
@@ -103,16 +107,30 @@ export const TourismEditor = () => {
     });
   };
 
-  const handleAttractionChange = (
-    index: number,
-    field: keyof AttractionItem,
-    value: string
-  ) => {
+  const handleMoveAttraction = (from: number, to: number) => {
+    const list = [...formData.attractions];
+    if (to < 0 || to >= list.length) return;
+    const [moved] = list.splice(from, 1);
+    list.splice(to, 0, moved);
+    setFormData({ ...formData, attractions: list });
+  };
+
+  const handleAttractionChange = (index: number, field: keyof AttractionItem, value: string) => {
     const updated = formData.attractions.map((item, i) =>
       i === index ? { ...item, [field]: value } : item
     );
     setFormData({ ...formData, attractions: updated });
   };
+
+  const resolvedAttractions: ResolvedAttraction[] = formData.attractions
+    .map((item) => {
+      const image = images.find((img) => img.slot === item.slot);
+      if (!image) return null;
+      return { ...item, image };
+    })
+    .filter((item): item is ResolvedAttraction => item !== null);
+
+  const [featured, ...rest] = resolvedAttractions;
 
   if (loadingContent) {
     return (
@@ -135,14 +153,6 @@ export const TourismEditor = () => {
   return (
     <div className="space-y-6">
       <Toast ref={toast} />
-
-      <PageHeader
-        variant="simple"
-        title="Turismo"
-        subtitle="Atracciones cercanas y experiencias"
-        icon="pi-map"
-        color="emerald"
-      />
 
       <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
         <h3 className="mb-4 text-base font-bold text-gray-800">Encabezado</h3>
@@ -170,17 +180,83 @@ export const TourismEditor = () => {
         </div>
       </div>
 
+      {resolvedAttractions.length > 0 && (
+        <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+          <div className="mb-4">
+            <h3 className="text-base font-bold text-gray-800">Vista previa</h3>
+            <p className="mt-0.5 text-sm text-gray-500">
+              Así se verá en la landing · la primera atracción ocupa la tarjeta grande
+            </p>
+          </div>
+
+          <div className="rounded-xl bg-[#f4f3f0] p-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="relative h-96 overflow-hidden rounded-2xl md:h-[520px]">
+                <img
+                  src={featured.image.public_url}
+                  alt={featured.name}
+                  className="h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
+                <div className="absolute inset-0 flex flex-col justify-end p-6">
+                  {featured.category && (
+                    <span className="mb-2 w-fit rounded-full bg-white/20 px-3 py-1 text-xs font-medium tracking-wider text-white backdrop-blur-sm">
+                      {featured.category}
+                    </span>
+                  )}
+                  <h3 className="mb-1 text-2xl font-bold text-white">{featured.name}</h3>
+                  {featured.description && (
+                    <p className="max-w-sm text-sm text-white/80">{featured.description}</p>
+                  )}
+                </div>
+              </div>
+
+              {rest.length > 0 && (
+                <div className="grid grid-cols-2 gap-4 md:h-[520px] md:grid-rows-2">
+                  {rest.map((item, index) => (
+                    <div
+                      key={item.id}
+                      className={`relative overflow-hidden rounded-2xl ${
+                        rest.length % 2 === 1 && index === rest.length - 1 ? "col-span-2" : ""
+                      }`}
+                    >
+                      <div className="relative h-56 w-full overflow-hidden md:h-full">
+                        <img
+                          src={item.image.public_url}
+                          alt={item.name}
+                          className="h-full w-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
+                        <div className="absolute inset-0 flex flex-col justify-end p-4">
+                          {item.category && (
+                            <span className="mb-1 w-fit rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-medium tracking-wider text-white/90 backdrop-blur-sm">
+                              {item.category}
+                            </span>
+                          )}
+                          <h3 className="text-lg font-bold text-white">{item.name}</h3>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
         <h3 className="mb-1 text-base font-bold text-gray-800">Atracciones</h3>
         <p className="mb-4 text-xs text-gray-500">
-          La primera atracción se muestra como tarjeta destacada (grande). Las siguientes van en
-          la grilla secundaria.
+          La primera atracción se muestra como tarjeta destacada (grande). Las siguientes van en la
+          grilla secundaria.
         </p>
 
         <Repeater
           items={formData.attractions}
           onAdd={handleAddAttraction}
           onRemove={handleRemoveAttraction}
+          onMove={handleMoveAttraction}
           addLabel="Agregar atracción"
           emptyLabel="No hay atracciones. Agrega la primera."
           renderItem={(item, index) => (

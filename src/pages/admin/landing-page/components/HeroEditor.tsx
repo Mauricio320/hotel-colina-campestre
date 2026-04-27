@@ -1,21 +1,21 @@
-import { useRef, useState, useEffect } from "react";
-import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
-import { InputTextarea } from "primereact/inputtextarea";
-import { Toast } from "primereact/toast";
-import { ProgressSpinner } from "primereact/progressspinner";
-import PageHeader from "@/components/ui/PageHeader";
+import { useBlockUI } from "@/context/BlockUIContext";
+import { useAuth } from "@/hooks/useAuth";
 import {
+  useDeleteLandingImage,
   useLandingContent,
   useLandingImages,
   useSaveLandingContent,
   useUploadLandingImage,
-  useDeleteLandingImage,
 } from "@/hooks/useLandingPageCms";
-import { useAuth } from "@/hooks/useAuth";
-import { useBlockUI } from "@/context/BlockUIContext";
-import { optimizeImage } from "@/util/helper/imageOptimizer";
 import { HeroContent } from "@/types/landingPage";
+import { optimizeImage } from "@/util/helper/imageOptimizer";
+import { Button } from "primereact/button";
+import { InputText } from "primereact/inputtext";
+import { InputTextarea } from "primereact/inputtextarea";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { Toast } from "primereact/toast";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ImageEditOverlay } from "./shared/ImageEditOverlay";
 
 export const HeroEditor = () => {
   const toast = useRef<Toast>(null);
@@ -41,6 +41,9 @@ export const HeroEditor = () => {
     cta_link: "/reservar",
   });
 
+  const [previewIndex, setPreviewIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
   useEffect(() => {
     if (sectionData?.content) {
       const content = sectionData.content as HeroContent;
@@ -52,6 +55,26 @@ export const HeroEditor = () => {
       });
     }
   }, [sectionData]);
+
+  const goTo = useCallback(
+    (index: number) => {
+      if (isTransitioning) return;
+      setIsTransitioning(true);
+      setPreviewIndex(index);
+      setTimeout(() => setIsTransitioning(false), 600);
+    },
+    [isTransitioning]
+  );
+
+  const goToNext = useCallback(() => {
+    goTo(previewIndex === images.length - 1 ? 0 : previewIndex + 1);
+  }, [previewIndex, images.length, goTo]);
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const timer = window.setInterval(goToNext, 5000);
+    return () => clearInterval(timer);
+  }, [goToNext, images.length]);
 
   const handleSaveTexts = async () => {
     if (!employee?.id) return;
@@ -131,6 +154,7 @@ export const HeroEditor = () => {
     try {
       showBlockUI("Eliminando imagen...");
       await deleteMutation.mutateAsync({ id, storagePath, sectionType: "hero" });
+      setPreviewIndex(0);
       toast.current?.show({
         severity: "success",
         summary: "Imagen eliminada",
@@ -170,14 +194,6 @@ export const HeroEditor = () => {
   return (
     <div className="space-y-6">
       <Toast ref={toast} />
-
-      <PageHeader
-        variant="simple"
-        title="Hero"
-        subtitle="Título, subtítulo y carousel de fondo"
-        icon="pi-home"
-        color="emerald"
-      />
 
       <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
         <h3 className="mb-4 text-base font-bold text-gray-800">Textos</h3>
@@ -282,38 +298,88 @@ export const HeroEditor = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {images.map((img, index) => (
-              <div
-                key={img.id}
-                className="group relative overflow-hidden rounded-lg border border-gray-100"
-              >
+          <div className="space-y-3">
+            <div className="relative h-[420px] overflow-hidden rounded-xl shadow-lg">
+              {images.map((img, idx) => (
                 <img
+                  key={img.id}
                   src={img.public_url}
-                  alt={img.alt_text ?? `Imagen ${index + 1}`}
-                  className="h-28 w-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://placehold.co/200x112?text=Error";
-                  }}
+                  alt={img.alt_text ?? `Foto ${idx + 1}`}
+                  className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-600 ${
+                    idx === previewIndex ? "opacity-100" : "opacity-0"
+                  }`}
                 />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-                  <Button
-                    icon="pi pi-trash"
-                    rounded
-                    severity="danger"
-                    size="small"
-                    className="cursor-pointer disabled:cursor-not-allowed"
-                    onClick={() => handleDeleteImage(img.id, img.storage_path)}
-                    loading={deleteMutation.isPending}
-                    tooltip="Eliminar imagen"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                </div>
-                <div className="bg-gray-50 px-2 py-1">
-                  <span className="text-xs text-gray-400">#{index + 1}</span>
+              ))}
+
+              <div className="absolute inset-0 bg-black/30" />
+
+              <div className="absolute inset-0 flex items-center px-8">
+                <div className="max-w-xl rounded-xl border border-white/10 bg-white/10 p-8 backdrop-blur-md">
+                  {formData.title && (
+                    <p className="mb-3 text-2xl font-extrabold tracking-tight text-white">
+                      {formData.title}
+                    </p>
+                  )}
+                  {formData.subtitle && (
+                    <p className="text-sm text-white/90">{formData.subtitle}</p>
+                  )}
+                  {formData.cta_text && (
+                    <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#006948] px-5 py-2 text-sm font-semibold text-white">
+                      {formData.cta_text}
+                      <i className="pi pi-arrow-right text-xs" />
+                    </div>
+                  )}
                 </div>
               </div>
-            ))}
+
+              {images.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => goTo(previewIndex === 0 ? images.length - 1 : previewIndex - 1)}
+                    className="absolute top-1/2 left-4 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-none bg-white/20 text-white backdrop-blur-sm transition-all hover:bg-white/40"
+                  >
+                    <i className="pi pi-chevron-left" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => goTo(previewIndex === images.length - 1 ? 0 : previewIndex + 1)}
+                    className="absolute top-1/2 right-4 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-none bg-white/20 text-white backdrop-blur-sm transition-all hover:bg-white/40"
+                  >
+                    <i className="pi pi-chevron-right" />
+                  </button>
+                </>
+              )}
+
+              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5">
+                {images.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => goTo(idx)}
+                    className={`h-2 rounded-full border-none transition-all ${
+                      idx === previewIndex ? "w-6 bg-white" : "w-2 cursor-pointer bg-white/50"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {images.map((img, idx) => (
+                <ImageEditOverlay
+                  key={img.id}
+                  className="h-16 w-24 shrink-0 overflow-hidden rounded-lg border border-gray-200"
+                  onDelete={() => handleDeleteImage(img.id, img.storage_path)}
+                >
+                  <img
+                    src={img.public_url}
+                    alt={img.alt_text ?? `Foto ${idx + 1}`}
+                    className="h-full w-full object-cover"
+                  />
+                </ImageEditOverlay>
+              ))}
+            </div>
           </div>
         )}
       </div>

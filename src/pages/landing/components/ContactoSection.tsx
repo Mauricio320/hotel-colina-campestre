@@ -1,6 +1,5 @@
 import { MapContainer, TileLayer, Marker, Popup, Circle, ZoomControl } from "react-leaflet";
 import { ContactContent } from "@/types/landingPage";
-import { useScrollReveal } from "../hooks/useScrollReveal";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -43,8 +42,6 @@ interface ContactoSectionProps {
 }
 
 export const ContactoSection = ({ content }: ContactoSectionProps) => {
-  const { ref, isVisible } = useScrollReveal<HTMLDivElement>();
-
   if (!content) return null;
 
   const title = content.title || "Contacto";
@@ -54,12 +51,11 @@ export const ContactoSection = ({ content }: ContactoSectionProps) => {
   const phone2 = content.phone2;
   const email = content.email;
   const hours = content.hours;
-  const whatsapp = content.whatsapp;
   const hasMap = Boolean(content.map_lat && content.map_lng);
   const coords: [number, number] = [content.map_lat, content.map_lng];
-  const whatsappNumber = whatsapp.replace(/\+/g, "");
 
-  const hasAnyContact = Boolean(phone1 || phone2 || email || whatsapp || hours);
+  const socialLinks = content.social_links ?? [];
+  const hasAnyContact = Boolean(phone1 || phone2 || email || hours || socialLinks.length > 0);
 
   if (!hasMap && !hasAnyContact && !address) return null;
 
@@ -73,13 +69,7 @@ export const ContactoSection = ({ content }: ContactoSectionProps) => {
         </div>
 
         <div
-          ref={ref}
           className={`grid gap-6 ${hasMap && hasAnyContact ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"}`}
-          style={{
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? "translateY(0)" : "translateY(20px)",
-            transition: "opacity 0.6s ease, transform 0.6s ease",
-          }}
         >
           {hasMap && (
             <div className="relative overflow-hidden rounded-2xl shadow-xl">
@@ -155,7 +145,7 @@ export const ContactoSection = ({ content }: ContactoSectionProps) => {
             <div className="h-fit rounded-2xl bg-[#f4f3f0] p-6 shadow-lg md:p-8">
               <div className="mb-6 flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#006948]/10">
-                  <i className="pi pi-phone text-2xl text-[#006948]" aria-hidden="true" />
+                  <i className="pi pi-calendar text-2xl text-[#006948]" aria-hidden="true" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-[#1a1c1a]">Central de Reservas</h3>
@@ -164,58 +154,47 @@ export const ContactoSection = ({ content }: ContactoSectionProps) => {
               </div>
 
               <div className="space-y-4">
-                {phone1 && (
-                  <a
-                    href={`tel:${phone1.replace(/\s/g, "")}`}
-                    className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3 transition-colors hover:bg-gray-100"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#006948]/10">
-                      <i className="pi pi-mobile text-[#006948]" aria-hidden="true" />
-                    </div>
-                    <span className="font-medium text-[#1a1c1a]">{phone1}</span>
-                  </a>
-                )}
-
-                {phone2 && (
-                  <a
-                    href={`tel:${phone2.replace(/[()\s]/g, "")}`}
-                    className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3 transition-colors hover:bg-gray-100"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#006948]/10">
-                      <i className="pi pi-phone text-[#006948]" aria-hidden="true" />
-                    </div>
-                    <span className="font-medium text-[#1a1c1a]">{phone2}</span>
-                  </a>
-                )}
-
-                {email && (
-                  <a
-                    href={`mailto:${email}`}
-                    className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3 transition-colors hover:bg-gray-100"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#006948]/10">
-                      <i className="pi pi-envelope text-[#006948]" aria-hidden="true" />
-                    </div>
-                    <span className="font-medium text-[#1a1c1a]">{email}</span>
-                  </a>
-                )}
-
-                {whatsapp && (
-                  <a
-                    href={`https://wa.me/${whatsappNumber}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 rounded-xl bg-[#25D366]/10 px-4 py-3 transition-colors hover:bg-[#25D366]/20"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#25D366]/20">
-                      <i className="pi pi-whatsapp text-[#128C7E]" aria-hidden="true" />
-                    </div>
-                    <div>
-                      <span className="block font-medium text-[#128C7E]">WhatsApp</span>
-                      <span className="text-xs text-[#128C7E]/70">Respuesta inmediata</span>
-                    </div>
-                  </a>
-                )}
+                {socialLinks.map((link) => {
+                  const color = link.color;
+                  return (
+                    <a
+                      key={link.id}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={
+                        color
+                          ? "flex items-center gap-3 rounded-xl px-4 py-3 transition-all hover:brightness-95"
+                          : "flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3 transition-colors hover:bg-gray-100"
+                      }
+                      style={color ? { backgroundColor: `${color}1a` } : undefined}
+                    >
+                      <div
+                        className="flex h-10 w-10 items-center justify-center rounded-full"
+                        style={{ backgroundColor: color ? `${color}33` : "rgba(0,105,72,0.1)" }}
+                      >
+                        <i
+                          className={`pi ${link.icon}`}
+                          style={{ color: color ?? "#006948" }}
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <div>
+                        <span className="block font-medium" style={{ color: color ?? "#1a1c1a" }}>
+                          {link.label}
+                        </span>
+                        {link.subtitle && (
+                          <span
+                            className="text-xs"
+                            style={{ color: color ? `${color}b3` : "#4a4a4a" }}
+                          >
+                            {link.subtitle}
+                          </span>
+                        )}
+                      </div>
+                    </a>
+                  );
+                })}
               </div>
             </div>
           )}
