@@ -40,7 +40,6 @@ const CraftTutorialPage = lazy(() => import("@/pages/craft-tutorial/CraftTutoria
 const CraftTutorialPreview = lazy(() => import("@/pages/craft-tutorial/CraftTutorialPreview"));
 
 const LandingPage = lazy(() => import("@/pages/landing/LandingPage"));
-const GaleriaPage = lazy(() => import("@/pages/landing/GaleriaPage"));
 const LandingPageAdmin = lazy(() => import("@/pages/admin/landing-page/LandingPageAdmin"));
 
 // Loading fallback component
@@ -119,16 +118,6 @@ const AppContent: React.FC = () => {
         element={
           <Suspense fallback={<PageLoader />}>
             <LandingPage />
-          </Suspense>
-        }
-      />
-
-      {/* Public Gallery Page */}
-      <Route
-        path="/galeria"
-        element={
-          <Suspense fallback={<PageLoader />}>
-            <GaleriaPage />
           </Suspense>
         }
       />

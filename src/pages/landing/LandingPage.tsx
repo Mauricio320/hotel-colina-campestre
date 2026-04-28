@@ -1,7 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { BalnearioSection } from "./components/BalnearioSection";
-import { FotosSection } from "./components/FotosSection";
 import { HotelAboutSection } from "./components/HotelAboutSection";
 import { HotelHeroSection } from "./components/HotelHeroSection";
 import { Navigation } from "./components/Navigation";
@@ -14,7 +13,6 @@ import {
   HeroContent,
   AboutContent,
   ServicesContent,
-  GalleryContent,
   TourismContent,
   ContactContent,
   BalnearioContent,
@@ -38,7 +36,6 @@ export const LandingPage = () => {
   const dbHero = sectionMap.get("hero")?.content as HeroContent | undefined;
   const aboutContent = sectionMap.get("about")?.content as AboutContent | undefined;
   const servicesContent = sectionMap.get("services")?.content as ServicesContent | undefined;
-  const galleryContent = sectionMap.get("gallery")?.content as GalleryContent | undefined;
   const tourismContent = sectionMap.get("tourism")?.content as TourismContent | undefined;
   const contactContent = sectionMap.get("contact")?.content as ContactContent | undefined;
   const balnearioContent = sectionMap.get("balneario")?.content as BalnearioContent | undefined;
@@ -46,7 +43,6 @@ export const LandingPage = () => {
   const heroImages = imagesBySection?.hero ?? [];
   const aboutImages = imagesBySection?.about ?? [];
   const servicesImages = imagesBySection?.services ?? [];
-  const galleryImages = imagesBySection?.gallery ?? [];
   const tourismImages = imagesBySection?.tourism ?? [];
   const balnearioImages = imagesBySection?.balneario ?? [];
 
@@ -91,10 +87,6 @@ export const LandingPage = () => {
 
         <ScrollReveal variant="fade-up">
           <BalnearioSection content={balnearioContent} images={balnearioImages} />
-        </ScrollReveal>
-
-        <ScrollReveal variant="fade-up">
-          <FotosSection content={galleryContent} images={galleryImages} />
         </ScrollReveal>
 
         <ScrollReveal variant="slide-left">

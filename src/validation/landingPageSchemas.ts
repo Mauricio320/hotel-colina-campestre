@@ -30,16 +30,6 @@ export const attractionItemSchema = z.object({
   image: z.string().url("Debe ser una URL válida"),
 });
 
-export const photoItemSchema = z.object({
-  id: z.string().uuid(),
-  image_url: z.string().url("Debe ser una URL válida"),
-  caption: z.string().max(100, "Máximo 100 caracteres").optional(),
-  alt: z
-    .string()
-    .min(1, "El texto alternativo es requerido para accesibilidad")
-    .max(100, "Máximo 100 caracteres"),
-});
-
 // ============================================================================
 // Section Schemas
 // ============================================================================
@@ -84,11 +74,6 @@ export const turismoContentSchema = z.object({
   attractions: z.array(attractionItemSchema).min(1, "Debe haber al menos una atracción"),
 });
 
-export const fotosContentSchema = z.object({
-  title: z.string().min(1, "El título es requerido").max(100, "Máximo 100 caracteres"),
-  photos: z.array(photoItemSchema).min(1, "Debe haber al menos una foto"),
-});
-
 export const contactoContentSchema = z.object({
   title: z.string().min(1, "El título es requerido").max(100, "Máximo 100 caracteres"),
   description: z.string().max(500, "Máximo 500 caracteres"),
@@ -109,5 +94,4 @@ export const contactoContentSchema = z.object({
 export type HotelFormSchema = z.infer<typeof hotelContentSchema>;
 export type ComfaboyFormSchema = z.infer<typeof comfaboyContentSchema>;
 export type TurismoFormSchema = z.infer<typeof turismoContentSchema>;
-export type FotosFormSchema = z.infer<typeof fotosContentSchema>;
 export type ContactoFormSchema = z.infer<typeof contactoContentSchema>;
