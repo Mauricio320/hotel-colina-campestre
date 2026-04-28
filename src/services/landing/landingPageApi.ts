@@ -7,7 +7,6 @@ import {
   HeroContent,
   AboutContent,
   ServicesContent,
-  GalleryContent,
   TourismContent,
   ContactContent,
   BalnearioContent,
@@ -23,7 +22,6 @@ const getDefaultContent = (
   | HeroContent
   | AboutContent
   | ServicesContent
-  | GalleryContent
   | TourismContent
   | ContactContent
   | BalnearioContent => {
@@ -53,12 +51,6 @@ const getDefaultContent = (
         featured_alt: "Convenio Comfaboy",
         items: [],
       } as ServicesContent;
-    case "gallery":
-      return {
-        title: "Galería de Fotos",
-        description: "",
-        featured_slots: [],
-      } as GalleryContent;
     case "tourism":
       return { title: "", subtitle: "", attractions: [] } as TourismContent;
     case "contact":
@@ -93,7 +85,6 @@ const parseContent = (
   | HeroContent
   | AboutContent
   | ServicesContent
-  | GalleryContent
   | TourismContent
   | ContactContent
   | BalnearioContent => {
@@ -104,7 +95,6 @@ const parseContent = (
     | HeroContent
     | AboutContent
     | ServicesContent
-    | GalleryContent
     | TourismContent
     | ContactContent
     | BalnearioContent;
@@ -242,7 +232,6 @@ export const landingPageApi = {
       hero: [],
       about: [],
       services: [],
-      gallery: [],
       tourism: [],
       contact: [],
       balneario: [],

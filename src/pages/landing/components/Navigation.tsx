@@ -13,7 +13,6 @@ const navLinks: NavLink[] = [
   { label: "Colina Suites", href: "#apartamentos" },
   { label: "Arrayanes", href: "#servicios" },
   { label: "Balneario", href: "#balneario" },
-  { label: "Galeria", href: "#fotos" },
   { label: "Turismo", href: "#turismo" },
   { label: "Contacto", href: "#contacto" },
 ];

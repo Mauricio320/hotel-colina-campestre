@@ -4,7 +4,6 @@ import { HeroEditor } from "./components/HeroEditor";
 import { AboutEditor } from "./components/AboutEditor";
 import { ServicesEditor } from "./components/ServicesEditor";
 import { BalnearioEditor } from "./components/BalnearioEditor";
-import { GalleryEditor } from "./components/GalleryEditor";
 import { TourismEditor } from "./components/TourismEditor";
 import { ContactEditor } from "./components/ContactEditor";
 import { SectionType } from "@/types/landingPage";
@@ -19,7 +18,6 @@ export const LandingPageAdmin = () => {
     { label: "Colina Suites", icon: "pi pi-building-columns", value: "about" },
     { label: "Arrayanes", icon: "pi pi-star", value: "services" },
     { label: "Balneario", icon: "pi pi-sun", value: "balneario" },
-    { label: "Galería", icon: "pi pi-images", value: "gallery" },
     { label: "Turismo", icon: "pi pi-map", value: "tourism" },
     { label: "Contacto", icon: "pi pi-envelope", value: "contact" },
   ];
@@ -34,8 +32,6 @@ export const LandingPageAdmin = () => {
         return <ServicesEditor />;
       case "balneario":
         return <BalnearioEditor />;
-      case "gallery":
-        return <GalleryEditor />;
       case "tourism":
         return <TourismEditor />;
       case "contact":

@@ -1,4 +1,4 @@
-export type SectionType = "hero" | "about" | "services" | "gallery" | "tourism" | "contact" | "balneario";
+export type SectionType = "hero" | "about" | "services" | "tourism" | "contact" | "balneario";
 
 export interface LandingPageSection {
   id: string;
@@ -41,7 +41,6 @@ export interface SectionContent {
     | HeroContent
     | AboutContent
     | ServicesContent
-    | GalleryContent
     | TourismContent
     | ContactContent
     | BalnearioContent;
@@ -104,12 +103,6 @@ export interface BalnearioItem {
   id: string;
   icon: string;
   title: string;
-}
-
-export interface GalleryContent {
-  title: string;
-  description: string;
-  featured_slots: string[];
 }
 
 export interface TourismContent {
@@ -185,11 +178,3 @@ export interface UpdateLandingImageParams {
   category?: string | null;
 }
 
-export interface LandingImageCategory {
-  id: string;
-  name: string;
-  display_order: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
