@@ -113,6 +113,12 @@ export const RoomActionModal: React.FC<RoomActionModalProps> = ({
     navigate,
   ]);
 
+  const navigateToModifyOccupation = useCallback(() => {
+    navigate(
+      `/modificar-ocupacion/${activeStay?.id}?room_id=${activeStay?.room_id}&tab=${activeTab}`
+    );
+  }, [activeStay?.id, activeStay?.room_id, activeTab, navigate]);
+
   const navigateToInvoice = useCallback(() => {
     navigate(`/invoice/${activeStay?.id}`, {
       state: { from: location.pathname + location.search },
@@ -247,13 +253,30 @@ export const RoomActionModal: React.FC<RoomActionModalProps> = ({
         )}
 
         {action === RoomActionEnum.CHECK_IN && (
-          <div className="grid grid-cols-1 gap-3">
+          <div className="flex flex-col gap-3">
             {renderActionButton({
               icon: "pi pi-sign-out",
               label: "Realizar Check-out",
               className: "bg-orange-600 hover:bg-orange-700",
               onClick: onGoToCheckOut,
             })}
+            <div
+              className={`grid gap-3 ${!paymentStatus?.canCheckIn ? "grid-cols-2" : "grid-cols-1"}`}
+            >
+              {renderActionButton({
+                icon: "pi pi-pencil",
+                label: "Modificar ocupación",
+                className: "bg-teal-600 hover:bg-teal-700",
+                onClick: navigateToModifyOccupation,
+              })}
+              {!paymentStatus?.canCheckIn &&
+                renderActionButton({
+                  icon: "pi pi-dollar",
+                  label: "Abonar",
+                  className: "bg-yellow-600 hover:bg-yellow-700",
+                  onClick: onCheckInAction,
+                })}
+            </div>
           </div>
         )}
 
