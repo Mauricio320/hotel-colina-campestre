@@ -35,6 +35,7 @@ const CancelReservationPage = lazy(() => import("@/pages/stays/CancelReservation
 const CheckInPage = lazy(() => import("@/pages/stays/CheckInPage"));
 const CheckOutPage = lazy(() => import("@/pages/stays/CheckOutPage"));
 const MoveReservationPage = lazy(() => import("@/pages/stays/MoveReservationPage"));
+const ModifyOccupationPage = lazy(() => import("@/pages/stays/ModifyOccupationPage"));
 const CheckInPayment = lazy(() => import("@/pages/stays/CheckInPayment"));
 const CraftTutorialPage = lazy(() => import("@/pages/craft-tutorial/CraftTutorialPage"));
 const CraftTutorialPreview = lazy(() => import("@/pages/craft-tutorial/CraftTutorialPreview"));
@@ -306,6 +307,14 @@ const AppContent: React.FC = () => {
           element={
             <Suspense fallback={<PageLoader />}>
               <MoveReservationPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/modificar-ocupacion/:stayId"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <ModifyOccupationPage />
             </Suspense>
           }
         />

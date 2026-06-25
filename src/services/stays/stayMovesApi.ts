@@ -212,11 +212,13 @@ export const moveStay = async (params: MoveStayParams): Promise<void> => {
     const historyRecord: Omit<RoomHistory, "id" | "timestamp"> = {
       room_id: newRoomId,
       stay_id: stayId,
-      previous_status_id: reservedStatus.id,
+      previous_status_id: isStayActive ? occupiedStatus?.id : reservedStatus.id,
       new_status_id: targetStatusId,
       employee_id: employeeId,
-      action_type: "CAMBIO FECHAS",
-      observation: `Cambio de fechas de la reserva. Fecha del movimiento: ${moveDate}. Nuevas fechas: ${newCheckInDate} a ${newCheckOutDate} | ${observation}`,
+      action_type: isStayActive ? "MODIFICACION OCUPACION" : "CAMBIO FECHAS",
+      observation: isStayActive
+        ? `Modificación de la ocupación. Fecha del movimiento: ${moveDate}. Nuevas fechas: ${newCheckInDate} a ${newCheckOutDate} | ${observation}`
+        : `Cambio de fechas de la reserva. Fecha del movimiento: ${moveDate}. Nuevas fechas: ${newCheckInDate} a ${newCheckOutDate} | ${observation}`,
     };
 
     const { error: historyError } = await supabase.from("room_history").insert(historyRecord);

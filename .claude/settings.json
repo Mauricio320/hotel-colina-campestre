@@ -5,7 +5,9 @@
       "PowerShell(git log --oneline -20; git diff HEAD -- src/pages/landing/components/HotelHeroSection.tsx)",
       "PowerShell(git diff feat/add-balneario-cms-section..HEAD -- src/pages/landing/components/Navigation.tsx)",
       "PowerShell(git diff HEAD -- src/pages/landing/components/Navigation.tsx)",
-      "PowerShell(cd \"c:\\\\Users\\\\MauricioTriana\\\\Desktop\\\\proyectos-personales\\\\hotel-colina-campestre\"; Start-Process powershell -ArgumentList \"-NoExit -Command `\"npm run preview`\"\" -WindowStyle Normal)"
+      "PowerShell(cd \"c:\\\\Users\\\\MauricioTriana\\\\Desktop\\\\proyectos-personales\\\\hotel-colina-campestre\"; Start-Process powershell -ArgumentList \"-NoExit -Command `\"npm run preview`\"\" -WindowStyle Normal)",
+      "PowerShell(git add src/pages/landing/components/Navigation.tsx public/images/logo.png)",
+      "PowerShell(git commit -m \"feat\\(navigation\\): agrega logo del hotel en la barra de navegaci�n\")"
     ]
   }
 }

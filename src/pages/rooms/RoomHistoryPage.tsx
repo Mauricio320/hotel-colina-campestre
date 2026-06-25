@@ -28,9 +28,9 @@ const RoomHistoryPage: React.FC = () => {
   const getStatusSeverity = (name: string) => {
     switch (name) {
       case "Disponible":
-        return "success";
+        return null;
       case "Ocupado":
-        return "danger";
+        return "success";
       case "Reservado":
         return "warning";
       case "Limpieza":
@@ -41,6 +41,9 @@ const RoomHistoryPage: React.FC = () => {
         return "danger";
     }
   };
+
+  const getStatusClassName = (name?: string) =>
+    name === "Mantenimiento" || name === "Disponible" ? "bg-gray-500! text-white!" : "";
 
   if (loading) {
     return (
@@ -111,13 +114,13 @@ const RoomHistoryPage: React.FC = () => {
                 <Tag
                   value={row.prev_status?.name || "N/A"}
                   severity={getStatusSeverity(row.prev_status?.name)}
-                  className={`text-[10px] font-bold uppercase ${row.prev_status?.name === "Mantenimiento" ? "bg-gray-500! text-white!" : ""}`}
+                  className={`text-[10px] font-bold uppercase ${getStatusClassName(row.prev_status?.name)}`}
                 />
                 <i className="pi pi-arrow-right text-xs text-gray-400"></i>
                 <Tag
                   value={row.new_status?.name}
                   severity={getStatusSeverity(row.new_status?.name)}
-                  className={`text-[10px] font-bold uppercase ${row.new_status?.name === "Mantenimiento" ? "bg-gray-500! text-white!" : ""}`}
+                  className={`text-[10px] font-bold uppercase ${getStatusClassName(row.new_status?.name)}`}
                 />
               </div>
             )}
